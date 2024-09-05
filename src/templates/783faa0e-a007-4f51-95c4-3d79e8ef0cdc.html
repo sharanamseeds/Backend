@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      width: 600px; /* Adjust width as needed */
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .header img {
+      max-width: 150px; /* Adjust logo size */
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Details section styles */
+    .details {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .details .company,
+    .details .buyer {
+      width: 48%; /* Adjust width for even distribution */
+    }
+    .details p {
+      margin-top: 5px; /* Add some space between elements */
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+    }
+
+    /* Summary and Bank Details styles */
+    .total,
+    .gst-summary {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .bank-details,
+    .terms-conditions {
+      margin-top: 20px;
+    }
+    .bank-details {
+      display: flex;
+      justify-content: space-between;
+    }
+    .bank-details .bank-info,
+    .bank-details .qr-code {
+      width: 48%;
+    }
+
+    /* Signature and Page Break styles */
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+  <title>Bill</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="logo.png" alt="Company Logo">
+      <h1>Tax Invoice</h1>
+    </div>
+    <div class="details">
+      <div class="company">
+        <p><strong>Seller Details:</strong></p>
+        <p><strong>Name:</strong> NEXTSPEED TECHNOLOGIES PVT LTD</p>
+        <p><strong>Address:</strong> H No 20/6, Huda colony, Hyderabad, 36-TELANGANA, 500075</p>
+        <p><strong>Email:</strong> example@example.com</p>
+        <p><strong>Mobile:</strong> 9876543210</p>
+        <p><strong>GST No:</strong> 36AAMFN0464A1ZZ</p>
+      </div>
+      <div class="buyer">
+        <p><strong>Buyer Details:</strong></p>
+        <p><strong>Name:</strong> John Doe</p>
+        <p><strong>Address:</strong> 123 Main Street, Springfield</p>
+        <p><strong>Email:</strong> john.doe@example.com</p>
+        <p><strong>Phone:</strong> 555-1234</p>
+        <p><strong>GST No:</strong> 12ABCDE3456FZ7</p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>HSN/SAC</th>
+          <th>Quantity</th>
+          <th>Rate</th>
+          <th>Taxable Value</th>
+          <th>GST Rate</th>
+          <th>GST Amount</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>Product 1</td>
+          <td>1234</td>
+          <td>2</td>
+          <td>500</td>
+          <td>1000</td>
+          <td>18%</td>
+          <td>180</td>
+          <td>1180</td>
+        </tr>
+        
+        <tr>
+          <td>Product 2</td>
+          <td>5678</td>
+          <td>1</td>
+          <td>1500</td>
+          <td>1500</td>
+          <td>18%</td>
+          <td>270</td>
+          <td>1770</td>
+        </tr>
+        
+      </tbody>
+    </table>
+    <p class="total"><strong>Subtotal:</strong> ₹ 2500</p>
+    <div class="gst-summary">
+      <p><strong>GST Summary:</strong></p>
+      <p><strong>GST @ 5%:</strong> ₹ 0</p>
+      <p><strong>GST @ 12%:</strong> ₹ 0</p>
+      <p><strong>GST @ 18%:</strong> ₹ 450</p>
+      <p><strong>GST @ 28%:</strong> ₹ 0</p>
+      <p><strong>Total GST:</strong> ₹ 450</p>
+    </div>
+    <p class="total"><strong>Total Amount (Including GST):</strong> ₹ 2950</p>
+    <div class="bank-details">
+      <div class="bank-info">
+        <p><strong>Bank Details:</strong></p>
+        <p><strong>Bank:</strong> Yes Bank</p>
+        <p><strong>Account No:</strong> 6789999222445</p>
+        <p><strong>IFSC:</strong> YESBINB4467</p>
+        <p><strong>Branch:</strong> Somajiguda</p>
+      </div>
+      <div class="qr-code">
+        <p><strong>Pay using UPI:</strong></p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1024px-QR_Code_Example.svg.png" alt="QR Code" style="max-width: 100px;">
+      </div>
+    </div>
+    <div class="terms-conditions">
+      <h3>Terms and Conditions:</h3>
+      <ul>
+        <li>1. Goods once sold cannot be taken back or exchanged.</li>
+        <li>2. We are not the manufacturers; the company will stand for warranty as per their policies.</li>
+        <li>3. Interest @ 36% p.a. will be charged for un-cleared bills beyond 15 days.</li>
+        <li>4. Subject to local jurisdiction.</li>
+      </ul>
+    </div>
+    <div class="signature">
+      <p>For Tata Motors Limited</p>
+      <img src="signature.png" alt="Signature" style="max-width: 100px;">
+    </div>
+  </div>
+</body>
+</html>

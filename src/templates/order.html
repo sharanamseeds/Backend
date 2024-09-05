@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+p {
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+    </style>
+<body>
+    <div class="container">
+        <header class="header">
+            </header>
+        <main class="content">
+            <h1 class="order-confirmation">Order Confirmed</h1>
+            <p class="order-number">Order Number: {{ orderNumber }}</p>
+            <p class="order-date">Order Date: {{ orderDate }}</p>
+            <p class="order-status">Order Status: {{ orderStatus }}</p>
+
+            <h2 class="order-summary">Order Summary</h2>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+
+            <h2 class="shipping-address">Shipping Address</h2>
+            <p>{{ shippingAddress }}</p>
+
+            <h2 class="billing-address">Billing Address</h2>
+            <p>{{ billingAddress }}</p>
+
+            <h2 class="payment-method">Payment Method</h2>
+            <p>{{ paymentMethod }}</p>
+
+            <h2 class="order-total">Order Total</h2>
+            <p>Total Amount: {{ totalAmount }}</p>
+
+            <h2 class="order-notes">Order Notes</h2>
+            <p>{{ orderNotes }}</p>
+        </main>
+        <footer class="footer">
+            </footer>
+    </div>
+</body>
+</html>

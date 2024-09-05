@@ -1,0 +1,378 @@
+<!-- 
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const Handlebars = require('handlebars');
+
+const ITEMS_PER_PAGE = 9;
+
+const generateBillPDF = async (bill, path) => {
+    const templateHtml = fs.readFileSync('billTemplate.html', 'utf8');
+    const template = Handlebars.compile(templateHtml);
+
+    const itemsWithTotal = bill.items.map(item => ({
+        ...item,
+        total: item.quantity * item.price
+    }));
+
+    const chunkArray = (array, chunkSize) => {
+        const result = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            result.push(array.slice(i, i + chunkSize));
+        }
+        return result;
+    };
+
+    const pages = chunkArray(itemsWithTotal, ITEMS_PER_PAGE).map((items, index, arr) => ({
+        items,
+        isLastPage: index === arr.length - 1,
+        pageNumber: index + 1,
+        totalPages: arr.length
+    }));
+
+    const html = template({
+        buyerName: bill.customerName,
+        buyerAddress: 'Buyer Address', // Update as needed
+        buyerContact: 'Buyer Contact', // Update as needed
+        buyerGST: 'Buyer GST Number', // Update as needed
+        pages,
+        totalAmount: bill.totalAmount
+    });
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html);
+    await page.pdf({ path, format: 'A4' });
+
+    await browser.close();
+};
+
+module.exports = generateBillPDF;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+<style>
+    .invoice {
+    width: 800px;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.company-info, .invoice-info {
+    width: 45%;
+}
+
+.billing-shipping {
+    display: flex;
+    justify-content: space-between;
+}
+
+.billed-to, .ship-to {
+    width: 45%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.totals {
+    margin-top: 20px;
+}
+
+</style>
+</head>
+<body>
+    <div class="invoice">
+        <div class="header">
+            <div class="company-info">
+                <p>Your Company name</p>
+                <p>Building name</p>
+                <p>123 Your Street</p>
+                <p>City/State, Country</p>
+                <p>Zip Code</p>
+                <p>+1-541-754-3010</p>
+                <p>you@email.co.uk</p>
+                <p>yourwebsite.co.uk</p>
+            </div>
+            <div class="invoice-info">
+                <p>Invoice</p>
+                <p>Date: <span id="invoice-date">MM/DD/YYYY</span></p>
+                <p>Invoice #: <span id="invoice-number">00001</span></p>
+                <p>Customer ID: <span id="customer-id">customer-1</span></p>
+                <p>Purchase order #: <span id="purchase-order">00001</span></p>
+                <p>Payment due by: <span id="payment-due">MM/DD/YYYY</span></p>
+            </div>
+        </div>
+        <div class="billing-shipping">
+            <div class="billed-to">
+                <p>Billed to</p>
+                <p>Client name</p>
+                <p>123 Your Street</p>
+                <p>City, State, Country</p>
+                <p>Zip Code</p>
+                <p>Phone</p>
+            </div>
+            <div class="ship-to">
+                <p>Ship to (if different)</p>
+                <p>Client name</p>
+                <p>123 Your Street</p>
+                <p>City, State, Country</p>
+                <p>Zip Code</p>
+                <p>Phone</p>
+            </div>
+        </div>
+        <div class="items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Unit cost</th>
+                        <th>QTY/HR Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Your item name</td>
+                        <td>$0.00</td>
+                        <td>1</td>
+                        <td>$0.00</td>
+                    </tr>
+                    </tbody>
+            </table>
+        </div>
+        <div class="totals">
+            <p>Special notes and instructions</p>
+            <p>Subtotal: <span id="subtotal">$0.00</span></p>
+            <p>Discount: <span id="discount">$0.00</span></p>
+            <p>Tax rate</p>
+            <p>Tax: <span id="tax">$0.00</span></p>
+            <p>Total: <span id="total">$0.00</span></p>
+        </div>
+        <div class="footer">
+            <p>Make all cheques payable to my company name</p>
+            <p>Thank you for your business!</p>
+            <p>Should you have any enquires concerning this invoice, please contact us</p>
+            <p>Your Street, Town/City County, Postcode</p>
+            <p>Tel: +1-541-754-3010 | Fax +1-541-754-3010 | E-mail: info@yourcompanysite.com | Web www.yourcompanysite.com</p>
+        </div>
+    </div>
+</body>
+</html>
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      width: 600px; /* Adjust width as needed */
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .header img {
+      max-width: 150px; /* Adjust logo size */
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Details section styles */
+    .details {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .details .company,
+    .details .buyer {
+      width: 48%; /* Adjust width for even distribution */
+    }
+    .details p {
+      margin-top: 5px; /* Add some space between elements */
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+    }
+
+    /* Summary and Bank Details styles */
+    .total,
+    .gst-summary {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .bank-details,
+    .terms-conditions {
+      margin-top: 20px;
+    }
+    .bank-details {
+      display: flex;
+      justify-content: space-between;
+    }
+    .bank-details .bank-info,
+    .bank-details .qr-code {
+      width: 48%;
+    }
+
+    /* Signature and Page Break styles */
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+  <title>Bill</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="logo.png" alt="Company Logo">
+      <h1>Tax Invoice</h1>
+    </div>
+    <div class="details">
+      <div class="company">
+        <p><strong>Seller Details:</strong></p>
+        <p><strong>Name:</strong> NEXTSPEED TECHNOLOGIES PVT LTD</p>
+        <p><strong>Address:</strong> H No 20/6, Huda colony, Hyderabad, 36-TELANGANA, 500075</p>
+        <p><strong>Email:</strong> example@example.com</p>
+        <p><strong>Mobile:</strong> 9876543210</p>
+        <p><strong>GST No:</strong> 36AAMFN0464A1ZZ</p>
+      </div>
+      <div class="buyer">
+        <p><strong>Buyer Details:</strong></p>
+        <p><strong>Name:</strong> Shivward</p>
+        <p><strong>Address:</strong> Survey 118/1, Financial District, Gachibowli, Hyderabad, 36-TELANGANA</p>
+        <p><strong>Email:</strong> example@example.com</p>
+        <p><strong>Phone:</strong> 9999999990</p>
+        <p><strong>GST No:</strong> 36AAMFN0464A1ZZ</p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>HSN/SAC</th>
+          <th>Quantity</th>
+          <th>Rate</th>
+          <th>Taxable Value</th>
+          <th>GST Rate</th>
+          <th>GST Amount</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Product A</td>
+          <td>123456</td>
+          <td>2</td>
+          <td>1000</td>
+          <td>2000</td>
+          <td>18%</td>
+          <td>360</td>
+          <td>2360</td>
+        </tr>
+        <tr>
+          <td>Product B</td>
+          <td>789012</td>
+          <td>1</td>
+          <td>500</td>
+          <td>500</td>
+          <td>12%</td>
+          <td>60</td>
+          <td>560</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="total"><strong>Subtotal:</strong> ₹ 2500</p>
+    <div class="gst-summary">
+      <p><strong>GST Summary:</strong></p>
+      <p><strong>GST @ 5%:</strong> ₹ 0</p>
+      <p><strong>GST @ 12%:</strong> ₹ 60</p>
+      <p><strong>GST @ 18%:</strong> ₹ 360</p>
+      <p><strong>GST @ 28%:</strong> ₹ 0</p>
+      <p><strong>Total GST:</strong> ₹ 420</p>
+    </div>
+    <p class="total"><strong>Total Amount (Including GST):</strong> ₹ 2920</p>
+    <div class="bank-details">
+      <div class="bank-info">
+        <p><strong>Bank Details:</strong></p>
+        <p><strong>Bank:</strong> Yes Bank</p>
+        <p><strong>Account No:</strong> 6789999222445</p>
+        <p><strong>IFSC:</strong> YESBINB4467</p>
+        <p><strong>Branch:</strong> Somajiguda</p>
+      </div>
+      <div class="qr-code">
+        <p><strong>Pay using UPI:</strong></p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1024px-QR_Code_Example.svg.png" alt="QR Code" style="max-width: 100px;">
+      </div>
+    </div>
+    <div class="terms-conditions">
+      <h3>Terms and Conditions:</h3>
+      <ul>
+        <li>1. Goods once sold cannot be taken back or exchanged.</li>
+        <li>2. We are not the manufacturers; the company will stand for warranty as per their policies.</li>
+        <li>3. Interest @ 36% p.a. will be charged for un-cleared bills beyond 15 days.</li>
+        <li>4. Subject to local jurisdiction.</li>
+      </ul>
+    </div>
+    <div class="signature">
+      <p>For Tata Motors Limited</p>
+      <img src="signature.png" alt="Signature" style="max-width: 100px;">
+      <p><strong>Page 1 of 1</strong></p>
+    </div>
+  </div>
+</body>
+</html>
