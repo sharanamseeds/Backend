@@ -297,7 +297,7 @@ const projectLocalizedProducts = (lang_code, isActive) => {
 const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
-        let { limit, page, pagination = true, brand_id, category_id, in_stock, product_name, product_code, is_active, is_verified, price, search, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", brand_id, category_id, in_stock, product_name, product_code, is_active, is_verified, price, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }
@@ -360,7 +360,9 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
             const productDoc = yield Product.aggregate([
                 { $match: filterQuery },
                 ...projectLocalizedProducts(lang_code),
-            ]);
+            ]).sort({
+                [sortBy]: sortOrder === "asc" ? 1 : -1,
+            });
             return {
                 data: productDoc,
                 meta: {
@@ -376,6 +378,9 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
             { $match: filterQuery },
             ...projectLocalizedProducts(lang_code),
         ])
+            .sort({
+            [sortBy]: sortOrder === "asc" ? 1 : -1,
+        })
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);

@@ -410,6 +410,7 @@ export const generateLedgerCodeHtml = (
 
 export const generateBillCodeHtml = (
   bill: {
+    invoice_id: string;
     sellerName: string;
     sellerAddress: string;
     sellerEmail: string;
@@ -443,7 +444,8 @@ export const generateBillCodeHtml = (
       branchName: string;
     };
   },
-  isForMail: boolean = true
+  isForMail: boolean = true,
+  isReturnBill: boolean = true
 ) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -460,8 +462,6 @@ export const generateBillCodeHtml = (
     }
     .container {
       padding: 20px;
-      /* border: 1px solid #ddd;  */
-      /* border-radius: 5px;  */
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
@@ -545,8 +545,17 @@ export const generateBillCodeHtml = (
     .page-break {
       page-break-before: always;
     }
+
+    /* Return bill notice */
+    .return-notice {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
   </style>
-  <title>Bill</title>
+  <title>${isReturnBill ? "Return Bill" : "Tax Invoice"}</title>
 </head>
 <body>
   <div class="container">
@@ -565,12 +574,24 @@ export const generateBillCodeHtml = (
                 .primary_logo_path
             ).b64Data
       } alt="Company Logo" />
-      <h1>Tax Invoice</h1>
+      <h1>${isReturnBill ? "Return Bill" : "Tax Invoice"}</h1>
     </div>
+
+    <!-- Add Invoice Number -->
+    <p><strong>Invoice No:</strong> ${bill.invoice_id}</p>
+
+    ${
+      isReturnBill
+        ? `<div class="return-notice">
+             <span><strong>Note:</strong> This is a return bill.</span>
+           </div>`
+        : ""
+    }
+
     <div class="details">
       <div class="company">
         <p><strong>Seller Details:</strong></p>
-          <p><strong>Name:</strong> ${bill.sellerName}</p>
+        <p><strong>Name:</strong> ${bill.sellerName}</p>
         <p><strong>Address:</strong> ${bill.sellerAddress}</p>
         <p><strong>Email:</strong> ${bill.sellerEmail}</p>
         <p><strong>Phone:</strong> ${bill.sellerPhone}</p>
@@ -585,6 +606,7 @@ export const generateBillCodeHtml = (
         <p><strong>GST No:</strong> ${bill.buyerGST}</p>
       </div>
     </div>
+
     <table>
       <thead>
         <tr>
@@ -619,16 +641,18 @@ export const generateBillCodeHtml = (
           .join("")}
       </tbody>
     </table>
-       <div class="gst-summary">
-        <p class="total"><strong>Order Amount:</strong> ₹ ${
-          bill.order_amount
-        }</p>
-        <p><strong>Discount Amount:</strong> ₹ ${bill.discount_amount}</p>
-        <p><strong>Tax Amount:</strong> ₹ ${bill.tax_amount}</p>
-        <p class="total">
-          <strong>Billing Amount:</strong> ₹ ${bill.billing_amount}
-        </p>
-      </div>
+
+    <div class="gst-summary">
+      <p class="total"><strong>Order Amount:</strong> ₹ ${bill.order_amount}</p>
+      <p><strong>Discount Amount:</strong> ₹ ${bill.discount_amount}</p>
+      <p><strong>Tax Amount:</strong> ₹ ${bill.tax_amount}</p>
+      <p class="total">
+        <strong>${
+          isReturnBill ? "Refund Amount" : "Billing Amount"
+        }:</strong> ₹ ${bill.billing_amount}
+      </p>
+    </div>
+
     <div class="bank-details">
       <div class="bank-info">
         <p><strong>Bank Details:</strong></p>
@@ -657,31 +681,21 @@ export const generateBillCodeHtml = (
         } alt="QR Code" style="max-width: 130px;"/>
       </div>
     </div>
+
     <div class="terms-conditions">
       <h3>Terms and Conditions:</h3>
       <ul>
-        <li>1. Goods once sold cannot be taken back or exchanged.</li>
-        <li>2. We are not the manufacturers; the company will stand for warranty as per their policies.</li>
-        <li>3. Interest @ 36% p.a. will be charged for un-cleared bills beyond 15 days.</li>
-        <li>4. Subject to local jurisdiction.</li>
+        ${
+          isReturnBill
+            ? "<li>Refunds will be processed within 7 business days.</li>"
+            : "<li>Payment is due within 30 days.</li>"
+        }
+        <li>Goods once sold will not be taken back.</li>
       </ul>
     </div>
+
     <div class="signature">
-      <p>For Tata Motors Limited</p>
-      <img src=${
-        isForMail
-          ? "cid:signature"
-          : "data:" +
-            getLocalImageB64(
-              masterConfig.nodemailerConfig.emailTemplateConfig.company_details
-                .signature
-            ).mimeType +
-            ";base64," +
-            getLocalImageB64(
-              masterConfig.nodemailerConfig.emailTemplateConfig.company_details
-                .signature
-            ).b64Data
-      } alt="Signature" style="max-width: 100px;"/>
+      <p>Authorized Signatory</p>
     </div>
   </div>
 </body>

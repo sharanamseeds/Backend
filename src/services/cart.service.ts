@@ -53,9 +53,11 @@ const getCartList = async ({
     const totalDocs = await Cart.countDocuments(filterQuery);
 
     if (!pagination) {
-      const cartDoc = await Cart.find(filterQuery).sort({
-        [sortBy]: sortOrder === "asc" ? 1 : -1,
-      });
+      const cartDoc = await Cart.find(filterQuery)
+        .sort({
+          [sortBy]: sortOrder === "asc" ? 1 : -1,
+        })
+        .populate("products");
       return {
         data: cartDoc,
         meta: {
@@ -71,7 +73,8 @@ const getCartList = async ({
     const cartDoc = await Cart.find(filterQuery)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .populate("products");
 
     const total_pages = Math.ceil(totalDocs / limit);
 
@@ -114,7 +117,6 @@ const getUserCartList = async ({
       pagination = true,
       sortBy = "createdAt",
       sortOrder = "asc",
-      user_id,
       product_id,
       status,
       search,
@@ -141,9 +143,11 @@ const getUserCartList = async ({
     const totalDocs = await Cart.countDocuments(filterQuery);
 
     if (!pagination) {
-      const cartDoc = await Cart.find(filterQuery).sort({
-        [sortBy]: sortOrder === "asc" ? 1 : -1,
-      });
+      const cartDoc = await Cart.find(filterQuery)
+        .sort({
+          [sortBy]: sortOrder === "asc" ? 1 : -1,
+        })
+        .populate("products");
       return {
         data: cartDoc,
         meta: {
@@ -159,7 +163,8 @@ const getUserCartList = async ({
     const cartDoc = await Cart.find(filterQuery)
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .populate("products");
 
     const total_pages = Math.ceil(totalDocs / limit);
 
@@ -183,7 +188,7 @@ const getCart = async ({
   cartId: string;
 }): Promise<Document<unknown, {}, typeCart> | null> => {
   try {
-    return await Cart.findById(cartId);
+    return await Cart.findById(cartId).populate("products");
   } catch (error) {
     throw error;
   }

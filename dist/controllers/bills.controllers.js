@@ -224,6 +224,7 @@ const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         }
         const convertItems = yield modifiedBillProducts(orderDoc.products);
         const bill = {
+            invoice_id: billDoc.invoice_id,
             sellerName: sellerDoc.agro_name,
             sellerAddress: ((_c = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _c === void 0 ? void 0 : _c.address_line) ||
                 ((_d = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _d === void 0 ? void 0 : _d.address_line),
@@ -252,7 +253,7 @@ const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
                 branchName: masterConfig.super_admin_bank_details.branchName,
             },
         };
-        const htmlForAttachment = generateBillCodeHtml(bill, false);
+        const htmlForAttachment = generateBillCodeHtml(bill, false, orderDoc.order_type === "sell");
         res.setHeader("Content-Type", "application/html");
         res.setHeader("Content-Disposition", "attachment; filename=bill.html");
         res.send(htmlForAttachment);

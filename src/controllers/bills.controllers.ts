@@ -294,6 +294,7 @@ const downloadBill = catchAsync(
       const convertItems = await modifiedBillProducts(orderDoc.products);
 
       const bill = {
+        invoice_id: billDoc.invoice_id,
         sellerName: sellerDoc.agro_name,
         sellerAddress:
           sellerDoc?.billing_address?.address_line ||
@@ -327,7 +328,11 @@ const downloadBill = catchAsync(
         },
       };
 
-      const htmlForAttachment = generateBillCodeHtml(bill, false);
+      const htmlForAttachment = generateBillCodeHtml(
+        bill,
+        false,
+        orderDoc.order_type === "sell"
+      );
       res.setHeader("Content-Type", "application/html");
       res.setHeader("Content-Disposition", "attachment; filename=bill.html");
       res.send(htmlForAttachment);

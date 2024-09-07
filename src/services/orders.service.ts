@@ -6,6 +6,8 @@ import { productService } from "./products.service.js";
 import Product from "../models/products.model.js";
 import { billService } from "./bills.service.js";
 import { convertFiles } from "../helpers/files.management.js";
+import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
+import { masterConfig } from "../config/master.config.js";
 
 const calculateDaysDifference = (startDate: Date, endDate: Date) => {
   // Convert the input dates to milliseconds
@@ -56,10 +58,10 @@ const calculateOrderAmount = (
   const billing_amount = order_amount + tax_amount - discount_amount;
 
   return {
-    order_amount,
-    discount_amount,
-    billing_amount,
-    tax_amount,
+    order_amount: Number(order_amount.toFixed(2)),
+    discount_amount: Number(discount_amount.toFixed(2)),
+    billing_amount: Number(billing_amount.toFixed(2)),
+    tax_amount: Number(tax_amount.toFixed(2)),
   };
 };
 
@@ -413,11 +415,11 @@ const modifiedProducts = async (
 
       return {
         ...product,
-        offer_discount: discount,
-        total_amount: final_amount,
-        gst_rate: productDoc.gst_percent,
-        purchase_price: productDoc.price,
-        gst_amount: gst_amount,
+        offer_discount: Number(discount.toFixed(2)),
+        total_amount: Number(final_amount.toFixed(2)),
+        gst_rate: Number(productDoc.gst_percent.toFixed(2)),
+        purchase_price: Number(productDoc.price.toFixed(2)),
+        gst_amount: Number(gst_amount.toFixed(2)),
         manufacture_date: productDoc?.manufacture_date,
         expiry_date: productDoc?.expiry_date,
       };
@@ -716,16 +718,88 @@ const getCustomerOrderList = async ({
   }
 };
 
+// const getOrder = async ({
+//   orderId,
+//   query,
+// }: {
+//   orderId: string;
+//   query?: any;
+// }): Promise<Document<unknown, {}, typeOrder> | null> => {
+//   try {
+//     const orderDoc = await Order.findById(orderId);
+//     return orderDoc;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
 const getOrder = async ({
   orderId,
   query,
 }: {
   orderId: string;
-  query?: any;
-}): Promise<Document<unknown, {}, typeOrder> | null> => {
+  query: any;
+}) => {
   try {
-    const orderDoc = await Order.findById(orderId);
-    return orderDoc;
+    const lang_code =
+      query.lang_code ||
+      masterConfig.defaultDataConfig.languageConfig.lang_code;
+
+    // Fetch the order and populate product details
+    let orderDoc = await Order.findById(orderId);
+
+    if (!orderDoc) return null;
+
+    const productPromises = orderDoc.products.map(async (product) => {
+      const productDoc = await Product.findById(product.product_id);
+      const productObject = productDoc.toObject();
+      const localizedImages = productObject.images
+        .filter((image: typeLocalizedString) => image.lang_code === lang_code)
+        .map((image: typeLocalizedString) => image.value);
+      const localizedLogo = productObject.logo
+        .filter((logo: typeLocalizedString) => logo.lang_code === lang_code)
+        .map((logo: typeLocalizedString) => logo.value);
+      const data = {
+        product_id: product.product_id,
+        offer_id: product.offer_id,
+        quantity: product.quantity,
+        offer_discount: product.offer_discount,
+        total_amount: product.total_amount,
+        gst_rate: product.gst_rate,
+        purchase_price: product.purchase_price,
+        gst_amount: product.gst_amount,
+        manufacture_date: product.manufacture_date,
+        expiry_date: product.expiry_date,
+        images: localizedImages,
+        logo: localizedLogo,
+      };
+      return data;
+    });
+
+    // Wait for all promises to resolve
+    const newProducts = await Promise.all(productPromises);
+
+    const modifiedOrder = {
+      user_id: orderDoc.user_id,
+      added_by: orderDoc.added_by,
+      updated_by: orderDoc.updated_by,
+      bill_id: orderDoc.bill_id,
+      order_type: orderDoc.order_type,
+      buy_order_id: orderDoc.buy_order_id,
+      products: newProducts,
+      order_amount: orderDoc.order_amount,
+      discount_amount: orderDoc.discount_amount,
+      billing_amount: orderDoc.billing_amount,
+      tax_amount: orderDoc.tax_amount,
+      status: orderDoc.status,
+      is_creditable: orderDoc.is_creditable,
+      credit_duration: orderDoc.credit_duration,
+      order_notes: orderDoc.order_notes,
+      reason: orderDoc.reason,
+    };
+
+    // Return the order with localized products
+    return modifiedOrder;
   } catch (error) {
     throw error;
   }

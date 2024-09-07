@@ -323,6 +323,8 @@ const getProductList = async ({
       limit,
       page,
       pagination = true,
+      sortBy = "createdAt",
+      sortOrder = "asc",
       brand_id,
       category_id,
       in_stock,
@@ -403,7 +405,9 @@ const getProductList = async ({
       const productDoc = await Product.aggregate([
         { $match: filterQuery },
         ...projectLocalizedProducts(lang_code),
-      ]);
+      ]).sort({
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      });
       return {
         data: productDoc,
         meta: {
@@ -420,6 +424,9 @@ const getProductList = async ({
       { $match: filterQuery },
       ...projectLocalizedProducts(lang_code),
     ])
+      .sort({
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      })
       .skip((page - 1) * limit)
       .limit(limit);
 

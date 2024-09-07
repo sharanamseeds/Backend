@@ -15,6 +15,7 @@ import { productService } from "./products.service.js";
 import Product from "../models/products.model.js";
 import { billService } from "./bills.service.js";
 import { convertFiles } from "../helpers/files.management.js";
+import { masterConfig } from "../config/master.config.js";
 const calculateDaysDifference = (startDate, endDate) => {
     // Convert the input dates to milliseconds
     const start = new Date(startDate).getTime();
@@ -39,10 +40,10 @@ const calculateOrderAmount = (products) => {
     });
     const billing_amount = order_amount + tax_amount - discount_amount;
     return {
-        order_amount,
-        discount_amount,
-        billing_amount,
-        tax_amount,
+        order_amount: Number(order_amount.toFixed(2)),
+        discount_amount: Number(discount_amount.toFixed(2)),
+        billing_amount: Number(billing_amount.toFixed(2)),
+        tax_amount: Number(tax_amount.toFixed(2)),
     };
 };
 const calculatePercentageDiscount = (amountBeforeGST, percentage) => {
@@ -222,7 +223,7 @@ const modifiedProducts = (products) => __awaiter(void 0, void 0, void 0, functio
         const gst_amount = productDoc.gst_percent > 0
             ? (final_amount * productDoc.gst_percent) / 100
             : 0; // GST should be calculated after applying discount
-        return Object.assign(Object.assign({}, product), { offer_discount: discount, total_amount: final_amount, gst_rate: productDoc.gst_percent, purchase_price: productDoc.price, gst_amount: gst_amount, manufacture_date: productDoc === null || productDoc === void 0 ? void 0 : productDoc.manufacture_date, expiry_date: productDoc === null || productDoc === void 0 ? void 0 : productDoc.expiry_date });
+        return Object.assign(Object.assign({}, product), { offer_discount: Number(discount.toFixed(2)), total_amount: Number(final_amount.toFixed(2)), gst_rate: Number(productDoc.gst_percent.toFixed(2)), purchase_price: Number(productDoc.price.toFixed(2)), gst_amount: Number(gst_amount.toFixed(2)), manufacture_date: productDoc === null || productDoc === void 0 ? void 0 : productDoc.manufacture_date, expiry_date: productDoc === null || productDoc === void 0 ? void 0 : productDoc.expiry_date });
     })));
     return calculatedProducts;
 });
@@ -413,10 +414,75 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
         throw error;
     }
 });
+// const getOrder = async ({
+//   orderId,
+//   query,
+// }: {
+//   orderId: string;
+//   query?: any;
+// }): Promise<Document<unknown, {}, typeOrder> | null> => {
+//   try {
+//     const orderDoc = await Order.findById(orderId);
+//     return orderDoc;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orderDoc = yield Order.findById(orderId);
-        return orderDoc;
+        const lang_code = query.lang_code ||
+            masterConfig.defaultDataConfig.languageConfig.lang_code;
+        // Fetch the order and populate product details
+        let orderDoc = yield Order.findById(orderId);
+        if (!orderDoc)
+            return null;
+        const productPromises = orderDoc.products.map((product) => __awaiter(void 0, void 0, void 0, function* () {
+            const productDoc = yield Product.findById(product.product_id);
+            const productObject = productDoc.toObject();
+            const localizedImages = productObject.images
+                .filter((image) => image.lang_code === lang_code)
+                .map((image) => image.value);
+            const localizedLogo = productObject.logo
+                .filter((logo) => logo.lang_code === lang_code)
+                .map((logo) => logo.value);
+            const data = {
+                product_id: product.product_id,
+                offer_id: product.offer_id,
+                quantity: product.quantity,
+                offer_discount: product.offer_discount,
+                total_amount: product.total_amount,
+                gst_rate: product.gst_rate,
+                purchase_price: product.purchase_price,
+                gst_amount: product.gst_amount,
+                manufacture_date: product.manufacture_date,
+                expiry_date: product.expiry_date,
+                images: localizedImages,
+                logo: localizedLogo,
+            };
+            return data;
+        }));
+        // Wait for all promises to resolve
+        const newProducts = yield Promise.all(productPromises);
+        const modifiedOrder = {
+            user_id: orderDoc.user_id,
+            added_by: orderDoc.added_by,
+            updated_by: orderDoc.updated_by,
+            bill_id: orderDoc.bill_id,
+            order_type: orderDoc.order_type,
+            buy_order_id: orderDoc.buy_order_id,
+            products: newProducts,
+            order_amount: orderDoc.order_amount,
+            discount_amount: orderDoc.discount_amount,
+            billing_amount: orderDoc.billing_amount,
+            tax_amount: orderDoc.tax_amount,
+            status: orderDoc.status,
+            is_creditable: orderDoc.is_creditable,
+            credit_duration: orderDoc.credit_duration,
+            order_notes: orderDoc.order_notes,
+            reason: orderDoc.reason,
+        };
+        // Return the order with localized products
+        return modifiedOrder;
     }
     catch (error) {
         throw error;

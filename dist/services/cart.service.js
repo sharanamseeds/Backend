@@ -31,9 +31,11 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {
-            const cartDoc = yield Cart.find(filterQuery).sort({
+            const cartDoc = yield Cart.find(filterQuery)
+                .sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
-            });
+            })
+                .populate("products");
             return {
                 data: cartDoc,
                 meta: {
@@ -48,7 +50,8 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         const cartDoc = yield Cart.find(filterQuery)
             .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .populate("products");
         const total_pages = Math.ceil(totalDocs / limit);
         const meta = {
             docsFound: totalDocs,
@@ -66,7 +69,7 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
 const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", user_id, product_id, status, search, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", product_id, status, search, } = query;
         limit = Number(limit);
         page = Number(page);
         pagination = pagination === "true";
@@ -84,9 +87,11 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {
-            const cartDoc = yield Cart.find(filterQuery).sort({
+            const cartDoc = yield Cart.find(filterQuery)
+                .sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
-            });
+            })
+                .populate("products");
             return {
                 data: cartDoc,
                 meta: {
@@ -101,7 +106,8 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
         const cartDoc = yield Cart.find(filterQuery)
             .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .populate("products");
         const total_pages = Math.ceil(totalDocs / limit);
         const meta = {
             docsFound: totalDocs,
@@ -118,7 +124,7 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
 });
 const getCart = ({ cartId, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return yield Cart.findById(cartId);
+        return yield Cart.findById(cartId).populate("products");
     }
     catch (error) {
         throw error;

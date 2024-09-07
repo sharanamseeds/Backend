@@ -159,55 +159,121 @@ const refreshUserToken = ({ refreshToken }) => __awaiter(void 0, void 0, void 0,
     }
 });
 const sendVerificationCode = ({ email }) => __awaiter(void 0, void 0, void 0, function* () {
+    // try {
+    //   // Find user by email
+    //   const user = await User.findOne({ email });
+    //   if (!user) {
+    //     throw new NotFoundError("User not found");
+    //   }
+    //   await Otps.deleteMany({ code_for: email });
+    //   const verificationCode = generateVerificationCode();
+    //   let otpDoc = new Otps({ code: verificationCode, code_for: email });
+    //   const savedOtp = await otpDoc.save();
+    //   if (savedOtp) {
+    //     // send code via email
+    //     await sendUserOTPMail(email, verificationCode);
+    //   }
+    //   // Respond with success message
+    //   const payloadDoc = {
+    //     status: savedOtp ? true : false,
+    //     message: "Verification Code Sent Successfully",
+    //   };
+    //   return payloadDoc;
+    // } catch (error) {
+    //   throw error;
+    // }
+    const session = yield mongoose.startSession();
+    session.startTransaction();
     try {
         // Find user by email
         const user = yield User.findOne({ email });
         if (!user) {
             throw new NotFoundError("User not found");
         }
-        yield Otps.deleteMany({ code_for: email });
+        // Delete old OTPs for the email
+        yield Otps.deleteMany({ code_for: email }).session(session);
+        // Generate a new verification code
         const verificationCode = generateVerificationCode();
-        let otpDoc = new Otps({ code: verificationCode, code_for: email });
-        const savedOtp = yield otpDoc.save();
+        // Create a new OTP document
+        const otpDoc = new Otps({ code: verificationCode, code_for: email });
+        const savedOtp = yield otpDoc.save({ session });
+        // If OTP is saved successfully, send email
         if (savedOtp) {
-            // send code via email
             yield sendUserOTPMail(email, verificationCode);
         }
+        // Commit the transaction
+        yield session.commitTransaction();
         // Respond with success message
-        const payloadDoc = {
-            status: savedOtp ? true : false,
-            message: "Verification Code Sent Successfully",
+        return {
+            status: !!savedOtp,
+            message: `Sent Verification Code Successfully`,
         };
-        return payloadDoc;
     }
     catch (error) {
+        yield session.abortTransaction();
         throw error;
+    }
+    finally {
+        session.endSession();
     }
 });
 const reSendVerificationCode = ({ email }) => __awaiter(void 0, void 0, void 0, function* () {
+    // try {
+    //   // Find user by email
+    //   const user = await User.findOne({ email });
+    //   if (!user) {
+    //     throw new NotFoundError("User not found");
+    //   }
+    //   await Otps.deleteMany({ code_for: email });
+    //   const verificationCode = generateVerificationCode();
+    //   let otpDoc = new Otps({ code: verificationCode, code_for: email });
+    //   const savedOtp = await otpDoc.save();
+    //   if (savedOtp) {
+    //     // send code via email
+    //     await sendUserOTPMail(email, verificationCode);
+    //   }
+    //   // Respond with success message
+    //   const payloadDoc = {
+    //     status: savedOtp ? true : false,
+    //     message: "Verification Code Sent Successfully",
+    //   };
+    //   return payloadDoc;
+    // } catch (error) {
+    //   throw error;
+    // }
+    const session = yield mongoose.startSession();
+    session.startTransaction();
     try {
         // Find user by email
         const user = yield User.findOne({ email });
         if (!user) {
             throw new NotFoundError("User not found");
         }
-        yield Otps.deleteMany({ code_for: email });
+        // Delete old OTPs for the email
+        yield Otps.deleteMany({ code_for: email }).session(session);
+        // Generate a new verification code
         const verificationCode = generateVerificationCode();
-        let otpDoc = new Otps({ code: verificationCode, code_for: email });
-        const savedOtp = yield otpDoc.save();
+        // Create a new OTP document
+        const otpDoc = new Otps({ code: verificationCode, code_for: email });
+        const savedOtp = yield otpDoc.save({ session });
+        // If OTP is saved successfully, send email
         if (savedOtp) {
-            // send code via email
             yield sendUserOTPMail(email, verificationCode);
         }
+        // Commit the transaction
+        yield session.commitTransaction();
         // Respond with success message
-        const payloadDoc = {
-            status: savedOtp ? true : false,
-            message: "Verification Code Sent Successfully",
+        return {
+            status: !!savedOtp,
+            message: `Resent Verification Code Successfully`,
         };
-        return payloadDoc;
     }
     catch (error) {
+        yield session.abortTransaction();
         throw error;
+    }
+    finally {
+        session.endSession();
     }
 });
 const verifyVerificationCode = ({ email, verification_code, }) => __awaiter(void 0, void 0, void 0, function* () {
