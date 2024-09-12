@@ -1,20 +1,14 @@
-// module.exports = {
-//   apps: [
-//     {
-//       name: "Agroveda-Backend",
-//       script:
-//         "/home/milan/runners/backend/actions-runner/_work/Backend/Backend/dist", // /home/milan/runners/backend/actions-runner/_work/Backend/Backend
-//       watch: false,
-//     },
-//   ],
-// };
 module.exports = {
   apps: [
     {
       name: "Agroveda",
-      script: "./dist/index.js",
-      instances: "max",
+      script: "./dist/index.js", // Ensure this points to the correct file
+      instances: "max", // Use 'max' to utilize all CPU cores or set a specific number
       exec_mode: "cluster",
+      watch: false, // Set to true if you want to watch for file changes
+      env: {
+        NODE_ENV: "production",
+      },
     },
   ],
 };
