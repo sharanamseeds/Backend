@@ -15,16 +15,15 @@ export const initializeServer = async (): Promise<void> => {
     try {
       const app = expressApp;
       const server =
-        // process.env.ENV === "production"
-        //   ? https.createServer(
-        //       {
-        //         key: fs.readFileSync(join(dirName, "../ssl/key.pem")),
-        //         cert: fs.readFileSync(join(dirName, "../ssl/cert.pem")),
-        //       },
-        //       app
-        //     )
-        //   :
-        http.createServer(app);
+        process.env.ENV === "production"
+          ? https.createServer(
+              {
+                key: fs.readFileSync(join(dirName, "../../id_rsa_priv.pem")), //id_rsa_pub.pem id_rsa_priv.pem
+                cert: fs.readFileSync(join(dirName, "../../id_rsa_pub.pem")),
+              },
+              app
+            )
+          : http.createServer(app);
 
       const port =
         process.env.PORT === "production"
