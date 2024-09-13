@@ -680,7 +680,10 @@ const getCustomerOrderList = async ({
     const totalDocs = await Order.countDocuments(filterQuery);
 
     if (!pagination) {
-      const orderDoc = await Order.find(filterQuery).sort({
+      const orderDoc = await Order.find(filterQuery).populate({
+        path: "products.product_id",  // Populating the product details
+        select: "images",  // Optional: Select specific fields from the Product model
+      }).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
       });
       return {
@@ -695,7 +698,10 @@ const getCustomerOrderList = async ({
       };
     }
 
-    const orderDoc = await Order.find(filterQuery)
+    const orderDoc = await Order.find(filterQuery).populate({
+      path: "products.product_id",  // Populating the product details
+      select: "images",  // Optional: Select specific fields from the Product model
+    })
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
       })
@@ -753,6 +759,9 @@ const getOrder = async ({
     const productPromises = orderDoc.products.map(async (product) => {
       const productDoc = await Product.findById(product.product_id);
       const productObject = productDoc.toObject();
+      const localizedProductName = productObject.product_name
+      .filter((image: typeLocalizedString) => image.lang_code === lang_code)
+      .map((image: typeLocalizedString) => image.value); 
       const localizedImages = productObject.images
         .filter((image: typeLocalizedString) => image.lang_code === lang_code)
         .map((image: typeLocalizedString) => image.value);
@@ -770,6 +779,8 @@ const getOrder = async ({
         gst_amount: product.gst_amount,
         manufacture_date: product.manufacture_date,
         expiry_date: product.expiry_date,
+        product_code: productObject?.product_code,
+        product_name: localizedProductName?.[0],
         images: localizedImages,
         logo: localizedLogo,
       };
@@ -780,6 +791,8 @@ const getOrder = async ({
     const newProducts = await Promise.all(productPromises);
 
     const modifiedOrder = {
+      _id: orderDoc?._id,
+      createdAt: orderDoc?.createdAt,
       user_id: orderDoc.user_id,
       added_by: orderDoc.added_by,
       updated_by: orderDoc.updated_by,

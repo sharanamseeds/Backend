@@ -251,7 +251,7 @@ const updateCart = async ({
 
 const deleteCart = async ({ cartId }: { cartId: string }): Promise<void> => {
   try {
-    await Cart.findByIdAndDelete(cartId);
+    await Cart.deleteOne({product_id: cartId});
   } catch (error) {
     throw error;
   }

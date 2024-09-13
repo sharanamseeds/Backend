@@ -30,7 +30,9 @@ router.post("/", authenticateToken, CHECKPERMISSION([{ module: "user", permissio
     validateViaJoi(userMiddlewareSchemas.addUserSchema, validationData, req, res, next);
 }), userController.addUser);
 /* Update an existing user */
-router.put("/:id", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_update" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.put("/:id", authenticateToken, 
+//CHECKPERMISSION([{ module: "user", permission: "can_update" }]),
+(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     let validationData = {};
     if (((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.payload) && typeof req.query.payload === "string") {

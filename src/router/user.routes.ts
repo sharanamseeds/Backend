@@ -61,7 +61,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  CHECKPERMISSION([{ module: "user", permission: "can_update" }]),
+  //CHECKPERMISSION([{ module: "user", permission: "can_update" }]),
   async (req, res, next) => {
     let validationData = {};
     if (req?.query?.payload && typeof req.query.payload === "string") {

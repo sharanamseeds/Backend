@@ -166,7 +166,7 @@ const updateCart = ({ cartId, requestUser, req, }) => __awaiter(void 0, void 0, 
 });
 const deleteCart = ({ cartId }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield Cart.findByIdAndDelete(cartId);
+        yield Cart.deleteOne({ product_id: cartId });
     }
     catch (error) {
         throw error;

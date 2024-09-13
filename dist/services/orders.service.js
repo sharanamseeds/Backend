@@ -380,7 +380,10 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
         }
         const totalDocs = yield Order.countDocuments(filterQuery);
         if (!pagination) {
-            const orderDoc = yield Order.find(filterQuery).sort({
+            const orderDoc = yield Order.find(filterQuery).populate({
+                path: "products.product_id",
+                select: "images", // Optional: Select specific fields from the Product model
+            }).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
             });
             return {
@@ -394,7 +397,10 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
                 },
             };
         }
-        const orderDoc = yield Order.find(filterQuery)
+        const orderDoc = yield Order.find(filterQuery).populate({
+            path: "products.product_id",
+            select: "images", // Optional: Select specific fields from the Product model
+        })
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
         })
@@ -439,6 +445,9 @@ const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, func
         const productPromises = orderDoc.products.map((product) => __awaiter(void 0, void 0, void 0, function* () {
             const productDoc = yield Product.findById(product.product_id);
             const productObject = productDoc.toObject();
+            const localizedProductName = productObject.product_name
+                .filter((image) => image.lang_code === lang_code)
+                .map((image) => image.value);
             const localizedImages = productObject.images
                 .filter((image) => image.lang_code === lang_code)
                 .map((image) => image.value);
@@ -456,6 +465,8 @@ const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, func
                 gst_amount: product.gst_amount,
                 manufacture_date: product.manufacture_date,
                 expiry_date: product.expiry_date,
+                product_code: productObject === null || productObject === void 0 ? void 0 : productObject.product_code,
+                product_name: localizedProductName === null || localizedProductName === void 0 ? void 0 : localizedProductName[0],
                 images: localizedImages,
                 logo: localizedLogo,
             };
@@ -464,6 +475,8 @@ const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, func
         // Wait for all promises to resolve
         const newProducts = yield Promise.all(productPromises);
         const modifiedOrder = {
+            _id: orderDoc === null || orderDoc === void 0 ? void 0 : orderDoc._id,
+            createdAt: orderDoc === null || orderDoc === void 0 ? void 0 : orderDoc.createdAt,
             user_id: orderDoc.user_id,
             added_by: orderDoc.added_by,
             updated_by: orderDoc.updated_by,
