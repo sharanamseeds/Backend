@@ -31,5 +31,5 @@ jobs:
         run: |
           pm2 stop all || true
           pm2 delete all || true
-      - name: Start PM2 with new configuration
-        run: pm2 start ecosystem.config.cjs
+      - run: pm2 start ecosystem.config.cjs
+      - run: pm2 save
