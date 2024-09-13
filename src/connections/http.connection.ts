@@ -15,7 +15,7 @@ export const initializeServer = async (): Promise<void> => {
     try {
       const app = expressApp;
       const server =
-        process.env.ENV === "production"
+        process.env.ENV !== "development"
           ? https.createServer(
               {
                 key: fs.readFileSync(join(dirName, "../../id_rsa_priv.pem")), //id_rsa_pub.pem id_rsa_priv.pem
@@ -24,7 +24,7 @@ export const initializeServer = async (): Promise<void> => {
               app
             )
           : http.createServer(app);
-
+      console.log(fs.readFileSync(join(dirName, "../../id_rsa_priv.pem"))); // olo command run thase to generate thai jase
       const port =
         process.env.PORT === "production"
           ? process.env.PROD_PORT
