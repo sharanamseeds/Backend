@@ -32,6 +32,32 @@ router.post(
 );
 
 router.post(
+  "/user/login",
+  async (req, res, next) =>
+    validateViaJoi(
+      authMiddlewareSchemas.userLoginSchema,
+      req.body,
+      req,
+      res,
+      next
+    ),
+  authController.loginApp
+);
+
+router.post(
+  "/user/register",
+  async (req, res, next) =>
+    validateViaJoi(
+      authMiddlewareSchemas.registerSchema,
+      req.body,
+      req,
+      res,
+      next
+    ),
+  authController.registerApp
+);
+
+router.post(
   "/change_password",
   async (req, res, next) =>
     validateViaJoi(

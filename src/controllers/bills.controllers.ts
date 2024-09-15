@@ -86,11 +86,67 @@ const getBill = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
     query: req.query,
   });
 
+  const billDocOther = await Bill.findById(req.params.id);
+  if (!billDocOther) {
+    throw new Error("Order Not Found!!!");
+  }
+  const sellerDoc = await User.findOne({
+    email: masterConfig.superAdminConfig.email,
+  });
+  if (!sellerDoc) {
+    throw new Error("Seller Not Found!!!");
+  }
+  const buyerDoc = await User.findById(billDocOther?.customer_id);
+  if (!buyerDoc) {
+    throw new Error("Buyer Not Found!!!");
+  }
+  const orderDoc = await Order.findById(billDocOther.order_id);
+  if (!orderDoc) {
+    throw new Error("Order Not Found!!!");
+  }
+
+  const convertItems = await modifiedBillProducts(orderDoc.products);
+
+  const bill = {
+    invoice_id: billDocOther.invoice_id,
+    sellerName: sellerDoc.agro_name,
+    sellerAddress:
+      sellerDoc?.billing_address?.address_line ||
+      sellerDoc?.shipping_address?.address_line,
+    sellerEmail: sellerDoc.email,
+    sellerPhone: sellerDoc.contact_number,
+    sellerGST:
+      sellerDoc._id?.toString() === sellerDoc.gst_number?.toString()
+        ? "-"
+        : sellerDoc.gst_number,
+    buyerName: buyerDoc.agro_name,
+    buyerAddress:
+      buyerDoc?.billing_address?.address_line ||
+      buyerDoc?.shipping_address?.address_line,
+    buyerEmail: buyerDoc.email,
+    buyerPhone: buyerDoc.contact_number,
+    buyerGST:
+      buyerDoc._id?.toString() === buyerDoc.gst_number?.toString()
+        ? "-"
+        : buyerDoc.gst_number,
+    items: convertItems,
+    order_amount: billDocOther.order_amount,
+    discount_amount: billDocOther.discount_amount,
+    tax_amount: billDocOther.tax_amount,
+    billing_amount: orderDoc.billing_amount,
+    sellerBankDetails: {
+      bankName: masterConfig.super_admin_bank_details.bankName,
+      accountNumber: masterConfig.super_admin_bank_details.accountNumber,
+      ifscCode: masterConfig.super_admin_bank_details.ifscCode,
+      branchName: masterConfig.super_admin_bank_details.branchName,
+    },
+  };
+
   const data4responseObject = {
     req: req,
     code: httpStatus.OK,
     message: "Bill Fetched Successfully!!",
-    payload: { result: billDoc },
+    payload: { result: billDoc, bill },
     logPayload: false,
   };
 

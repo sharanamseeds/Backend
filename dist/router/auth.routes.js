@@ -18,6 +18,12 @@ router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, func
 router.post("/register", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     return validateViaJoi(authMiddlewareSchemas.registerSchema, req.body, req, res, next);
 }), authController.register);
+router.post("/user/login", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    return validateViaJoi(authMiddlewareSchemas.userLoginSchema, req.body, req, res, next);
+}), authController.loginApp);
+router.post("/user/register", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    return validateViaJoi(authMiddlewareSchemas.registerSchema, req.body, req, res, next);
+}), authController.registerApp);
 router.post("/change_password", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     return validateViaJoi(authMiddlewareSchemas.changePasswordSchema, req.body, req, res, next);
 }), authController.changePassword);

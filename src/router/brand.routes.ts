@@ -27,6 +27,10 @@ router.get(
   brandController.getBrand
 );
 
+router.get("/user/", authenticateToken, brandController.getBrandList);
+
+router.get("/user/:id", authenticateToken, brandController.getBrand);
+
 router.post(
   "/",
   authenticateToken,

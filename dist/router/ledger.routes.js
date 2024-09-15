@@ -5,7 +5,8 @@ import { ledgerController } from "../controllers/ledgers.controllers.js";
 const router = express.Router();
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "ledger", permission: "can_download" }]), ledgerController.downloadExcel);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "ledger", permission: "can_read" }]), ledgerController.getLedgerList);
-router.get("/user/", authenticateToken, CHECKPERMISSION([{ module: "ledger", permission: "can_read" }]), ledgerController.getCustomerLedgerList);
+router.get("/user/", authenticateToken, ledgerController.getCustomerLedgerList);
+router.get("/user/:id", authenticateToken, ledgerController.getLedger);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "ledger", permission: "can_read" }]), ledgerController.getLedger);
 // router.post(
 //   "/",

@@ -161,6 +161,7 @@ const createSuperAdminRole = () => __awaiter(void 0, void 0, void 0, function* (
             const superAdminRole = new Role({
                 role_name: "Super Admin",
                 identifier: makeIdentifier("Super Admin"),
+                is_active: true,
             });
             yield superAdminRole.save();
             // global.logger.info("ROLE: Super Admin Created ✔");

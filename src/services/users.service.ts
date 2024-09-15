@@ -93,6 +93,7 @@ const getUserList = async ({
       pagination = true,
       sortBy = "createdAt",
       sortOrder = "asc",
+      is_app_user,
       role_id,
       is_verified,
       is_blocked,
@@ -129,6 +130,9 @@ const getUserList = async ({
     }
     if (is_verified !== undefined) {
       filterQuery.is_verified = is_verified;
+    }
+    if (is_app_user !== undefined) {
+      filterQuery.is_app_user = is_app_user;
     }
     if (is_blocked !== undefined) {
       filterQuery.is_blocked = is_blocked;
@@ -247,7 +251,6 @@ const addUser = async ({
       _id: new mongoose.Types.ObjectId(userId),
       added_by: new mongoose.Types.ObjectId(requestUser._id),
       updated_by: new mongoose.Types.ObjectId(requestUser._id),
-      gst_number: new mongoose.Types.ObjectId(userId),
       hash: hashData,
       salt: saltData,
     };

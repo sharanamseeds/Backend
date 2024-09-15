@@ -17,6 +17,8 @@ const router = express.Router();
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "brand", permission: "can_download" }]), brandController.downloadExcel);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "brand", permission: "can_read" }]), brandController.getBrandList);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "brand", permission: "can_read" }]), brandController.getBrand);
+router.get("/user/", authenticateToken, brandController.getBrandList);
+router.get("/user/:id", authenticateToken, brandController.getBrand);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "brand", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let validationData = {};

@@ -21,12 +21,9 @@ router.get(
   offerController.getOfferList
 );
 
-router.get(
-  "/user/",
-  authenticateToken,
-  CHECKPERMISSION([{ module: "offer", permission: "can_read" }]),
-  offerController.getCustomerOfferList
-);
+router.get("/user/", authenticateToken, offerController.getCustomerOfferList);
+
+router.get("/user/:id", authenticateToken, offerController.getOffer);
 
 router.get(
   "/:id",

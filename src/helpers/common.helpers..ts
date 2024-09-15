@@ -187,6 +187,7 @@ const createSuperAdminRole = async () => {
       const superAdminRole = new Role({
         role_name: "Super Admin",
         identifier: makeIdentifier("Super Admin"),
+        is_active: true,
       });
       await superAdminRole.save();
       // global.logger.info("ROLE: Super Admin Created ✔");

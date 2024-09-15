@@ -24,9 +24,10 @@ router.get(
 router.get(
   "/user/",
   authenticateToken,
-  CHECKPERMISSION([{ module: "product", permission: "can_read" }]),
   productController.getCustomerProductList
 );
+
+router.get("/user/:id", authenticateToken, productController.getProduct);
 
 router.get(
   "/:id",

@@ -49,15 +49,65 @@ const modifiedBillProducts = (products) => __awaiter(void 0, void 0, void 0, fun
     return calculatedProducts;
 });
 const getBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     const billDoc = yield billService.getBill({
         billId: req.params.id,
         query: req.query,
     });
+    const billDocOther = yield Bill.findById(req.params.id);
+    if (!billDocOther) {
+        throw new Error("Order Not Found!!!");
+    }
+    const sellerDoc = yield User.findOne({
+        email: masterConfig.superAdminConfig.email,
+    });
+    if (!sellerDoc) {
+        throw new Error("Seller Not Found!!!");
+    }
+    const buyerDoc = yield User.findById(billDocOther === null || billDocOther === void 0 ? void 0 : billDocOther.customer_id);
+    if (!buyerDoc) {
+        throw new Error("Buyer Not Found!!!");
+    }
+    const orderDoc = yield Order.findById(billDocOther.order_id);
+    if (!orderDoc) {
+        throw new Error("Order Not Found!!!");
+    }
+    const convertItems = yield modifiedBillProducts(orderDoc.products);
+    const bill = {
+        invoice_id: billDocOther.invoice_id,
+        sellerName: sellerDoc.agro_name,
+        sellerAddress: ((_a = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _a === void 0 ? void 0 : _a.address_line) ||
+            ((_b = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _b === void 0 ? void 0 : _b.address_line),
+        sellerEmail: sellerDoc.email,
+        sellerPhone: sellerDoc.contact_number,
+        sellerGST: ((_c = sellerDoc._id) === null || _c === void 0 ? void 0 : _c.toString()) === ((_d = sellerDoc.gst_number) === null || _d === void 0 ? void 0 : _d.toString())
+            ? "-"
+            : sellerDoc.gst_number,
+        buyerName: buyerDoc.agro_name,
+        buyerAddress: ((_e = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address) === null || _e === void 0 ? void 0 : _e.address_line) ||
+            ((_f = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.shipping_address) === null || _f === void 0 ? void 0 : _f.address_line),
+        buyerEmail: buyerDoc.email,
+        buyerPhone: buyerDoc.contact_number,
+        buyerGST: ((_g = buyerDoc._id) === null || _g === void 0 ? void 0 : _g.toString()) === ((_h = buyerDoc.gst_number) === null || _h === void 0 ? void 0 : _h.toString())
+            ? "-"
+            : buyerDoc.gst_number,
+        items: convertItems,
+        order_amount: billDocOther.order_amount,
+        discount_amount: billDocOther.discount_amount,
+        tax_amount: billDocOther.tax_amount,
+        billing_amount: orderDoc.billing_amount,
+        sellerBankDetails: {
+            bankName: masterConfig.super_admin_bank_details.bankName,
+            accountNumber: masterConfig.super_admin_bank_details.accountNumber,
+            ifscCode: masterConfig.super_admin_bank_details.ifscCode,
+            branchName: masterConfig.super_admin_bank_details.branchName,
+        },
+    };
     const data4responseObject = {
         req: req,
         code: httpStatus.OK,
         message: "Bill Fetched Successfully!!",
-        payload: { result: billDoc },
+        payload: { result: billDoc, bill },
         logPayload: false,
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
@@ -90,9 +140,9 @@ const getCustomerBillList = catchAsync((req, res) => __awaiter(void 0, void 0, v
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
 const updateBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _j;
     let bodyData = {};
-    if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {
+    if (((_j = req === null || req === void 0 ? void 0 : req.query) === null || _j === void 0 ? void 0 : _j.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
     const billDoc = yield billService.updateBill({
@@ -112,9 +162,9 @@ const updateBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
 const addBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _k;
     let bodyData = {};
-    if (((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.payload) && typeof req.query.payload === "string") {
+    if (((_k = req === null || req === void 0 ? void 0 : req.query) === null || _k === void 0 ? void 0 : _k.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
     const billDoc = yield billService.addBill({
@@ -201,7 +251,7 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
     }
 }));
 const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d, _e, _f, _g, _h, _j, _k;
+    var _l, _m, _o, _p, _q, _r, _s, _t;
     try {
         // Fetch bill from the database
         const billDoc = yield Bill.findById(req.params.id);
@@ -226,19 +276,19 @@ const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         const bill = {
             invoice_id: billDoc.invoice_id,
             sellerName: sellerDoc.agro_name,
-            sellerAddress: ((_c = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _c === void 0 ? void 0 : _c.address_line) ||
-                ((_d = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _d === void 0 ? void 0 : _d.address_line),
+            sellerAddress: ((_l = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _l === void 0 ? void 0 : _l.address_line) ||
+                ((_m = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _m === void 0 ? void 0 : _m.address_line),
             sellerEmail: sellerDoc.email,
             sellerPhone: sellerDoc.contact_number,
-            sellerGST: ((_e = sellerDoc._id) === null || _e === void 0 ? void 0 : _e.toString()) === ((_f = sellerDoc.gst_number) === null || _f === void 0 ? void 0 : _f.toString())
+            sellerGST: ((_o = sellerDoc._id) === null || _o === void 0 ? void 0 : _o.toString()) === ((_p = sellerDoc.gst_number) === null || _p === void 0 ? void 0 : _p.toString())
                 ? "-"
                 : sellerDoc.gst_number,
             buyerName: buyerDoc.agro_name,
-            buyerAddress: ((_g = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address) === null || _g === void 0 ? void 0 : _g.address_line) ||
-                ((_h = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.shipping_address) === null || _h === void 0 ? void 0 : _h.address_line),
+            buyerAddress: ((_q = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address) === null || _q === void 0 ? void 0 : _q.address_line) ||
+                ((_r = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.shipping_address) === null || _r === void 0 ? void 0 : _r.address_line),
             buyerEmail: buyerDoc.email,
             buyerPhone: buyerDoc.contact_number,
-            buyerGST: ((_j = buyerDoc._id) === null || _j === void 0 ? void 0 : _j.toString()) === ((_k = buyerDoc.gst_number) === null || _k === void 0 ? void 0 : _k.toString())
+            buyerGST: ((_s = buyerDoc._id) === null || _s === void 0 ? void 0 : _s.toString()) === ((_t = buyerDoc.gst_number) === null || _t === void 0 ? void 0 : _t.toString())
                 ? "-"
                 : buyerDoc.gst_number,
             items: convertItems,

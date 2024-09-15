@@ -21,6 +21,10 @@ router.get(
   languageController.getLanguage
 );
 
+router.get("/user/", authenticateToken, languageController.getLanguageList);
+
+router.get("/user/:id", authenticateToken, languageController.getLanguage);
+
 router.post(
   "/",
   authenticateToken,

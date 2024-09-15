@@ -13,21 +13,11 @@ import { validateViaJoi } from "../validations/joi.validation.js";
 import { favouriteMiddlewareSchemas } from "../validations/favourite.validation.js";
 import { favouriteController } from "../controllers/favourite.controller.js";
 const router = express.Router();
-router.get("/download-excel", authenticateToken, 
-//CHECKPERMISSION([{ module: "favourite", permission: "can_download" }]),
-favouriteController.downloadExcel);
-router.get("/user/", authenticateToken, 
-//CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
-favouriteController.getUserFavouriteList);
-router.get("/", authenticateToken, 
-//CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
-favouriteController.getFavouriteList);
-router.get("/:id", authenticateToken, 
-//CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
-favouriteController.getFavourite);
-router.post("/", authenticateToken, 
-//CHECKPERMISSION([{ module: "favourite", permission: "can_add" }]),
-(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/download-excel", authenticateToken, favouriteController.downloadExcel);
+router.get("/user/", authenticateToken, favouriteController.getUserFavouriteList);
+router.get("/", authenticateToken, favouriteController.getFavouriteList);
+router.get("/:id", authenticateToken, favouriteController.getFavourite);
+router.post("/", authenticateToken, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let validationData = {};
     if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {

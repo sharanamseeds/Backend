@@ -16,7 +16,8 @@ import { productMiddlewareSchemas } from "../validations/product.validation.js";
 const router = express.Router();
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "product", permission: "can_download" }]), productController.downloadExcel);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "product", permission: "can_read" }]), productController.getProductList);
-router.get("/user/", authenticateToken, CHECKPERMISSION([{ module: "product", permission: "can_read" }]), productController.getCustomerProductList);
+router.get("/user/", authenticateToken, productController.getCustomerProductList);
+router.get("/user/:id", authenticateToken, productController.getProduct);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "product", permission: "can_read" }]), productController.getProduct);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "product", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

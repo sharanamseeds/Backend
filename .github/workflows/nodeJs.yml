@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       - run: mv ecosystem.config.js ecosystem.config.cjs
       - run: cp -r default_images/ /home/ubuntu/pm2/
-      - run: npm run gen-secrets
+      # - run: npm run gen-secrets
       - run: npm run build
       - name: Stop and delete existing PM2 processes
         run: |

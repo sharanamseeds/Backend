@@ -16,7 +16,8 @@ import { validateViaJoi } from "../validations/joi.validation.js";
 const router = express.Router();
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "offer", permission: "can_download" }]), offerController.downloadExcel);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "offer", permission: "can_read" }]), offerController.getOfferList);
-router.get("/user/", authenticateToken, CHECKPERMISSION([{ module: "offer", permission: "can_read" }]), offerController.getCustomerOfferList);
+router.get("/user/", authenticateToken, offerController.getCustomerOfferList);
+router.get("/user/:id", authenticateToken, offerController.getOffer);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "offer", permission: "can_read" }]), offerController.getOffer);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "offer", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

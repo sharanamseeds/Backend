@@ -8,35 +8,30 @@ const router = express.Router();
 router.get(
   "/download-excel",
   authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_download" }]),
   cartController.downloadExcel
 );
 
 router.get(
   "/user/",
   authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
   cartController.getUserCartList
 );
 
 router.get(
   "/",
   authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
   cartController.getCartList
 );
 
 router.get(
   "/:id",
   authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
   cartController.getCart
 );
 
 router.post(
   "/",
   authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_add" }]),
   async (req, res, next) => {
     let validationData = {};
     if (req?.query?.payload && typeof req.query.payload === "string") {

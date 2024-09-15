@@ -12,6 +12,7 @@ export interface typeUser extends Document {
   name: string;
   agro_name: string;
   is_email_verified: boolean;
+  is_app_user: boolean;
   contact_number: string;
   gst_number?: string; // Optional
   email: string;
@@ -57,8 +58,9 @@ const usersSchema: Schema = new Schema(
     name: { type: String },
     agro_name: { type: String, required: true },
     is_email_verified: { type: Boolean, default: false },
+    is_app_user: { type: Boolean, default: false },
     contact_number: { type: String },
-    gst_number: { type: String, default: null, unique: true },
+    gst_number: { type: String, default: null },
     email: { type: String, required: true, unique: true },
     billing_address: {
       address_line: { type: String, default: null },

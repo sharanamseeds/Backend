@@ -8,35 +8,22 @@ const router = express.Router();
 router.get(
   "/download-excel",
   authenticateToken,
-  //CHECKPERMISSION([{ module: "favourite", permission: "can_download" }]),
   favouriteController.downloadExcel
 );
 
 router.get(
   "/user/",
   authenticateToken,
-  //CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
   favouriteController.getUserFavouriteList
 );
 
-router.get(
-  "/",
-  authenticateToken,
-  //CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
-  favouriteController.getFavouriteList
-);
+router.get("/", authenticateToken, favouriteController.getFavouriteList);
 
-router.get(
-  "/:id",
-  authenticateToken,
-  //CHECKPERMISSION([{ module: "favourite", permission: "can_read" }]),
-  favouriteController.getFavourite
-);
+router.get("/:id", authenticateToken, favouriteController.getFavourite);
 
 router.post(
   "/",
   authenticateToken,
-  //CHECKPERMISSION([{ module: "favourite", permission: "can_add" }]),
   async (req, res, next) => {
     let validationData = {};
     if (req?.query?.payload && typeof req.query.payload === "string") {

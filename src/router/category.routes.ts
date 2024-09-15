@@ -28,6 +28,10 @@ router.get(
   categoryController.getCategory
 );
 
+router.get("/user/", authenticateToken, categoryController.getCategoryList);
+
+router.get("/user/:id", authenticateToken, categoryController.getCategory);
+
 router.post(
   "/",
   authenticateToken,

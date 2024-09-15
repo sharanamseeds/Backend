@@ -24,6 +24,54 @@ const login = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, functio
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
+const register = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const payload = yield authService.register({
+        email: req.body.email,
+        name: req.body.name,
+        password: req.body.password,
+        confirm_password: req.body.confirm_password,
+        gst_number: req.body.gst_number,
+    });
+    const data4responseObject = {
+        req: req,
+        code: httpStatus.OK,
+        message: "User Created Succesfully",
+        payload: payload,
+        logPayload: false,
+    };
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+}));
+const loginApp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const payload = yield authService.loginApp({
+        email: req.body.email,
+        password: req.body.password,
+    });
+    const data4responseObject = {
+        req: req,
+        code: httpStatus.OK,
+        message: "Login successful",
+        payload: payload,
+        logPayload: false,
+    };
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+}));
+const registerApp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const payload = yield authService.registerApp({
+        email: req.body.email,
+        name: req.body.name,
+        password: req.body.password,
+        confirm_password: req.body.confirm_password,
+        gst_number: req.body.gst_number,
+    });
+    const data4responseObject = {
+        req: req,
+        code: httpStatus.OK,
+        message: "User Created Succesfully",
+        payload: payload,
+        logPayload: false,
+    };
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+}));
 const changePassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = yield authService.changePassword({
         email: req.body.email,
@@ -92,30 +140,15 @@ const verifyVerificationCode = catchAsync((req, res) => __awaiter(void 0, void 0
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
-const register = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const payload = yield authService.register({
-        email: req.body.email,
-        name: req.body.name,
-        password: req.body.password,
-        confirm_password: req.body.confirm_password,
-        gst_number: req.body.gst_number,
-    });
-    const data4responseObject = {
-        req: req,
-        code: httpStatus.OK,
-        message: "User Created Succesfully",
-        payload: payload,
-        logPayload: false,
-    };
-    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
-}));
 export const authController = {
     login,
+    register,
+    loginApp,
+    registerApp,
     changePassword,
     refreshUserToken,
     sendVerificationCode,
     reSendVerificationCode,
     verifyVerificationCode,
-    register,
 };
 //# sourceMappingURL=auth.controller.js.map

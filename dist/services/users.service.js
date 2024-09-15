@@ -67,7 +67,7 @@ const calculateUserFinancials = ({ userId }) => __awaiter(void 0, void 0, void 0
 });
 const getUserList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", role_id, is_verified, is_blocked, name, is_email_verified, contact_number, gst_number, email, search, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", is_app_user, role_id, is_verified, is_blocked, name, is_email_verified, contact_number, gst_number, email, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }
@@ -89,6 +89,9 @@ const getUserList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         }
         if (is_verified !== undefined) {
             filterQuery.is_verified = is_verified;
+        }
+        if (is_app_user !== undefined) {
+            filterQuery.is_app_user = is_app_user;
         }
         if (is_blocked !== undefined) {
             filterQuery.is_blocked = is_blocked;
@@ -186,7 +189,6 @@ const addUser = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, fun
             _id: new mongoose.Types.ObjectId(userId),
             added_by: new mongoose.Types.ObjectId(requestUser._id),
             updated_by: new mongoose.Types.ObjectId(requestUser._id),
-            gst_number: new mongoose.Types.ObjectId(userId),
             hash: hashData,
             salt: saltData,
         };

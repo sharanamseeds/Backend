@@ -16,6 +16,8 @@ import { languageMiddlewareSchemas } from "../validations/language.validation.js
 const router = express.Router();
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "language", permission: "can_read" }]), languageController.getLanguageList);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "language", permission: "can_read" }]), languageController.getLanguage);
+router.get("/user/", authenticateToken, languageController.getLanguageList);
+router.get("/user/:id", authenticateToken, languageController.getLanguage);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "language", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     return validateViaJoi(languageMiddlewareSchemas.addLanguage, req.body, req, res, next);
 }), languageController.addLanguage);

@@ -37,7 +37,6 @@ initializeDatabase()
     logger.info(`Database connection ✔`);
     initializeServer()
         .then(() => {
-        logger.info(`HttpServer connection ✔`);
         createDefaultDatabase()
             .then(() => {
             logger.info(`Basic Data Created ✔`);

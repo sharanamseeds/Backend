@@ -16,6 +16,8 @@ import { moneyController } from "../controllers/money.controller.js";
 const router = express.Router();
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_read" }]), moneyController.getMoneyList);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_read" }]), moneyController.getMoney);
+router.get("/user/", authenticateToken, moneyController.getMoneyList);
+router.get("/user/:id", authenticateToken, moneyController.getMoney);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let validationData = {};

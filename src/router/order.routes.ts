@@ -41,12 +41,9 @@ router.get(
   orderController.getOrderList
 );
 
-router.get(
-  "/user/",
-  authenticateToken,
-  CHECKPERMISSION([{ module: "order", permission: "can_read" }]),
-  orderController.getCustomerOrderList
-);
+router.get("/user/", authenticateToken, orderController.getCustomerOrderList);
+
+router.get("/user/:id", authenticateToken, orderController.getOrder);
 
 router.get(
   "/:id",

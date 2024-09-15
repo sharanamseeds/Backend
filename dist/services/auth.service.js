@@ -23,7 +23,7 @@ const login = ({ email, password, }) => __awaiter(void 0, void 0, void 0, functi
             throw new NotFoundError("Email and password are required");
         }
         // Find user by email
-        const user = yield User.findOne({ email });
+        const user = yield User.findOne({ email, is_app_user: false });
         if (!user) {
             throw new NotFoundError("User not found");
         }
@@ -92,6 +92,119 @@ const login = ({ email, password, }) => __awaiter(void 0, void 0, void 0, functi
         throw error;
     }
 });
+const register = ({ email, name, password, confirm_password, gst_number, }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Find user by email
+        const user = yield User.findOne({ email });
+        if (user) {
+            throw new NotFoundError("User Alredy Existed!!");
+        }
+        if (confirm_password !== password) {
+            throw new NotFoundError("Confirm Password Must be Match With Password");
+        }
+        const userId = new mongoose.Types.ObjectId();
+        const { hash, salt } = generatePassword(password);
+        const userData = {
+            _id: new mongoose.Types.ObjectId(userId),
+            added_by: new mongoose.Types.ObjectId(userId),
+            updated_by: new mongoose.Types.ObjectId(userId),
+            gst_number: gst_number,
+            name: name,
+            email: email,
+            hash,
+            salt,
+        };
+        const userDoc = new User(Object.assign({}, userData));
+        yield userDoc.save();
+        if (userDoc.is_verified) {
+            sendUserAccountVerifiedMail(userDoc.email, userDoc.contact_number);
+        }
+        else {
+            sendUserAccountCreatedMail(userDoc.email, userDoc.contact_number);
+        }
+        return userDoc;
+    }
+    catch (error) {
+        throw error;
+    }
+});
+const loginApp = ({ email, password, }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Validate email and password presence
+        if (!email || !password) {
+            throw new NotFoundError("Email and password are required");
+        }
+        // Find user by email
+        const user = yield User.findOne({ email, is_app_user: true });
+        if (!user) {
+            throw new NotFoundError("User not found");
+        }
+        // Verify password
+        const isValid = comparePassword(password, user.hash, user.salt);
+        if (!isValid) {
+            throw new NotFoundError("Invalid credentials");
+        }
+        // Password is valid, generate tokens
+        const token = generateAccessToken(user._id);
+        const refresh_token = generateRefreshToken(user._id);
+        // Removed sensitive information
+        let userData = user;
+        delete userData.hash;
+        delete userData.salt;
+        delete userData.added_by;
+        delete userData.updated_by;
+        delete userData.__v;
+        let accessModules = [];
+        // Respond with tokens and user data
+        const payloadDoc = {
+            token,
+            refresh_token,
+            user: userData,
+            accessModules,
+        };
+        return payloadDoc;
+    }
+    catch (error) {
+        throw error;
+    }
+});
+const registerApp = ({ email, name, password, confirm_password, gst_number, }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Find user by email
+        const user = yield User.findOne({ email });
+        if (user) {
+            throw new NotFoundError("User Alredy Existed!!");
+        }
+        if (confirm_password !== password) {
+            throw new NotFoundError("Confirm Password Must be Match With Password");
+        }
+        const userId = new mongoose.Types.ObjectId();
+        const { hash, salt } = generatePassword(password);
+        const userData = {
+            _id: new mongoose.Types.ObjectId(userId),
+            added_by: new mongoose.Types.ObjectId(userId),
+            updated_by: new mongoose.Types.ObjectId(userId),
+            is_app_user: true,
+            gst_number: gst_number,
+            name: name,
+            email: email,
+            hash,
+            salt,
+        };
+        const userDoc = new User(Object.assign({}, userData));
+        yield userDoc.save();
+        if (userDoc.is_verified) {
+            sendUserAccountVerifiedMail(userDoc.email, userDoc.contact_number);
+        }
+        else {
+            sendUserAccountCreatedMail(userDoc.email, userDoc.contact_number);
+        }
+        return userDoc;
+    }
+    catch (error) {
+        throw error;
+    }
+});
 const changePassword = ({ email, new_password, confirm_password, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Find user by email
@@ -119,7 +232,6 @@ const changePassword = ({ email, new_password, confirm_password, }) => __awaiter
         throw error;
     }
 });
-//
 const refreshUserToken = ({ refreshToken }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let decoded;
@@ -308,49 +420,15 @@ const verifyVerificationCode = ({ email, verification_code, }) => __awaiter(void
         throw error;
     }
 });
-const register = ({ email, name, password, confirm_password, gst_number, }) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // Find user by email
-        const user = yield User.findOne({ email });
-        if (user) {
-            throw new NotFoundError("User Alredy Existed!!");
-        }
-        if (confirm_password !== password) {
-            throw new NotFoundError("Confirm Password Must be Match With Password");
-        }
-        const userId = new mongoose.Types.ObjectId();
-        const { hash, salt } = generatePassword(password);
-        const userData = {
-            _id: new mongoose.Types.ObjectId(userId),
-            added_by: new mongoose.Types.ObjectId(userId),
-            updated_by: new mongoose.Types.ObjectId(userId),
-            gst_number: gst_number,
-            name: name,
-            email: email,
-            hash,
-            salt,
-        };
-        const userDoc = new User(Object.assign({}, userData));
-        yield userDoc.save();
-        if (userDoc.is_verified) {
-            sendUserAccountVerifiedMail(userDoc.email, userDoc.contact_number);
-        }
-        else {
-            sendUserAccountCreatedMail(userDoc.email, userDoc.contact_number);
-        }
-        return userDoc;
-    }
-    catch (error) {
-        throw error;
-    }
-});
 export const authService = {
     login,
+    register,
+    loginApp,
+    registerApp,
     changePassword,
     refreshUserToken,
     sendVerificationCode,
     reSendVerificationCode,
     verifyVerificationCode,
-    register,
 };
 //# sourceMappingURL=auth.service.js.map

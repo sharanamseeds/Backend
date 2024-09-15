@@ -13,21 +13,11 @@ import { validateViaJoi } from "../validations/joi.validation.js";
 import { cartMiddlewareSchemas } from "../validations/cart.validation.js";
 import { cartController } from "../controllers/cart.controller.js";
 const router = express.Router();
-router.get("/download-excel", authenticateToken, 
-// CHECKPERMISSION([{ module: "cart", permission: "can_download" }]),
-cartController.downloadExcel);
-router.get("/user/", authenticateToken, 
-// CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
-cartController.getUserCartList);
-router.get("/", authenticateToken, 
-// CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
-cartController.getCartList);
-router.get("/:id", authenticateToken, 
-// CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
-cartController.getCart);
-router.post("/", authenticateToken, 
-// CHECKPERMISSION([{ module: "cart", permission: "can_add" }]),
-(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/download-excel", authenticateToken, cartController.downloadExcel);
+router.get("/user/", authenticateToken, cartController.getUserCartList);
+router.get("/", authenticateToken, cartController.getCartList);
+router.get("/:id", authenticateToken, cartController.getCart);
+router.post("/", authenticateToken, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let validationData = {};
     if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {

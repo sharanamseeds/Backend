@@ -21,6 +21,10 @@ router.get(
   moneyController.getMoney
 );
 
+router.get("/user/", authenticateToken, moneyController.getMoneyList);
+
+router.get("/user/:id", authenticateToken, moneyController.getMoney);
+
 router.post(
   "/",
   authenticateToken,

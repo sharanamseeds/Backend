@@ -24,7 +24,8 @@ router.post("/return/:id", authenticateToken, CHECKPERMISSION([{ module: "order"
     validateViaJoi(orderMiddlewareSchemas.returnOrder, validationData, req, res, next);
 }), orderController.returnOrder);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_read" }]), orderController.getOrderList);
-router.get("/user/", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_read" }]), orderController.getCustomerOrderList);
+router.get("/user/", authenticateToken, orderController.getCustomerOrderList);
+router.get("/user/:id", authenticateToken, orderController.getOrder);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_read" }]), orderController.getOrder);
 router.post("/calculate_bill", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;

@@ -7,12 +7,7 @@ const router = express.Router();
 
 router.get("/download-excel", authenticateToken, wishController.downloadExcel);
 
-router.get(
-  "/user/",
-  authenticateToken,
-  // CHECKPERMISSION([{ module: "cart", permission: "can_read" }]),
-  wishController.getUserWishList
-);
+router.get("/user/", authenticateToken, wishController.getUserWishList);
 
 router.get("/", authenticateToken, wishController.getWishList);
 
