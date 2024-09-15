@@ -23,7 +23,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: mv ecosystem.config.js ecosystem.config.cjs
+      # - run: mv ecosystem.config.js ecosystem.config.cjs
       - run: cp -r default_images/ /home/ubuntu/pm2/
       # - run: npm run gen-secrets
       - run: npm run build
@@ -31,5 +31,5 @@ jobs:
         run: |
           pm2 stop all || true
           pm2 delete all || true
-      - run: pm2 start ecosystem.config.cjs
-      - run: pm2 save
+      - run: pm2 start ./dist/index.js
+      # - run: pm2 save
