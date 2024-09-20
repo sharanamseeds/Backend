@@ -142,7 +142,6 @@ const projectLocalizedProducts = (lang_code: string, isActive?: boolean) => {
               coupon_details: 1,
               createdAt: 1,
               updatedAt: 1,
-
               image: {
                 $map: {
                   input: {
@@ -220,6 +219,13 @@ const projectLocalizedProducts = (lang_code: string, isActive?: boolean) => {
         is_verified: 1,
         manufacture_date: 1,
         expiry_date: 1,
+        is_featured: 1,
+        base_unit: 1,
+        lot_no: 1,
+        vendor_name: 1,
+        grn_date: 1,
+        std_qty: 1,
+
         logo: {
           $arrayElemAt: [
             {
@@ -325,6 +331,7 @@ const getProductList = async ({
       pagination = true,
       sortBy = "createdAt",
       sortOrder = "asc",
+      is_featured,
       brand_id,
       category_id,
       in_stock,
@@ -398,6 +405,9 @@ const getProductList = async ({
     if (in_stock !== undefined) {
       filterQuery.in_stock = in_stock == "true" ? true : false;
     }
+    if (is_featured) {
+      filterQuery.is_featured = is_featured == "true" ? true : false;
+    }
 
     const totalDocs = await Product.countDocuments(filterQuery);
 
@@ -469,6 +479,7 @@ const getCustomerProductList = async ({
       pagination = true,
       sortBy = "createdAt",
       sortOrder = "asc",
+      is_featured,
       brand_id,
       category_id,
       product_name,
@@ -532,6 +543,9 @@ const getCustomerProductList = async ({
         },
         { product_code: { $regex: search, $options: "i" } },
       ];
+    }
+    if (is_featured) {
+      filterQuery.is_featured = is_featured == "true" ? true : false;
     }
 
     const totalDocs = await Product.countDocuments(filterQuery);

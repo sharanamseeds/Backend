@@ -215,6 +215,12 @@ const projectLocalizedProducts = (lang_code, isActive) => {
                 is_verified: 1,
                 manufacture_date: 1,
                 expiry_date: 1,
+                is_featured: 1,
+                base_unit: 1,
+                lot_no: 1,
+                vendor_name: 1,
+                grn_date: 1,
+                std_qty: 1,
                 logo: {
                     $arrayElemAt: [
                         {
@@ -297,7 +303,7 @@ const projectLocalizedProducts = (lang_code, isActive) => {
 const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", brand_id, category_id, in_stock, product_name, product_code, is_active, is_verified, price, search, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", is_featured, brand_id, category_id, in_stock, product_name, product_code, is_active, is_verified, price, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }
@@ -355,6 +361,9 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
         if (in_stock !== undefined) {
             filterQuery.in_stock = in_stock == "true" ? true : false;
         }
+        if (is_featured) {
+            filterQuery.is_featured = is_featured == "true" ? true : false;
+        }
         const totalDocs = yield Product.countDocuments(filterQuery);
         if (!pagination) {
             const productDoc = yield Product.aggregate([
@@ -400,7 +409,7 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
 const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", brand_id, category_id, product_name, product_code, price, search, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", is_featured, brand_id, category_id, product_name, product_code, price, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }
@@ -452,6 +461,9 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
                 },
                 { product_code: { $regex: search, $options: "i" } },
             ];
+        }
+        if (is_featured) {
+            filterQuery.is_featured = is_featured == "true" ? true : false;
         }
         const totalDocs = yield Product.countDocuments(filterQuery);
         if (!pagination) {
