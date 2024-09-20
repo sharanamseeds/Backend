@@ -1,3 +1,8 @@
+import { fileURLToPath } from "url";
+import path from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const rootDir = path.resolve(__dirname, "../..");
 export const masterConfig = {
     server_type: "production",
     server_base_url: "http://15.206.141.175:8080/",
@@ -33,6 +38,7 @@ export const masterConfig = {
             "Company",
             "Language",
             "Ledger",
+            "App Banner",
         ],
         languageConfig: {
             lang_name: "English",
@@ -77,6 +83,7 @@ export const masterConfig = {
             COMPANY: "company/",
             NOTIFICATON: "notification/",
             TEMP: "temp/",
+            APP_BANNERS: "banners/",
         },
         fileTypes: {
             IMAGE: "jpeg|jpg|png|gif",

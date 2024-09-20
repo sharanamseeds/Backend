@@ -16,7 +16,7 @@ import { masterConfig } from "../config/master.config.js";
 export const authenticateToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.query.lang_code) {
         const englishLanguageDoc = yield Languages.findOne({
-            identifier: "english",
+            lang_code: masterConfig.defaultDataConfig.languageConfig.lang_code,
         });
         req.query.lang_code = req.query.lang_code || englishLanguageDoc.lang_code;
     }

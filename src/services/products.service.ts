@@ -635,7 +635,7 @@ const addProduct = async ({
     const formatedBodyData = transformFormData(bodyData);
     const product_id = new mongoose.Types.ObjectId();
 
-    let basicData = {
+    let basicData: any = {
       _id: product_id,
       brand_id: formatedBodyData.brand_id,
       category_id: formatedBodyData.category_id,
@@ -647,15 +647,47 @@ const addProduct = async ({
       quantity: formatedBodyData?.quantity,
       expiry_date: formatedBodyData?.expiry_date,
       manufacture_date: formatedBodyData?.manufacture_date,
+      is_featured: false,
+      base_unit: formatedBodyData?.base_unit,
       images: [],
       logo: [],
       in_stock: formatedBodyData?.quantity && formatedBodyData.quantity > 0,
     };
 
+    if ("is_featured" in formatedBodyData) {
+      basicData = {
+        ...basicData,
+        is_featured: formatedBodyData?.is_featured,
+      };
+      delete formatedBodyData.is_featured;
+    }
+    if ("grn_date" in formatedBodyData) {
+      basicData = {
+        ...basicData,
+        grn_date: new Date(formatedBodyData?.grn_date),
+      };
+      delete formatedBodyData.grn_date;
+    }
+    if ("lot_no" in formatedBodyData) {
+      basicData = {
+        ...basicData,
+        lot_no: formatedBodyData?.lot_no,
+      };
+      delete formatedBodyData.lot_no;
+    }
+    if ("vendor_name" in formatedBodyData) {
+      basicData = {
+        ...basicData,
+        vendor_name: formatedBodyData?.vendor_name,
+      };
+      delete formatedBodyData.vendor_name;
+    }
+
     if (formatedBodyData.product_name) {
       updateField(basicData, formatedBodyData, "product_name", lang_code);
       delete formatedBodyData.product_name;
     }
+
     if (formatedBodyData.description) {
       updateField(basicData, formatedBodyData, "description", lang_code);
       delete formatedBodyData.description;
@@ -785,6 +817,27 @@ const updateProduct = async ({
       productDoc.in_stock = productDoc?.quantity && productDoc.quantity > 0;
     }
 
+    if ("is_featured" in bodyData) {
+      productDoc.is_featured = bodyData.is_featured;
+      delete bodyData.is_featured;
+    }
+    if ("grn_date" in bodyData) {
+      productDoc.grn_date = bodyData.grn_date;
+      delete bodyData.grn_date;
+    }
+    if ("lot_no" in bodyData) {
+      productDoc.lot_no = bodyData.lot_no;
+      delete bodyData.lot_no;
+    }
+    if ("vendor_name" in bodyData) {
+      productDoc.vendor_name = bodyData.vendor_name;
+      delete bodyData.vendor_name;
+    }
+    if ("base_unit" in bodyData) {
+      productDoc.base_unit = bodyData.base_unit;
+      delete bodyData.base_unit;
+    }
+
     if (bodyData.product_name) {
       updateField(productDoc, bodyData, "product_name", lang_code);
       delete bodyData.product_name;
@@ -793,6 +846,7 @@ const updateProduct = async ({
       updateField(productDoc, bodyData, "description", lang_code);
       delete bodyData.description;
     }
+
     productDoc.updated_by = requestUser._id;
 
     const files = convertFiles(req.files);

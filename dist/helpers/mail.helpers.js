@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import nodemailer from "nodemailer";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 import path from "path";
 import fs from "fs";
 export const sendMail = (options) => __awaiter(void 0, void 0, void 0, function* () {
@@ -55,7 +55,7 @@ export const sendMail = (options) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 const getLocalImageB64 = (imagePath) => {
-    const basePath = path.join(process.cwd(), imagePath);
+    const basePath = path.join(rootDir, imagePath);
     const imageBuffer = fs.readFileSync(basePath);
     const imageBase64 = imageBuffer.toString("base64");
     const imageMimeType = "image/png";

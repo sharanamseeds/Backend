@@ -19,6 +19,7 @@ import favouritesRoutes from "./favourite.routes.js";
 import wishsRoutes from "./wish.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import moneyRoutes from "./money.routes.js";
+import appBannerRoutes from "./app_banner.routes.js";
 
 const router = express.Router();
 
@@ -42,5 +43,6 @@ router.use("/cart", cartsRoutes);
 router.use("/favourite", favouritesRoutes);
 router.use("/wish", wishsRoutes);
 router.use("/money", moneyRoutes);
+router.use("/banners", appBannerRoutes);
 
 export default router;

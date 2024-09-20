@@ -12,6 +12,11 @@ const addProductSchema = Joi.object({
     quantity: Joi.number().required(),
     is_verified: Joi.boolean(),
     is_active: Joi.boolean(),
+    is_featured: Joi.boolean(),
+    base_unit: Joi.string().valid("GM", "ML", "KG", "LTR").required(),
+    grn_date: Joi.date().optional(),
+    lot_no: Joi.string(),
+    vendor_name: Joi.string(),
 });
 const updateProductSchema = Joi.object({
     product_name: Joi.string().allow(""),
@@ -25,6 +30,11 @@ const updateProductSchema = Joi.object({
     quantity: Joi.number().allow(""),
     is_verified: Joi.boolean(),
     is_active: Joi.boolean(),
+    is_featured: Joi.boolean(),
+    base_unit: Joi.string().valid("GM", "ML", "KG", "LTR"),
+    grn_date: Joi.date().optional(),
+    lot_no: Joi.string(),
+    vendor_name: Joi.string(),
 });
 const deleteProductImageSchema = Joi.object({
     src: Joi.string().required(),

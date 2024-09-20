@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { promisify } from "util";
 import File, { IFile } from "../models/files.models.js";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 
 const unlinkAsync = promisify(fs.unlink);
 const mkdirAsync = promisify(fs.mkdir);
@@ -132,7 +132,7 @@ export const createDocument = async ({
 
     // Construct the full path to the upload directory
     const basePath = path.join(
-      process.cwd(),
+      rootDir,
       masterConfig.fileStystem.folderPaths.BASE_FOLDER
     );
     const fullPath = path.join(basePath, documentPath);

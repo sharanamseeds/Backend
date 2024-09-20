@@ -5,7 +5,7 @@ export interface typeCart extends Document {
   user_id: mongoose.Types.ObjectId;
   product_id: mongoose.Types.ObjectId;
   quantity: number;
-  status: string;
+  status: "active" | "ordered" | "abandoned" | "completed";
   //   session_id?: mongoose.Types.ObjectId;
   notes?: string;
   createdAt: Date;

@@ -15,7 +15,7 @@
 // export const convertPdf = async (html: string): Promise<string> => {
 //   return new Promise((resolve, reject) => {
 //     const basePath = path.join(
-//       process.cwd(),
+//       rootDir,
 //       masterConfig.fileStystem.folderPaths.BASE_FOLDER
 //     );
 //     const tempPath =

@@ -15,7 +15,7 @@ import Modules from "../models/modules.model.js";
 import mongoose from "mongoose";
 import Permissions from "../models/permission.model.js";
 import { buildAccountCreatedHtml, buildWelcomeHtml, generateVerificationCodeHtml, sendMail, } from "./mail.helpers.js";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 import Company from "../models/company.model.js";
 import path, { dirname } from "path";
 import fs from "fs";
@@ -33,7 +33,7 @@ export const sendUserAccountCreatedMail = (userEmail, contact) => __awaiter(void
         attachments: [
             {
                 filename: "logo.png",
-                path: path.join(process.cwd(), masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                path: path.join(rootDir, masterConfig.nodemailerConfig.emailTemplateConfig.company_details
                     .primary_logo_path),
                 cid: "companylogo", // same as the cid value in the html img src
             },
@@ -48,7 +48,7 @@ export const sendUserOTPMail = (email, code) => __awaiter(void 0, void 0, void 0
         attachments: [
             {
                 filename: "logo.png",
-                path: path.join(process.cwd(), masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                path: path.join(rootDir, masterConfig.nodemailerConfig.emailTemplateConfig.company_details
                     .primary_logo_path),
                 cid: "companylogo", // same as the cid value in the html img src
             },
@@ -63,7 +63,7 @@ export const sendUserAccountVerifiedMail = (userEmail, contact) => __awaiter(voi
         attachments: [
             {
                 filename: "logo.png",
-                path: path.join(process.cwd(), masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                path: path.join(rootDir, masterConfig.nodemailerConfig.emailTemplateConfig.company_details
                     .primary_logo_path),
                 cid: "companylogo", // same as the cid value in the html img src
             },

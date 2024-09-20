@@ -7,6 +7,7 @@ import { initializeServer } from "./connections/http.connection.js";
 import dotenv from "dotenv";
 import { initializeDatabase } from "./connections/database.connection.js";
 import { createDefaultDatabase } from "./helpers/common.helpers..js";
+import { rootDir } from "./config/master.config.js";
 
 dotenv.config();
 

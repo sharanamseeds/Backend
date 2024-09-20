@@ -1,5 +1,5 @@
 import nodemailer, { TransportOptions } from "nodemailer";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 import path from "path";
 import fs from "fs";
 
@@ -57,7 +57,7 @@ export const sendMail = async (options: MailOptions): Promise<void> => {
 };
 
 const getLocalImageB64 = (imagePath: string) => {
-  const basePath = path.join(process.cwd(), imagePath);
+  const basePath = path.join(rootDir, imagePath);
 
   const imageBuffer = fs.readFileSync(basePath);
   const imageBase64 = imageBuffer.toString("base64");

@@ -11,7 +11,7 @@ import {
   generateVerificationCodeHtml,
   sendMail,
 } from "./mail.helpers.js";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 import Company from "../models/company.model.js";
 import path, { dirname } from "path";
 import fs from "fs";
@@ -35,7 +35,7 @@ export const sendUserAccountCreatedMail = async (
       {
         filename: "logo.png",
         path: path.join(
-          process.cwd(),
+          rootDir,
           masterConfig.nodemailerConfig.emailTemplateConfig.company_details
             .primary_logo_path
         ),
@@ -57,7 +57,7 @@ export const sendUserOTPMail = async (email: string, code: string) => {
       {
         filename: "logo.png",
         path: path.join(
-          process.cwd(),
+          rootDir,
           masterConfig.nodemailerConfig.emailTemplateConfig.company_details
             .primary_logo_path
         ),
@@ -79,7 +79,7 @@ export const sendUserAccountVerifiedMail = async (
       {
         filename: "logo.png",
         path: path.join(
-          process.cwd(),
+          rootDir,
           masterConfig.nodemailerConfig.emailTemplateConfig.company_details
             .primary_logo_path
         ),

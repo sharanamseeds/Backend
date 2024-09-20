@@ -4,7 +4,7 @@ import routes from "../router/routes.js";
 import upload from "../middleware/upload.middleware.js";
 import path from "path";
 import { errorHandler, errorConverter } from "../middleware/error.js";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 
 const app = express();
 
@@ -34,16 +34,13 @@ app.use(upload.any());
 app.use(
   "/api/uploads",
   express.static(
-    path.join(process.cwd(), masterConfig.fileStystem.folderPaths.BASE_FOLDER)
+    path.join(rootDir, masterConfig.fileStystem.folderPaths.BASE_FOLDER)
   )
 );
 app.use(
   "/api/default_images",
   express.static(
-    path.join(
-      process.cwd(),
-      masterConfig.fileStystem.folderPaths.DEFAULT_FOLDER
-    )
+    path.join(rootDir, masterConfig.fileStystem.folderPaths.DEFAULT_FOLDER)
   )
 );
 

@@ -13,7 +13,7 @@ import routes from "../router/routes.js";
 import upload from "../middleware/upload.middleware.js";
 import path from "path";
 import { errorHandler, errorConverter } from "../middleware/error.js";
-import { masterConfig } from "../config/master.config.js";
+import { masterConfig, rootDir } from "../config/master.config.js";
 const app = express();
 // const corsOptions = {
 //   origin: ["http://localhost:3000", "http://15.206.141.175", "*"], // Allow connections from any origin
@@ -35,8 +35,8 @@ app.use(cors(corsOptions));
 app.use(upload.any());
 /* middlwares ends here */
 /* serve static files */
-app.use("/api/uploads", express.static(path.join(process.cwd(), masterConfig.fileStystem.folderPaths.BASE_FOLDER)));
-app.use("/api/default_images", express.static(path.join(process.cwd(), masterConfig.fileStystem.folderPaths.DEFAULT_FOLDER)));
+app.use("/api/uploads", express.static(path.join(rootDir, masterConfig.fileStystem.folderPaths.BASE_FOLDER)));
+app.use("/api/default_images", express.static(path.join(rootDir, masterConfig.fileStystem.folderPaths.DEFAULT_FOLDER)));
 app.get("/api/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("Welcome To Server");
 }));

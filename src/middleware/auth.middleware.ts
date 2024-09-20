@@ -18,7 +18,7 @@ export const authenticateToken = async (
 ) => {
   if (!req.query.lang_code) {
     const englishLanguageDoc = await Languages.findOne({
-      identifier: "english",
+      lang_code: masterConfig.defaultDataConfig.languageConfig.lang_code,
     });
     req.query.lang_code = req.query.lang_code || englishLanguageDoc.lang_code;
   }

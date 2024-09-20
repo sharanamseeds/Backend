@@ -540,10 +540,28 @@ const addProduct = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, 
             quantity: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.quantity,
             expiry_date: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.expiry_date,
             manufacture_date: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.manufacture_date,
+            is_featured: false,
+            base_unit: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.base_unit,
             images: [],
             logo: [],
             in_stock: (formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.quantity) && formatedBodyData.quantity > 0,
         };
+        if ("is_featured" in formatedBodyData) {
+            basicData = Object.assign(Object.assign({}, basicData), { is_featured: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.is_featured });
+            delete formatedBodyData.is_featured;
+        }
+        if ("grn_date" in formatedBodyData) {
+            basicData = Object.assign(Object.assign({}, basicData), { grn_date: new Date(formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.grn_date) });
+            delete formatedBodyData.grn_date;
+        }
+        if ("lot_no" in formatedBodyData) {
+            basicData = Object.assign(Object.assign({}, basicData), { lot_no: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.lot_no });
+            delete formatedBodyData.lot_no;
+        }
+        if ("vendor_name" in formatedBodyData) {
+            basicData = Object.assign(Object.assign({}, basicData), { vendor_name: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.vendor_name });
+            delete formatedBodyData.vendor_name;
+        }
         if (formatedBodyData.product_name) {
             updateField(basicData, formatedBodyData, "product_name", lang_code);
             delete formatedBodyData.product_name;
@@ -657,6 +675,26 @@ const updateProduct = ({ productId, requestUser, req, }) => __awaiter(void 0, vo
             productDoc.quantity = bodyData.quantity;
             delete bodyData.quantity;
             productDoc.in_stock = (productDoc === null || productDoc === void 0 ? void 0 : productDoc.quantity) && productDoc.quantity > 0;
+        }
+        if ("is_featured" in bodyData) {
+            productDoc.is_featured = bodyData.is_featured;
+            delete bodyData.is_featured;
+        }
+        if ("grn_date" in bodyData) {
+            productDoc.grn_date = bodyData.grn_date;
+            delete bodyData.grn_date;
+        }
+        if ("lot_no" in bodyData) {
+            productDoc.lot_no = bodyData.lot_no;
+            delete bodyData.lot_no;
+        }
+        if ("vendor_name" in bodyData) {
+            productDoc.vendor_name = bodyData.vendor_name;
+            delete bodyData.vendor_name;
+        }
+        if ("base_unit" in bodyData) {
+            productDoc.base_unit = bodyData.base_unit;
+            delete bodyData.base_unit;
         }
         if (bodyData.product_name) {
             updateField(productDoc, bodyData, "product_name", lang_code);
