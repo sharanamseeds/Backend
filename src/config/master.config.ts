@@ -8,7 +8,7 @@ export const rootDir = path.resolve(__dirname, "../..");
 
 export const masterConfig = {
   server_type: "production",
-  server_base_url: "http://15.206.141.175:8080/",
+  server_base_url: "https://sharanamagritech.com:8080/",
   authConfig: {
     ACCESS_TOKEN_SECRET: "ACCESS_TOKEN_SECRET",
     REFRESH_TOKEN_SECRET: "REFRESH_TOKEN_SECRET",
@@ -56,9 +56,9 @@ export const masterConfig = {
     },
     emailTemplateConfig: {
       email_template_info: {
-        admin_web_app_link: "http://13.202.47.107:8080/authentication/login",
-        mobile_app_link: "http://13.202.47.107:8080/authentication/login",
-        app_store_link: "http://13.202.47.107:8080/authentication/login",
+        admin_web_app_link: "https://sharanamagritech.com/authentication/login",
+        mobile_app_link: "https://sharanamagritech.com/authentication/login",
+        app_store_link: "https://sharanamagritech.com/authentication/login",
       },
       company_details: {
         company_name: "Agroveda",

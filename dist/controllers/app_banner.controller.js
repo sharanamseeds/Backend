@@ -50,7 +50,7 @@ const deleteAppBannerImage = catchAsync((req, res) => __awaiter(void 0, void 0, 
     const data4responseObject = {
         req: req,
         code: httpStatus.OK,
-        message: "Banner Fetched Successfully!!",
+        message: "Banner Image Deleted Successfully!!",
         payload: { result: bannerDoc },
         logPayload: false,
     };

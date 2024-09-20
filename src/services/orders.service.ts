@@ -680,12 +680,14 @@ const getCustomerOrderList = async ({
     const totalDocs = await Order.countDocuments(filterQuery);
 
     if (!pagination) {
-      const orderDoc = await Order.find(filterQuery).populate({
-        path: "products.product_id",  // Populating the product details
-        select: "images",  // Optional: Select specific fields from the Product model
-      }).sort({
-        [sortBy]: sortOrder === "asc" ? 1 : -1,
-      });
+      const orderDoc = await Order.find(filterQuery)
+        .populate({
+          path: "products.product_id", // Populating the product details
+          select: "images", // Optional: Select specific fields from the Product model
+        })
+        .sort({
+          [sortBy]: sortOrder === "asc" ? 1 : -1,
+        });
       return {
         data: orderDoc,
         meta: {
@@ -698,10 +700,11 @@ const getCustomerOrderList = async ({
       };
     }
 
-    const orderDoc = await Order.find(filterQuery).populate({
-      path: "products.product_id",  // Populating the product details
-      select: "images",  // Optional: Select specific fields from the Product model
-    })
+    const orderDoc = await Order.find(filterQuery)
+      .populate({
+        path: "products.product_id", // Populating the product details
+        select: "images", // Optional: Select specific fields from the Product model
+      })
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
       })
@@ -760,8 +763,8 @@ const getOrder = async ({
       const productDoc = await Product.findById(product.product_id);
       const productObject = productDoc.toObject();
       const localizedProductName = productObject.product_name
-      .filter((image: typeLocalizedString) => image.lang_code === lang_code)
-      .map((image: typeLocalizedString) => image.value); 
+        .filter((image: typeLocalizedString) => image.lang_code === lang_code)
+        .map((image: typeLocalizedString) => image.value);
       const localizedImages = productObject.images
         .filter((image: typeLocalizedString) => image.lang_code === lang_code)
         .map((image: typeLocalizedString) => image.value);
@@ -1172,7 +1175,7 @@ const returnOrder = async ({
   requestUser: typeUser | null;
 }): Promise<Document<unknown, {}, typeOrder> | null> => {
   try {
-    const sellOrderDoc = await Order.findById(buy_order_id);
+    let sellOrderDoc = await Order.findById(buy_order_id);
     if (!sellOrderDoc) {
       throw new Error("Order Not Found");
     }
@@ -1187,6 +1190,12 @@ const returnOrder = async ({
       throw new Error("This Order is Already Returned");
     }
 
+    const sell_order_id = new mongoose.Types.ObjectId();
+
+    sellOrderDoc.is_retuned = true;
+    sellOrderDoc.sell_order_id = sell_order_id;
+    await sellOrderDoc.save();
+
     const duration = calculateDaysDifference(
       sellOrderDoc.createdAt,
       new Date()
@@ -1198,6 +1207,7 @@ const returnOrder = async ({
     }
 
     const order = new Order({
+      _id: sell_order_id,
       order_type: "sell",
       status: "return_requested",
       user_id: sellOrderDoc.user_id,

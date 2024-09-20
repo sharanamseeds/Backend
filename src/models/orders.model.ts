@@ -23,6 +23,7 @@ export interface typeOrder extends Document {
   tax_amount: number;
   order_type: "buy" | "sell";
   buy_order_id: mongoose.Types.ObjectId | null;
+  sell_order_id: mongoose.Types.ObjectId | null;
   status:
     | "confirm"
     | "rejected"
@@ -34,6 +35,7 @@ export interface typeOrder extends Document {
     | "return_rejected"
     | "return_fulfilled";
   is_creditable: boolean;
+  is_retuned: boolean;
   credit_duration: number;
 
   order_notes: string;
@@ -56,6 +58,11 @@ const orderSchema = new mongoose.Schema(
       default: "sell",
     },
     buy_order_id: {
+      type: mongoose.Types.ObjectId,
+      default: null,
+      ref: "orders",
+    },
+    sell_order_id: {
       type: mongoose.Types.ObjectId,
       default: null,
       ref: "orders",
@@ -103,6 +110,7 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     is_creditable: { type: Boolean, default: false },
+    is_retuned: { type: Boolean, default: false },
     credit_duration: { type: Number },
 
     order_notes: {

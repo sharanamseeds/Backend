@@ -15,6 +15,11 @@ const orderSchema = new mongoose.Schema({
         default: null,
         ref: "orders",
     },
+    sell_order_id: {
+        type: mongoose.Types.ObjectId,
+        default: null,
+        ref: "orders",
+    },
     products: [
         {
             product_id: {
@@ -58,6 +63,7 @@ const orderSchema = new mongoose.Schema({
         default: "pending",
     },
     is_creditable: { type: Boolean, default: false },
+    is_retuned: { type: Boolean, default: false },
     credit_duration: { type: Number },
     order_notes: {
         type: String,

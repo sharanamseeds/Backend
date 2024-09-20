@@ -380,10 +380,12 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
         }
         const totalDocs = yield Order.countDocuments(filterQuery);
         if (!pagination) {
-            const orderDoc = yield Order.find(filterQuery).populate({
+            const orderDoc = yield Order.find(filterQuery)
+                .populate({
                 path: "products.product_id",
                 select: "images", // Optional: Select specific fields from the Product model
-            }).sort({
+            })
+                .sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
             });
             return {
@@ -397,7 +399,8 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
                 },
             };
         }
-        const orderDoc = yield Order.find(filterQuery).populate({
+        const orderDoc = yield Order.find(filterQuery)
+            .populate({
             path: "products.product_id",
             select: "images", // Optional: Select specific fields from the Product model
         })
@@ -756,7 +759,7 @@ const updateOrder = ({ orderId, requestUser, req, }) => __awaiter(void 0, void 0
 });
 const returnOrder = ({ buy_order_id, requestUser, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const sellOrderDoc = yield Order.findById(buy_order_id);
+        let sellOrderDoc = yield Order.findById(buy_order_id);
         if (!sellOrderDoc) {
             throw new Error("Order Not Found");
         }
@@ -770,11 +773,16 @@ const returnOrder = ({ buy_order_id, requestUser, }) => __awaiter(void 0, void 0
         if (isReturnedOder) {
             throw new Error("This Order is Already Returned");
         }
+        const sell_order_id = new mongoose.Types.ObjectId();
+        sellOrderDoc.is_retuned = true;
+        sellOrderDoc.sell_order_id = sell_order_id;
+        yield sellOrderDoc.save();
         const duration = calculateDaysDifference(sellOrderDoc.createdAt, new Date());
         if (duration > sellOrderDoc.credit_duration) {
             throw new Error(`Order Can Be Delivered in ${sellOrderDoc.credit_duration} Days`);
         }
         const order = new Order({
+            _id: sell_order_id,
             order_type: "sell",
             status: "return_requested",
             user_id: sellOrderDoc.user_id,
