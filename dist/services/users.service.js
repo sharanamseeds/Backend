@@ -298,7 +298,8 @@ const updateUser = ({ userId, requestUser, req, }) => __awaiter(void 0, void 0, 
             if (body.is_verified &&
                 body.is_verified === true &&
                 !userDoc.role_id &&
-                !body.role_id) {
+                !body.role_id &&
+                !userDoc.is_app_user) {
                 throw new Error("Please Assign Role For User");
             }
         }

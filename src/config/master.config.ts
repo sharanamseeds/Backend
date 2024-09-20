@@ -22,9 +22,9 @@ export const masterConfig = {
   superAdminConfig: {
     email: "milank7376@gmail.com",
     password: "Admin@1234",
-    name: "Super Admin",
+    name: "Sharanam Seeds",
     contact_number: "9537712126",
-    agro_name: "Agro Name",
+    agro_name: "Sharanam Seeds",
   },
   defaultDataConfig: {
     defaultModules: [
@@ -50,9 +50,9 @@ export const masterConfig = {
   },
   nodemailerConfig: {
     mailConfig: {
-      email: "milank7376@gmail.com",
-      password: "libl debu zpib ypqu",
-      name: "Milan Kotadiya",
+      email: "sharanamseeds@gmail.com",
+      password: "bizg gtar ogel vbmm",
+      name: "Sharanam Seeds",
     },
     emailTemplateConfig: {
       email_template_info: {
@@ -61,7 +61,7 @@ export const masterConfig = {
         app_store_link: "https://sharanamagritech.com/authentication/login",
       },
       company_details: {
-        company_name: "Agroveda",
+        company_name: "Sharanam Seeds",
         company_slogan: "Vedic Wisdom for Modern Farming",
         qr_code_path: "default_images/qr-code.png",
         primary_logo_path: "default_images/1.png",
@@ -104,12 +104,12 @@ export const masterConfig = {
     invoiceFormat: "PREFIX-0001-MMYYYY",
   },
   ownerCompanyDetails: {
-    brand_name: "Agroveda",
-    legal_name: "Agroveda Private Limited",
+    brand_name: "Sharanam Seeds",
+    legal_name: "Sharanam Seeds Private Limited",
     slogan: "Vedic Wisdom for Modern Farming",
     industry: ["Agriculture"],
     description: "",
-    website: "www.agroveda.com",
+    website: "sharanamagritech.com",
     type: "B2B",
     logo: {
       primary: "",
