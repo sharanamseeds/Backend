@@ -15,143 +15,115 @@ import Brand from "../models/brands.model.js";
 import Category from "../models/categories.model.js";
 import Offer from "../models/offers.models.js";
 import Languages from "../models/languages.model.js";
+import Ledger from "../models/ledger.model.js";
 const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a, _b;
     try {
         let { start_date, end_date } = query;
         let filterQuery = {};
-        if (start_date && end_date) {
-            filterQuery.createdAt = {
-                $gte: new Date(start_date),
-                $lte: new Date(end_date),
-            };
+        if (start_date || end_date) {
+            if (start_date && end_date) {
+                filterQuery.createdAt = {
+                    $gte: new Date(start_date),
+                    $lte: new Date(end_date),
+                };
+            }
+            else {
+                if (end_date) {
+                    filterQuery.createdAt = {
+                        $lte: new Date(end_date),
+                    };
+                }
+                else {
+                    filterQuery.createdAt = {
+                        $gte: new Date(start_date),
+                    };
+                }
+            }
         }
-        // Total Users
-        const totalUsers = yield User.countDocuments(filterQuery);
-        // Role Wise Users
-        const roleWiseUsers = yield User.aggregate([
-            { $match: filterQuery },
-            { $group: { _id: "$role_id", count: { $sum: 1 } } },
-            {
-                $lookup: {
-                    from: "roles",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "role",
-                },
+        let newData = {
+            languages: 0,
+            brands: 0,
+            categories: 0,
+            ledgers: 0,
+            users: {
+                total: 0,
+                appUsers: 0,
+                adminUsers: 0,
+                blockedUsers: 0,
+                activeUsers: 0,
+                verifiedUsers: 0,
+                unverifiedUsers: 0,
             },
-            { $unwind: "$role" },
-            { $project: { roleName: "$role.name", count: 1 } },
-        ]);
-        // Active, Blocked, Verified And Deactive Ratio
-        const statusMetrics = yield User.aggregate([
-            { $match: filterQuery },
-            {
-                $group: {
-                    _id: null,
-                    activeCount: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $and: [
-                                        { $eq: ["$is_verified", true] },
-                                        { $eq: ["$is_blocked", false] },
-                                    ],
-                                },
-                                1,
-                                0,
-                            ],
-                        },
-                    },
-                    blockedCount: {
-                        $sum: { $cond: [{ $eq: ["$is_blocked", true] }, 1, 0] },
-                    },
-                    verifiedCount: {
-                        $sum: { $cond: [{ $eq: ["$is_verified", true] }, 1, 0] },
-                    },
-                    deactiveCount: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $and: [
-                                        { $eq: ["$is_verified", false] },
-                                        { $eq: ["$is_blocked", false] },
-                                    ],
-                                },
-                                1,
-                                0,
-                            ],
-                        },
-                    },
-                },
+            products: {
+                total: 0,
+                inStockProducts: 0,
+                outOfStockProducts: 0,
+                verifiedProducts: 0,
+                featuredProducts: 0,
             },
-            {
-                $project: {
-                    activeRatio: { $divide: ["$activeCount", totalUsers] },
-                    blockedRatio: { $divide: ["$blockedCount", totalUsers] },
-                    verifiedRatio: { $divide: ["$verifiedCount", totalUsers] },
-                    deactiveRatio: { $divide: ["$deactiveCount", totalUsers] },
-                },
+            offers: {
+                total: 0,
+                activeOffers: 0,
+                productSpecifiedOffers: 0,
+                categorySpecifiedOffers: 0,
             },
-        ]);
-        const userData = {
-            totalUsers,
-            roleWiseUsers,
-            statusMetrics: statusMetrics[0], // Assuming only one group due to null _id
+            bills: {
+                total: 0,
+                paidBills: 0,
+                unPaidBills: 0,
+            },
+            orders: {
+                total: 0,
+                averageOrderCount: 0,
+                averageOrderAmount: 0,
+                confirmedOrderCount: 0,
+                rejectedOrderCount: 0,
+                pendingOrderCount: 0,
+                deliveredOrderCount: 0,
+                cancelledOrderCount: 0,
+                returnRequestedOrderCount: 0,
+                returnAcceptedOrderCount: 0,
+                returnRejectedOrderCount: 0,
+                returnFulfilledOrderCount: 0,
+            },
         };
-        // Order Metrics
-        const totalOrders = yield Order.countDocuments(filterQuery);
-        const totalLanguages = yield Languages.countDocuments({});
-        // Pending, Confirmed Orders
-        const orderStatusMetrics = yield Order.aggregate([
+        newData.users.total = yield User.countDocuments(filterQuery);
+        newData.users.appUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_app_user: true }));
+        newData.users.blockedUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_blocked: true }));
+        newData.users.verifiedUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_verified: true }));
+        newData.users.unverifiedUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_verified: false }));
+        newData.users.activeUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_blocked: false }));
+        newData.users.adminUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_app_user: false }));
+        newData.languages = yield Languages.countDocuments(filterQuery);
+        newData.brands = yield Brand.countDocuments(filterQuery);
+        newData.categories = yield Category.countDocuments(filterQuery);
+        newData.ledgers = yield Ledger.countDocuments(filterQuery);
+        newData.products.total = yield Product.countDocuments(filterQuery);
+        newData.products.inStockProducts = yield Product.countDocuments(Object.assign(Object.assign({}, filterQuery), { in_stock: true }));
+        newData.products.outOfStockProducts = yield Product.countDocuments(Object.assign(Object.assign({}, filterQuery), { in_stock: false }));
+        newData.products.verifiedProducts = yield Product.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_verified: true }));
+        newData.products.featuredProducts = yield Product.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_featured: true }));
+        newData.offers.total = yield Offer.countDocuments(filterQuery);
+        newData.offers.activeOffers = yield Offer.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_active: true }));
+        newData.offers.productSpecifiedOffers = yield Offer.countDocuments(Object.assign(Object.assign({}, filterQuery), { product_specified: true }));
+        newData.offers.categorySpecifiedOffers = yield Offer.countDocuments(Object.assign(Object.assign({}, filterQuery), { category_specified: true }));
+        newData.bills.total = yield Bill.countDocuments(filterQuery);
+        newData.bills.paidBills = yield Bill.countDocuments(Object.assign(Object.assign({}, filterQuery), { payment_status: "paid" }));
+        newData.bills.unPaidBills = yield Bill.countDocuments(Object.assign(Object.assign({}, filterQuery), { payment_status: "unpaid" }));
+        newData.orders.total = yield Order.countDocuments(filterQuery);
+        const averageOrdersPerDay = yield Order.aggregate([
             { $match: filterQuery },
             {
                 $group: {
-                    _id: "$status",
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
                     count: { $sum: 1 },
                 },
             },
+            { $group: { _id: null, averageOrdersPerDay: { $avg: "$count" } } },
         ]);
-        const pendingOrders = ((_a = orderStatusMetrics.find((item) => item._id === "pending")) === null || _a === void 0 ? void 0 : _a.count) || 0;
-        const confirmedOrders = ((_b = orderStatusMetrics.find((item) => item._id === "confirm")) === null || _b === void 0 ? void 0 : _b.count) || 0;
-        // Return Ratio, Delivered, Canceled Ratio
-        const returnMetrics = yield Order.aggregate([
-            { $match: filterQuery },
-            {
-                $group: {
-                    _id: null,
-                    returnCount: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $or: [
-                                        { $eq: ["$status", "return_requested"] },
-                                        { $eq: ["$status", "return_accepeted"] },
-                                        { $eq: ["$status", "return_fulfilled"] },
-                                    ],
-                                },
-                                1,
-                                0,
-                            ],
-                        },
-                    },
-                    deliveredCount: {
-                        $sum: { $cond: [{ $eq: ["$status", "delivered"] }, 1, 0] },
-                    },
-                    canceledCount: {
-                        $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] },
-                    },
-                },
-            },
-            {
-                $project: {
-                    returnRatio: { $divide: ["$returnCount", totalOrders] },
-                    deliveredRatio: { $divide: ["$deliveredCount", totalOrders] },
-                    canceledRatio: { $divide: ["$canceledCount", totalOrders] },
-                },
-            },
-        ]);
-        // Average Order Amount
+        newData.orders.averageOrderCount =
+            ((_a = averageOrdersPerDay[0]) === null || _a === void 0 ? void 0 : _a.averageOrdersPerDay) || 0;
         const averageOrderAmount = yield Order.aggregate([
             { $match: filterQuery },
             {
@@ -161,152 +133,17 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                 },
             },
         ]);
-        // Find the earliest order date
-        const firstOrder = yield Order.findOne().sort({ createdAt: 1 });
-        const earliestDate = (firstOrder === null || firstOrder === void 0 ? void 0 : firstOrder.createdAt) || new Date(); // Default to now if no orders found
-        // Calculate the date difference in days
-        const dateDifference = Math.ceil((new Date(end_date || Date.now()).getTime() -
-            new Date(start_date || earliestDate).getTime()) /
-            (1000 * 60 * 60 * 24));
-        const avgOrdersPerDay = totalOrders / (dateDifference || 1);
-        const orderData = {
-            totalOrders,
-            pendingOrders,
-            confirmedOrders,
-            returnMetrics: returnMetrics[0],
-            averageOrderAmount: ((_c = averageOrderAmount[0]) === null || _c === void 0 ? void 0 : _c.avgAmount) || 0,
-            avgOrdersPerDay,
-        };
-        // Total Products
-        const totalProducts = yield Product.countDocuments(filterQuery);
-        // In-Stock and Out-of-Stock Ratio
-        const stockMetrics = yield Product.aggregate([
-            { $match: filterQuery },
-            {
-                $group: {
-                    _id: null,
-                    inStockCount: {
-                        $sum: { $cond: [{ $eq: ["$in_stock", true] }, 1, 0] },
-                    },
-                    outStockCount: {
-                        $sum: { $cond: [{ $eq: ["$in_stock", false] }, 1, 0] },
-                    },
-                },
-            },
-            {
-                $project: {
-                    inStockRatio: { $divide: ["$inStockCount", totalProducts] },
-                    outStockRatio: { $divide: ["$outStockCount", totalProducts] },
-                },
-            },
-        ]);
-        // Most Sold and Least Sold Products
-        const productSalesMetrics = yield Product.aggregate([
-            { $match: filterQuery },
-            {
-                $lookup: {
-                    from: "orders",
-                    localField: "_id",
-                    foreignField: "products.product_id",
-                    as: "orderDetails",
-                },
-            },
-            {
-                $addFields: {
-                    totalSales: { $sum: "$orderDetails.products.quantity" },
-                },
-            },
-            {
-                $sort: { totalSales: -1 },
-            },
-            {
-                $group: {
-                    _id: null,
-                    mostSold: { $first: "$$ROOT" },
-                    leastSold: { $last: "$$ROOT" },
-                },
-            },
-            {
-                $project: {
-                    mostSoldProduct: {
-                        product_name: "$mostSold.product_name",
-                        totalSales: "$mostSold.totalSales",
-                    },
-                    leastSoldProduct: {
-                        product_name: "$leastSold.product_name",
-                        totalSales: "$leastSold.totalSales",
-                    },
-                },
-            },
-        ]);
-        const productData = {
-            totalProducts,
-            stockMetrics: stockMetrics[0],
-            productSalesMetrics: productSalesMetrics[0], // Assuming only one group due to null _id
-        };
-        // Total Bills
-        const totalBills = yield Bill.countDocuments(filterQuery);
-        // Cash Bill and Online Bill Ratio
-        const paymentMethodMetrics = yield Bill.aggregate([
-            { $match: filterQuery },
-            {
-                $group: {
-                    _id: "$payment_method",
-                    count: { $sum: 1 },
-                },
-            },
-            {
-                $project: {
-                    method: "$_id",
-                    ratio: { $divide: ["$count", totalBills] },
-                    _id: 0,
-                },
-            },
-        ]);
-        // Unpaid, Fully Paid, Partially Paid
-        const paymentStatusMetrics = yield Bill.aggregate([
-            { $match: filterQuery },
-            {
-                $group: {
-                    _id: "$payment_status",
-                    count: { $sum: 1 },
-                },
-            },
-            {
-                $project: {
-                    status: "$_id",
-                    ratio: { $divide: ["$count", totalBills] },
-                    _id: 0,
-                },
-            },
-        ]);
-        const billData = {
-            totalBills,
-            paymentMethodMetrics,
-            paymentStatusMetrics,
-        };
-        // Total Brands
-        const totalBrands = yield Brand.countDocuments();
-        // Total Categories
-        const totalCategories = yield Category.countDocuments();
-        // Total Offers
-        const totalOffers = yield Offer.countDocuments();
-        // Active Offers
-        const activeOffers = yield Offer.countDocuments({ is_active: true });
-        // Inactive Offers
-        const inactiveOffers = yield Offer.countDocuments({ is_active: false });
-        const offerData = { totalOffers, activeOffers, inactiveOffers };
-        const data = {
-            totalLanguages,
-            brands: totalBrands,
-            category: totalCategories,
-            bill: billData,
-            offer: offerData,
-            user: userData,
-            order: orderData,
-            product: productData,
-        };
-        return { data };
+        newData.orders.averageOrderAmount = ((_b = averageOrderAmount[0]) === null || _b === void 0 ? void 0 : _b.avgAmount) || 0;
+        newData.orders.confirmedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "confirm" }));
+        newData.orders.rejectedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "rejected" }));
+        newData.orders.pendingOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "pending" }));
+        newData.orders.deliveredOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "delivered" }));
+        newData.orders.cancelledOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "cancelled" }));
+        newData.orders.returnRequestedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_requested" }));
+        newData.orders.returnAcceptedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_accepeted" }));
+        newData.orders.returnRejectedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_rejected" }));
+        newData.orders.returnFulfilledOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_fulfilled" }));
+        return { data: newData };
     }
     catch (error) {
         throw error;

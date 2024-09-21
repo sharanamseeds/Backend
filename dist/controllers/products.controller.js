@@ -164,13 +164,23 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
             { header: "Updated By", key: "updated_by", width: 30 },
             { header: "Created At", key: "createdAt", width: 25 },
             { header: "Updated At", key: "updatedAt", width: 25 },
+            { header: "Is Featured", key: "is_featured", width: 25 },
+            { header: "Base Unit", key: "base_unit", width: 25 },
+            { header: "lot_no", key: "lot_no", width: 25 },
+            { header: "Vendor Name", key: "vendor_name", width: 25 },
+            { header: "Standard Quantity", key: "std_qty", width: 25 },
+            { header: "Manufacture Date", key: "manufacture_date", width: 25 },
+            { header: "Expiry Date", key: "expiry_date", width: 25 },
+            { header: "GRN Date", key: "grn_date", width: 25 },
         ];
         // Add rows to the worksheet
         products.forEach((product) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e, _f, _g;
             worksheet.addRow({
                 product_code: product.product_code,
-                product_name: product.product_name.map((name) => name.value).join(", "),
+                product_name: product.product_name
+                    .map((name) => name.value)
+                    .join(", "),
                 description: product.description.map((desc) => desc.value).join(", "),
                 brand_id: product.brand_id.toString(),
                 category_id: product.category_id.toString(),
@@ -180,10 +190,18 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
                 gst_percent: product.gst_percent,
                 price: product.price,
                 quantity: product.quantity,
-                added_by: ((_a = product.added_by) === null || _a === void 0 ? void 0 : _a.toString()) || '',
-                updated_by: ((_b = product.updated_by) === null || _b === void 0 ? void 0 : _b.toString()) || '',
+                added_by: ((_a = product.added_by) === null || _a === void 0 ? void 0 : _a.toString()) || "",
+                updated_by: ((_b = product.updated_by) === null || _b === void 0 ? void 0 : _b.toString()) || "",
                 createdAt: (_c = product.createdAt) === null || _c === void 0 ? void 0 : _c.toISOString(),
                 updatedAt: (_d = product.updatedAt) === null || _d === void 0 ? void 0 : _d.toISOString(),
+                is_featured: product.is_featured,
+                base_unit: product.base_unit,
+                lot_no: product.lot_no,
+                vendor_name: product.vendor_name,
+                std_qty: product.std_qty,
+                manufacture_date: (_e = product.manufacture_date) === null || _e === void 0 ? void 0 : _e.toISOString(),
+                expiry_date: (_f = product.expiry_date) === null || _f === void 0 ? void 0 : _f.toISOString(),
+                grn_date: (_g = product.grn_date) === null || _g === void 0 ? void 0 : _g.toISOString(),
             });
         });
         // Set the response headers and content type for the Excel file

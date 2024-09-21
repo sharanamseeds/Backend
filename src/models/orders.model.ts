@@ -126,6 +126,8 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ user_id: 1 });
 orderSchema.index({ order_type: 1 });
 orderSchema.index({ buy_order_id: 1 });
+orderSchema.index({ sell_order_id: 1 });
+orderSchema.index({ is_retuned: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ is_creditable: 1 });
 orderSchema.index({ credit_duration: 1 });

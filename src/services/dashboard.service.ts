@@ -6,6 +6,7 @@ import Brand from "../models/brands.model.js";
 import Category from "../models/categories.model.js";
 import Offer from "../models/offers.models.js";
 import Languages from "../models/languages.model.js";
+import Ledger from "../models/ledger.model.js";
 
 const getDashboard = async ({
   query,
@@ -19,147 +20,160 @@ const getDashboard = async ({
 
     let filterQuery: any = {};
 
-    if (start_date && end_date) {
-      filterQuery.createdAt = {
-        $gte: new Date(start_date),
-        $lte: new Date(end_date),
-      };
+    if (start_date || end_date) {
+      if (start_date && end_date) {
+        filterQuery.createdAt = {
+          $gte: new Date(start_date),
+          $lte: new Date(end_date),
+        };
+      } else {
+        if (end_date) {
+          filterQuery.createdAt = {
+            $lte: new Date(end_date),
+          };
+        } else {
+          filterQuery.createdAt = {
+            $gte: new Date(start_date),
+          };
+        }
+      }
     }
-    // Total Users
-    const totalUsers = await User.countDocuments(filterQuery);
 
-    // Role Wise Users
-    const roleWiseUsers = await User.aggregate([
-      { $match: filterQuery },
-      { $group: { _id: "$role_id", count: { $sum: 1 } } },
-      {
-        $lookup: {
-          from: "roles",
-          localField: "_id",
-          foreignField: "_id",
-          as: "role",
-        },
+    let newData = {
+      languages: 0,
+      brands: 0,
+      categories: 0,
+      ledgers: 0,
+      users: {
+        total: 0, // Replace with actual value
+        appUsers: 0,
+        adminUsers: 0,
+        blockedUsers: 0,
+        activeUsers: 0,
+        verifiedUsers: 0,
+        unverifiedUsers: 0,
       },
-      { $unwind: "$role" },
-      { $project: { roleName: "$role.name", count: 1 } },
-    ]);
-
-    // Active, Blocked, Verified And Deactive Ratio
-    const statusMetrics = await User.aggregate([
-      { $match: filterQuery },
-      {
-        $group: {
-          _id: null,
-          activeCount: {
-            $sum: {
-              $cond: [
-                {
-                  $and: [
-                    { $eq: ["$is_verified", true] },
-                    { $eq: ["$is_blocked", false] },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
-          blockedCount: {
-            $sum: { $cond: [{ $eq: ["$is_blocked", true] }, 1, 0] },
-          },
-          verifiedCount: {
-            $sum: { $cond: [{ $eq: ["$is_verified", true] }, 1, 0] },
-          },
-          deactiveCount: {
-            $sum: {
-              $cond: [
-                {
-                  $and: [
-                    { $eq: ["$is_verified", false] },
-                    { $eq: ["$is_blocked", false] },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
-        },
+      products: {
+        total: 0,
+        inStockProducts: 0,
+        outOfStockProducts: 0,
+        verifiedProducts: 0,
+        featuredProducts: 0,
       },
-      {
-        $project: {
-          activeRatio: { $divide: ["$activeCount", totalUsers] },
-          blockedRatio: { $divide: ["$blockedCount", totalUsers] },
-          verifiedRatio: { $divide: ["$verifiedCount", totalUsers] },
-          deactiveRatio: { $divide: ["$deactiveCount", totalUsers] },
-        },
+      offers: {
+        total: 0,
+        activeOffers: 0,
+        productSpecifiedOffers: 0,
+        categorySpecifiedOffers: 0,
       },
-    ]);
-
-    const userData = {
-      totalUsers,
-      roleWiseUsers,
-      statusMetrics: statusMetrics[0], // Assuming only one group due to null _id
+      bills: {
+        total: 0,
+        paidBills: 0,
+        unPaidBills: 0,
+      },
+      orders: {
+        total: 0,
+        averageOrderCount: 0,
+        averageOrderAmount: 0,
+        confirmedOrderCount: 0,
+        rejectedOrderCount: 0,
+        pendingOrderCount: 0,
+        deliveredOrderCount: 0,
+        cancelledOrderCount: 0,
+        returnRequestedOrderCount: 0,
+        returnAcceptedOrderCount: 0,
+        returnRejectedOrderCount: 0,
+        returnFulfilledOrderCount: 0,
+      },
     };
 
-    // Order Metrics
-    const totalOrders = await Order.countDocuments(filterQuery);
-    const totalLanguages = await Languages.countDocuments({});
-    // Pending, Confirmed Orders
-    const orderStatusMetrics = await Order.aggregate([
+    newData.users.total = await User.countDocuments(filterQuery);
+    newData.users.appUsers = await User.countDocuments({
+      ...filterQuery,
+      is_app_user: true,
+    });
+    newData.users.blockedUsers = await User.countDocuments({
+      ...filterQuery,
+      is_blocked: true,
+    });
+    newData.users.verifiedUsers = await User.countDocuments({
+      ...filterQuery,
+      is_verified: true,
+    });
+    newData.users.unverifiedUsers = await User.countDocuments({
+      ...filterQuery,
+      is_verified: false,
+    });
+    newData.users.activeUsers = await User.countDocuments({
+      ...filterQuery,
+      is_blocked: false,
+    });
+    newData.users.adminUsers = await User.countDocuments({
+      ...filterQuery,
+      is_app_user: false,
+    });
+
+    newData.languages = await Languages.countDocuments(filterQuery);
+    newData.brands = await Brand.countDocuments(filterQuery);
+    newData.categories = await Category.countDocuments(filterQuery);
+    newData.ledgers = await Ledger.countDocuments(filterQuery);
+
+    newData.products.total = await Product.countDocuments(filterQuery);
+    newData.products.inStockProducts = await Product.countDocuments({
+      ...filterQuery,
+      in_stock: true,
+    });
+    newData.products.outOfStockProducts = await Product.countDocuments({
+      ...filterQuery,
+      in_stock: false,
+    });
+    newData.products.verifiedProducts = await Product.countDocuments({
+      ...filterQuery,
+      is_verified: true,
+    });
+    newData.products.featuredProducts = await Product.countDocuments({
+      ...filterQuery,
+      is_featured: true,
+    });
+
+    newData.offers.total = await Offer.countDocuments(filterQuery);
+    newData.offers.activeOffers = await Offer.countDocuments({
+      ...filterQuery,
+      is_active: true,
+    });
+    newData.offers.productSpecifiedOffers = await Offer.countDocuments({
+      ...filterQuery,
+      product_specified: true,
+    });
+    newData.offers.categorySpecifiedOffers = await Offer.countDocuments({
+      ...filterQuery,
+      category_specified: true,
+    });
+
+    newData.bills.total = await Bill.countDocuments(filterQuery);
+    newData.bills.paidBills = await Bill.countDocuments({
+      ...filterQuery,
+      payment_status: "paid",
+    });
+    newData.bills.unPaidBills = await Bill.countDocuments({
+      ...filterQuery,
+      payment_status: "unpaid",
+    });
+
+    newData.orders.total = await Order.countDocuments(filterQuery);
+    const averageOrdersPerDay = await Order.aggregate([
       { $match: filterQuery },
       {
         $group: {
-          _id: "$status",
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           count: { $sum: 1 },
         },
       },
+      { $group: { _id: null, averageOrdersPerDay: { $avg: "$count" } } },
     ]);
 
-    const pendingOrders =
-      orderStatusMetrics.find((item) => item._id === "pending")?.count || 0;
-    const confirmedOrders =
-      orderStatusMetrics.find((item) => item._id === "confirm")?.count || 0;
-
-    // Return Ratio, Delivered, Canceled Ratio
-    const returnMetrics = await Order.aggregate([
-      { $match: filterQuery },
-      {
-        $group: {
-          _id: null,
-          returnCount: {
-            $sum: {
-              $cond: [
-                {
-                  $or: [
-                    { $eq: ["$status", "return_requested"] },
-                    { $eq: ["$status", "return_accepeted"] },
-                    { $eq: ["$status", "return_fulfilled"] },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
-          deliveredCount: {
-            $sum: { $cond: [{ $eq: ["$status", "delivered"] }, 1, 0] },
-          },
-          canceledCount: {
-            $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] },
-          },
-        },
-      },
-      {
-        $project: {
-          returnRatio: { $divide: ["$returnCount", totalOrders] },
-          deliveredRatio: { $divide: ["$deliveredCount", totalOrders] },
-          canceledRatio: { $divide: ["$canceledCount", totalOrders] },
-        },
-      },
-    ]);
-
-    // Average Order Amount
+    newData.orders.averageOrderCount =
+      averageOrdersPerDay[0]?.averageOrdersPerDay || 0;
     const averageOrderAmount = await Order.aggregate([
       { $match: filterQuery },
       {
@@ -169,175 +183,46 @@ const getDashboard = async ({
         },
       },
     ]);
+    newData.orders.averageOrderAmount = averageOrderAmount[0]?.avgAmount || 0;
 
-    // Find the earliest order date
-    const firstOrder = await Order.findOne().sort({ createdAt: 1 });
+    newData.orders.confirmedOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "confirm",
+    });
+    newData.orders.rejectedOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "rejected",
+    });
+    newData.orders.pendingOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "pending",
+    });
+    newData.orders.deliveredOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "delivered",
+    });
+    newData.orders.cancelledOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "cancelled",
+    });
+    newData.orders.returnRequestedOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "return_requested",
+    });
+    newData.orders.returnAcceptedOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "return_accepeted",
+    });
+    newData.orders.returnRejectedOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "return_rejected",
+    });
+    newData.orders.returnFulfilledOrderCount = await Order.countDocuments({
+      ...filterQuery,
+      status: "return_fulfilled",
+    });
 
-    const earliestDate = firstOrder?.createdAt || new Date(); // Default to now if no orders found
-
-    // Calculate the date difference in days
-    const dateDifference = Math.ceil(
-      (new Date(end_date || Date.now()).getTime() -
-        new Date(start_date || earliestDate).getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
-
-    const avgOrdersPerDay = totalOrders / (dateDifference || 1);
-
-    const orderData = {
-      totalOrders,
-      pendingOrders,
-      confirmedOrders,
-      returnMetrics: returnMetrics[0], // Assuming only one group due to null _id
-      averageOrderAmount: averageOrderAmount[0]?.avgAmount || 0,
-      avgOrdersPerDay,
-    };
-
-    // Total Products
-    const totalProducts = await Product.countDocuments(filterQuery);
-
-    // In-Stock and Out-of-Stock Ratio
-    const stockMetrics = await Product.aggregate([
-      { $match: filterQuery },
-      {
-        $group: {
-          _id: null,
-          inStockCount: {
-            $sum: { $cond: [{ $eq: ["$in_stock", true] }, 1, 0] },
-          },
-          outStockCount: {
-            $sum: { $cond: [{ $eq: ["$in_stock", false] }, 1, 0] },
-          },
-        },
-      },
-      {
-        $project: {
-          inStockRatio: { $divide: ["$inStockCount", totalProducts] },
-          outStockRatio: { $divide: ["$outStockCount", totalProducts] },
-        },
-      },
-    ]);
-
-    // Most Sold and Least Sold Products
-    const productSalesMetrics = await Product.aggregate([
-      { $match: filterQuery },
-      {
-        $lookup: {
-          from: "orders",
-          localField: "_id",
-          foreignField: "products.product_id",
-          as: "orderDetails",
-        },
-      },
-      {
-        $addFields: {
-          totalSales: { $sum: "$orderDetails.products.quantity" },
-        },
-      },
-      {
-        $sort: { totalSales: -1 },
-      },
-      {
-        $group: {
-          _id: null,
-          mostSold: { $first: "$$ROOT" },
-          leastSold: { $last: "$$ROOT" },
-        },
-      },
-      {
-        $project: {
-          mostSoldProduct: {
-            product_name: "$mostSold.product_name",
-            totalSales: "$mostSold.totalSales",
-          },
-          leastSoldProduct: {
-            product_name: "$leastSold.product_name",
-            totalSales: "$leastSold.totalSales",
-          },
-        },
-      },
-    ]);
-
-    const productData = {
-      totalProducts,
-      stockMetrics: stockMetrics[0], // Assuming only one group due to null _id
-      productSalesMetrics: productSalesMetrics[0], // Assuming only one group due to null _id
-    };
-
-    // Total Bills
-    const totalBills = await Bill.countDocuments(filterQuery);
-
-    // Cash Bill and Online Bill Ratio
-    const paymentMethodMetrics = await Bill.aggregate([
-      { $match: filterQuery },
-      {
-        $group: {
-          _id: "$payment_method",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          method: "$_id",
-          ratio: { $divide: ["$count", totalBills] },
-          _id: 0,
-        },
-      },
-    ]);
-
-    // Unpaid, Fully Paid, Partially Paid
-    const paymentStatusMetrics = await Bill.aggregate([
-      { $match: filterQuery },
-      {
-        $group: {
-          _id: "$payment_status",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          status: "$_id",
-          ratio: { $divide: ["$count", totalBills] },
-          _id: 0,
-        },
-      },
-    ]);
-
-    const billData = {
-      totalBills,
-      paymentMethodMetrics,
-      paymentStatusMetrics,
-    };
-
-    // Total Brands
-    const totalBrands = await Brand.countDocuments();
-
-    // Total Categories
-    const totalCategories = await Category.countDocuments();
-
-    // Total Offers
-    const totalOffers = await Offer.countDocuments();
-
-    // Active Offers
-    const activeOffers = await Offer.countDocuments({ is_active: true });
-
-    // Inactive Offers
-    const inactiveOffers = await Offer.countDocuments({ is_active: false });
-
-    const offerData = { totalOffers, activeOffers, inactiveOffers };
-
-    const data = {
-      totalLanguages,
-      brands: totalBrands,
-      category: totalCategories,
-      bill: billData,
-      offer: offerData,
-      user: userData,
-      order: orderData,
-      product: productData,
-    };
-
-    return { data };
+    return { data: newData };
   } catch (error) {
     throw error;
   }

@@ -209,13 +209,23 @@ const downloadExcel = catchAsync(
         { header: "Updated By", key: "updated_by", width: 30 },
         { header: "Created At", key: "createdAt", width: 25 },
         { header: "Updated At", key: "updatedAt", width: 25 },
+        { header: "Is Featured", key: "is_featured", width: 25 },
+        { header: "Base Unit", key: "base_unit", width: 25 },
+        { header: "lot_no", key: "lot_no", width: 25 },
+        { header: "Vendor Name", key: "vendor_name", width: 25 },
+        { header: "Standard Quantity", key: "std_qty", width: 25 },
+        { header: "Manufacture Date", key: "manufacture_date", width: 25 },
+        { header: "Expiry Date", key: "expiry_date", width: 25 },
+        { header: "GRN Date", key: "grn_date", width: 25 },
       ];
 
       // Add rows to the worksheet
       products.forEach((product) => {
         worksheet.addRow({
           product_code: product.product_code,
-          product_name: product.product_name.map((name) => name.value).join(", "),
+          product_name: product.product_name
+            .map((name) => name.value)
+            .join(", "),
           description: product.description.map((desc) => desc.value).join(", "),
           brand_id: product.brand_id.toString(),
           category_id: product.category_id.toString(),
@@ -225,10 +235,18 @@ const downloadExcel = catchAsync(
           gst_percent: product.gst_percent,
           price: product.price,
           quantity: product.quantity,
-          added_by: product.added_by?.toString() || '',
-          updated_by: product.updated_by?.toString() || '',
+          added_by: product.added_by?.toString() || "",
+          updated_by: product.updated_by?.toString() || "",
           createdAt: product.createdAt?.toISOString(),
           updatedAt: product.updatedAt?.toISOString(),
+          is_featured: product.is_featured,
+          base_unit: product.base_unit,
+          lot_no: product.lot_no,
+          vendor_name: product.vendor_name,
+          std_qty: product.std_qty,
+          manufacture_date: product.manufacture_date?.toISOString(),
+          expiry_date: product.expiry_date?.toISOString(),
+          grn_date: product.grn_date?.toISOString(),
         });
       });
 
@@ -237,7 +255,10 @@ const downloadExcel = catchAsync(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       );
-      res.setHeader("Content-Disposition", "attachment; filename=products.xlsx");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=products.xlsx"
+      );
 
       // Write the Excel file to the response
       await workbook.xlsx.write(res);
