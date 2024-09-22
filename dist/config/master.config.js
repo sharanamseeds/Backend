@@ -122,7 +122,7 @@ export const masterConfig = {
             coordinates: [70.4417, 21.3206],
         },
         billing_information: {
-            gst_number: "24A****0621H1ZW",
+            gst_number: "24DCUPP7026Q1ZM",
             business_model: "manufacturer",
         },
     },

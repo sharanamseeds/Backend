@@ -39,6 +39,9 @@ const login = async ({
     if (!user) {
       throw new NotFoundError("User not found");
     }
+    if (user.is_blocked) {
+      throw new NotFoundError("Permission Denied");
+    }
 
     if (!user.is_verified) {
       throw new NotFoundError(
@@ -190,6 +193,10 @@ const loginApp = async ({
 
     if (!user) {
       throw new NotFoundError("User not found");
+    }
+
+    if (user.is_blocked) {
+      throw new NotFoundError("Permission Denied");
     }
 
     if (!user.is_verified) {

@@ -7,6 +7,27 @@ import { userMiddlewareSchemas } from "../validations/users.validation.js";
 
 const router = express.Router();
 
+router.get("/user/:id", authenticateToken, userController.getUser);
+
+router.put(
+  "/user/:id",
+  authenticateToken,
+  async (req, res, next) => {
+    let validationData = {};
+    if (req?.query?.payload && typeof req.query.payload === "string") {
+      validationData = JSON.parse(req.query.payload);
+    }
+    validateViaJoi(
+      userMiddlewareSchemas.updateUserSchema,
+      validationData,
+      req,
+      res,
+      next
+    );
+  },
+  userController.updateUser
+);
+
 router.get(
   "/get_account_details",
   authenticateToken,
@@ -61,7 +82,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  //CHECKPERMISSION([{ module: "user", permission: "can_update" }]),
+  CHECKPERMISSION([{ module: "user", permission: "can_update" }]),
   async (req, res, next) => {
     let validationData = {};
     if (req?.query?.payload && typeof req.query.payload === "string") {
