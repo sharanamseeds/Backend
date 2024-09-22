@@ -7,6 +7,10 @@ import { categoryMiddlewareScheas } from "../validations/category.validation.js"
 
 const router = express.Router();
 
+router.get("/user/", authenticateToken, categoryController.getCategoryList);
+
+router.get("/user/:id", authenticateToken, categoryController.getCategory);
+
 router.get(
   "/download-excel",
   authenticateToken,
@@ -27,10 +31,6 @@ router.get(
   CHECKPERMISSION([{ module: "category", permission: "can_read" }]),
   categoryController.getCategory
 );
-
-router.get("/user/", authenticateToken, categoryController.getCategoryList);
-
-router.get("/user/:id", authenticateToken, categoryController.getCategory);
 
 router.post(
   "/",

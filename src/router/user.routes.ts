@@ -8,6 +8,12 @@ import { userMiddlewareSchemas } from "../validations/users.validation.js";
 const router = express.Router();
 
 router.get(
+  "/get_account_details",
+  authenticateToken,
+  userController.getAccountDetails
+);
+
+router.get(
   "/download-excel",
   authenticateToken,
   CHECKPERMISSION([{ module: "user", permission: "can_download" }]),
@@ -20,12 +26,6 @@ router.get(
   authenticateToken,
   CHECKPERMISSION([{ module: "user", permission: "can_read" }]),
   userController.getUserList
-);
-
-router.get(
-  "/get_account_details",
-  authenticateToken,
-  userController.getAccountDetails
 );
 
 /* Get a specific user by ID */

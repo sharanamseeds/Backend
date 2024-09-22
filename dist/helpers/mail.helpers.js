@@ -121,8 +121,8 @@ export const buildWelcomeHtml = (emailId, contact) => `<!DOCTYPE html>
 
       <p>Start exploring our amazing products and enjoy a seamless shopping experience.</p>
       <p><strong>Download our app for a convenient shopping experience:</strong></p>
-      <p><strong>App Store :</strong> <a href="${masterConfig.nodemailerConfig.emailTemplateConfig.email_template_info.mobile_app_link}" class="button visit">Visit Now</a></p>
-      <p><strong>Google Play Store :</strong> <a href="${masterConfig.nodemailerConfig.emailTemplateConfig.email_template_info.app_store_link}" class="button visit">Visit Now</a></p>
+      <p><strong>App Store :</strong> <a href="${masterConfig.nodemailerConfig.emailTemplateConfig.email_template_info.mobile_app_link}" class="button visit">Download Now</a></p>
+      <p><strong>Google Play Store :</strong> <a href="${masterConfig.nodemailerConfig.emailTemplateConfig.email_template_info.app_store_link}" class="button visit">Download Now</a></p>
 
       <p>${masterConfig.nodemailerConfig.emailTemplateConfig.company_details.company_slogan}</p>
     </div>

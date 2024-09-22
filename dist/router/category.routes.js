@@ -14,11 +14,11 @@ import { categoryController } from "../controllers/categories.controller.js";
 import { validateViaJoi } from "../validations/joi.validation.js";
 import { categoryMiddlewareScheas } from "../validations/category.validation.js";
 const router = express.Router();
+router.get("/user/", authenticateToken, categoryController.getCategoryList);
+router.get("/user/:id", authenticateToken, categoryController.getCategory);
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "category", permission: "can_download" }]), categoryController.downloadExcel);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "category", permission: "can_read" }]), categoryController.getCategoryList);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "category", permission: "can_read" }]), categoryController.getCategory);
-router.get("/user/", authenticateToken, categoryController.getCategoryList);
-router.get("/user/:id", authenticateToken, categoryController.getCategory);
 router.post("/", authenticateToken, CHECKPERMISSION([{ module: "category", permission: "can_add" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let validationData = {};

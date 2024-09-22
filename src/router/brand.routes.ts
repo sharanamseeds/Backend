@@ -6,6 +6,10 @@ import { validateViaJoi } from "../validations/joi.validation.js";
 import { brandMiddlewareSchemas } from "../validations/brand.validation.js";
 const router = express.Router();
 
+router.get("/user/", authenticateToken, brandController.getBrandList);
+
+router.get("/user/:id", authenticateToken, brandController.getBrand);
+
 router.get(
   "/download-excel",
   authenticateToken,
@@ -26,10 +30,6 @@ router.get(
   CHECKPERMISSION([{ module: "brand", permission: "can_read" }]),
   brandController.getBrand
 );
-
-router.get("/user/", authenticateToken, brandController.getBrandList);
-
-router.get("/user/:id", authenticateToken, brandController.getBrand);
 
 router.post(
   "/",
