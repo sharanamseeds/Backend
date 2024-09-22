@@ -14,9 +14,23 @@ router.get(
 );
 
 router.get(
-  "/download-bill/:id",
-  // authenticateToken,
+  "/user/",
+  authenticateToken,
+  // CHECKPERMISSION([{ module: "bill", permission: "can_read" }]),
+  billController.getCustomerBillList
+);
+
+router.get(
+  "/user/download-bill/:id",
+  authenticateToken,
   // CHECKPERMISSION([{ module: "bill", permission: "can_download" }]),
+  billController.downloadBill
+);
+
+router.get(
+  "/download-bill/:id",
+  authenticateToken,
+  CHECKPERMISSION([{ module: "bill", permission: "can_download" }]),
   billController.downloadBill
 );
 
@@ -25,12 +39,6 @@ router.get(
   authenticateToken,
   CHECKPERMISSION([{ module: "bill", permission: "can_read" }]),
   billController.getBillList
-);
-router.get(
-  "/user/",
-  authenticateToken,
-  CHECKPERMISSION([{ module: "bill", permission: "can_read" }]),
-  billController.getCustomerBillList
 );
 
 router.get(
