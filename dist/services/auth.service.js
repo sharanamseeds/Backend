@@ -27,6 +27,9 @@ const login = ({ email, password, }) => __awaiter(void 0, void 0, void 0, functi
         if (!user) {
             throw new NotFoundError("User not found");
         }
+        if (!user.is_verified) {
+            throw new NotFoundError("User not Verified, Please Wait Admin Will Verify Soon");
+        }
         // Verify password
         const isValid = comparePassword(password, user.hash, user.salt);
         if (!isValid) {
@@ -139,6 +142,9 @@ const loginApp = ({ email, password, }) => __awaiter(void 0, void 0, void 0, fun
         const user = yield User.findOne({ email, is_app_user: true });
         if (!user) {
             throw new NotFoundError("User not found");
+        }
+        if (!user.is_verified) {
+            throw new NotFoundError("User not Verified, Please Wait Admin Will Verify Soon");
         }
         // Verify password
         const isValid = comparePassword(password, user.hash, user.salt);

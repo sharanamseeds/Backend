@@ -40,6 +40,12 @@ const login = async ({
       throw new NotFoundError("User not found");
     }
 
+    if (!user.is_verified) {
+      throw new NotFoundError(
+        "User not Verified, Please Wait Admin Will Verify Soon"
+      );
+    }
+
     // Verify password
     const isValid = comparePassword(password, user.hash, user.salt);
 
@@ -186,6 +192,11 @@ const loginApp = async ({
       throw new NotFoundError("User not found");
     }
 
+    if (!user.is_verified) {
+      throw new NotFoundError(
+        "User not Verified, Please Wait Admin Will Verify Soon"
+      );
+    }
     // Verify password
     const isValid = comparePassword(password, user.hash, user.salt);
 
