@@ -44,6 +44,20 @@ export const masterConfig = {
             lang_name: "English",
             lang_code: "en",
         },
+        defaultLanguages: [
+            {
+                lang_name: "English",
+                lang_code: "en",
+            },
+            {
+                lang_name: "Gujarati",
+                lang_code: "gu",
+            },
+            {
+                lang_name: "Hindi",
+                lang_code: "hi",
+            },
+        ],
     },
     nodemailerConfig: {
         mailConfig: {

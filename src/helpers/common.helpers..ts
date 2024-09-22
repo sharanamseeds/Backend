@@ -252,25 +252,21 @@ const createSuperAdmin = async (roleId: any) => {
   }
 };
 
-const createDefaultLanguage = async () => {
+const createDefaultLanguage = async (lang_name: string, lang_code: string) => {
   const englishLanguageDoc = await Languages.findOne({
-    identifier: makeIdentifier(
-      masterConfig.defaultDataConfig.languageConfig.lang_name
-    ),
+    lang_code: lang_code,
   });
   if (!englishLanguageDoc) {
     const languageData = {
-      lang_name: masterConfig.defaultDataConfig.languageConfig.lang_name,
-      lang_code: masterConfig.defaultDataConfig.languageConfig.lang_code,
-      identifier: makeIdentifier(
-        masterConfig.defaultDataConfig.languageConfig.lang_name
-      ),
+      lang_name: lang_name,
+      lang_code: lang_code,
+      identifier: makeIdentifier(lang_name),
     };
     const englishDoc = new Languages(languageData);
     await englishDoc.save();
-    // global.logger.info("LANGUAGE: English Created ✔");
+    // global.logger.info(`LANGUAGE: ${lang_name} Created ✔`);
   } else {
-    // global.logger.info("LANGUAGE: English Exists ✔");
+    // global.logger.info(`LANGUAGE: ${lang_name} Exists ✔`);
   }
 };
 
@@ -381,7 +377,10 @@ export const createDefaultDatabase = async () => {
     // create default modules
     await createModules();
     // create default language
-    await createDefaultLanguage();
+    const languages = masterConfig.defaultDataConfig.defaultLanguages;
+    languages.forEach(async (language) => {
+      await createDefaultLanguage(language.lang_name, language.lang_code);
+    });
     // create super_admin_role
     const superAdminRole = await createSuperAdminRole();
     // create super_admin_user

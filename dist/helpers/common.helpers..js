@@ -220,22 +220,22 @@ const createSuperAdmin = (roleId) => __awaiter(void 0, void 0, void 0, function*
         global.logger.error("Error creating super admin", error);
     }
 });
-const createDefaultLanguage = () => __awaiter(void 0, void 0, void 0, function* () {
+const createDefaultLanguage = (lang_name, lang_code) => __awaiter(void 0, void 0, void 0, function* () {
     const englishLanguageDoc = yield Languages.findOne({
-        identifier: makeIdentifier(masterConfig.defaultDataConfig.languageConfig.lang_name),
+        lang_code: lang_code,
     });
     if (!englishLanguageDoc) {
         const languageData = {
-            lang_name: masterConfig.defaultDataConfig.languageConfig.lang_name,
-            lang_code: masterConfig.defaultDataConfig.languageConfig.lang_code,
-            identifier: makeIdentifier(masterConfig.defaultDataConfig.languageConfig.lang_name),
+            lang_name: lang_name,
+            lang_code: lang_code,
+            identifier: makeIdentifier(lang_name),
         };
         const englishDoc = new Languages(languageData);
         yield englishDoc.save();
-        // global.logger.info("LANGUAGE: English Created ✔");
+        // global.logger.info(`LANGUAGE: ${lang_name} Created ✔`);
     }
     else {
-        // global.logger.info("LANGUAGE: English Exists ✔");
+        // global.logger.info(`LANGUAGE: ${lang_name} Exists ✔`);
     }
 });
 const getDefaultImagePath = (imageName) => {
@@ -324,7 +324,10 @@ export const createDefaultDatabase = () => __awaiter(void 0, void 0, void 0, fun
         // create default modules
         yield createModules();
         // create default language
-        yield createDefaultLanguage();
+        const languages = masterConfig.defaultDataConfig.defaultLanguages;
+        languages.forEach((language) => __awaiter(void 0, void 0, void 0, function* () {
+            yield createDefaultLanguage(language.lang_name, language.lang_code);
+        }));
         // create super_admin_role
         const superAdminRole = yield createSuperAdminRole();
         // create super_admin_user
