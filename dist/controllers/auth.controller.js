@@ -31,6 +31,7 @@ const register = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, func
         password: req.body.password,
         confirm_password: req.body.confirm_password,
         gst_number: req.body.gst_number,
+        agro_name: req.body.agro_name,
     });
     const data4responseObject = {
         req: req,
@@ -62,6 +63,7 @@ const registerApp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, f
         password: req.body.password,
         confirm_password: req.body.confirm_password,
         gst_number: req.body.gst_number,
+        agro_name: req.body.agro_name,
     });
     const data4responseObject = {
         req: req,

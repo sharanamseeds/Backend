@@ -8,7 +8,8 @@ const registerSchema = Joi.object({
     email: Joi.string().email().required(),
     name: Joi.string().required(),
     confirm_password: Joi.string().required(),
-    gst_number: Joi.string().required(),
+    gst_number: Joi.string(),
+    agro_name: Joi.string().required(),
 });
 const changePasswordSchema = Joi.object({
     new_password: Joi.string().required(),

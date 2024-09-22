@@ -92,7 +92,7 @@ const login = ({ email, password, }) => __awaiter(void 0, void 0, void 0, functi
         throw error;
     }
 });
-const register = ({ email, name, password, confirm_password, gst_number, }) => __awaiter(void 0, void 0, void 0, function* () {
+const register = ({ email, name, password, confirm_password, gst_number, agro_name, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Find user by email
         const user = yield User.findOne({ email });
@@ -108,7 +108,8 @@ const register = ({ email, name, password, confirm_password, gst_number, }) => _
             _id: new mongoose.Types.ObjectId(userId),
             added_by: new mongoose.Types.ObjectId(userId),
             updated_by: new mongoose.Types.ObjectId(userId),
-            gst_number: gst_number,
+            gst_number: gst_number || null,
+            agro_name: agro_name,
             name: name,
             email: email,
             hash,
@@ -168,7 +169,7 @@ const loginApp = ({ email, password, }) => __awaiter(void 0, void 0, void 0, fun
         throw error;
     }
 });
-const registerApp = ({ email, name, password, confirm_password, gst_number, }) => __awaiter(void 0, void 0, void 0, function* () {
+const registerApp = ({ email, name, password, confirm_password, gst_number, agro_name, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Find user by email
         const user = yield User.findOne({ email });
@@ -185,7 +186,8 @@ const registerApp = ({ email, name, password, confirm_password, gst_number, }) =
             added_by: new mongoose.Types.ObjectId(userId),
             updated_by: new mongoose.Types.ObjectId(userId),
             is_app_user: true,
-            gst_number: gst_number,
+            gst_number: gst_number || null,
+            agro_name: agro_name,
             name: name,
             email: email,
             hash,

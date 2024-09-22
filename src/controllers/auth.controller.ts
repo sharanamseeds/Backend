@@ -32,6 +32,7 @@ const register = catchAsync(
       password: req.body.password,
       confirm_password: req.body.confirm_password,
       gst_number: req.body.gst_number,
+      agro_name: req.body.agro_name,
     });
 
     const data4responseObject = {
@@ -73,6 +74,7 @@ const registerApp = catchAsync(
       password: req.body.password,
       confirm_password: req.body.confirm_password,
       gst_number: req.body.gst_number,
+      agro_name: req.body.agro_name,
     });
 
     const data4responseObject = {

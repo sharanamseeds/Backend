@@ -116,12 +116,14 @@ const register = async ({
   password,
   confirm_password,
   gst_number,
+  agro_name,
 }: {
   email: string;
   name: string;
   password: string;
   confirm_password: string;
   gst_number: string;
+  agro_name: string;
 }) => {
   try {
     // Find user by email
@@ -142,7 +144,8 @@ const register = async ({
       _id: new mongoose.Types.ObjectId(userId),
       added_by: new mongoose.Types.ObjectId(userId),
       updated_by: new mongoose.Types.ObjectId(userId),
-      gst_number: gst_number,
+      gst_number: gst_number || null,
+      agro_name: agro_name,
       name: name,
       email: email,
       hash,
@@ -222,12 +225,14 @@ const registerApp = async ({
   password,
   confirm_password,
   gst_number,
+  agro_name,
 }: {
   email: string;
   name: string;
   password: string;
   confirm_password: string;
   gst_number: string;
+  agro_name: string;
 }) => {
   try {
     // Find user by email
@@ -249,7 +254,8 @@ const registerApp = async ({
       added_by: new mongoose.Types.ObjectId(userId),
       updated_by: new mongoose.Types.ObjectId(userId),
       is_app_user: true,
-      gst_number: gst_number,
+      gst_number: gst_number || null,
+      agro_name: agro_name,
       name: name,
       email: email,
       hash,
