@@ -91,7 +91,7 @@ const usersSchema: Schema = new Schema(
 
 usersSchema.index({ email: 1 }, { unique: true });
 usersSchema.index({ contact_number: 1 }, { unique: true });
-usersSchema.index({ gst_number: 1 }, { unique: true });
+usersSchema.index({ gst_number: 1 });
 usersSchema.index({ role_id: 1 });
 usersSchema.index({ is_verified: 1 });
 usersSchema.index({ is_email_verified: 1 });
