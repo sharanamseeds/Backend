@@ -48,8 +48,23 @@ const modifiedBillProducts = (products) => __awaiter(void 0, void 0, void 0, fun
     })));
     return calculatedProducts;
 });
+const formatAddress = (address) => {
+    const { address_line, city, state, pincode } = address;
+    // Create an array of available values
+    const parts = [];
+    if (address_line)
+        parts.push(address_line);
+    if (city)
+        parts.push(city);
+    if (state)
+        parts.push(state);
+    if (pincode)
+        parts.push(pincode);
+    // Join the parts with a comma and return
+    return parts.length > 0 ? parts.join(", ") : "";
+};
 const getBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d;
     const billDoc = yield billService.getBill({
         billId: req.params.id,
         query: req.query,
@@ -76,19 +91,17 @@ const getBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, funct
     const bill = {
         invoice_id: billDocOther.invoice_id,
         sellerName: sellerDoc.agro_name,
-        sellerAddress: ((_a = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _a === void 0 ? void 0 : _a.address_line) ||
-            ((_b = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _b === void 0 ? void 0 : _b.address_line),
+        sellerAddress: formatAddress(sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address),
         sellerEmail: sellerDoc.email,
         sellerPhone: sellerDoc.contact_number,
-        sellerGST: ((_c = sellerDoc._id) === null || _c === void 0 ? void 0 : _c.toString()) === ((_d = sellerDoc.gst_number) === null || _d === void 0 ? void 0 : _d.toString())
+        sellerGST: ((_a = sellerDoc._id) === null || _a === void 0 ? void 0 : _a.toString()) === ((_b = sellerDoc.gst_number) === null || _b === void 0 ? void 0 : _b.toString())
             ? "-"
             : sellerDoc.gst_number,
         buyerName: buyerDoc.agro_name,
-        buyerAddress: ((_e = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address) === null || _e === void 0 ? void 0 : _e.address_line) ||
-            ((_f = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.shipping_address) === null || _f === void 0 ? void 0 : _f.address_line),
+        buyerAddress: formatAddress(buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address),
         buyerEmail: buyerDoc.email,
         buyerPhone: buyerDoc.contact_number,
-        buyerGST: ((_g = buyerDoc._id) === null || _g === void 0 ? void 0 : _g.toString()) === ((_h = buyerDoc.gst_number) === null || _h === void 0 ? void 0 : _h.toString())
+        buyerGST: ((_c = buyerDoc._id) === null || _c === void 0 ? void 0 : _c.toString()) === ((_d = buyerDoc.gst_number) === null || _d === void 0 ? void 0 : _d.toString())
             ? "-"
             : buyerDoc.gst_number,
         items: convertItems,
@@ -140,9 +153,9 @@ const getCustomerBillList = catchAsync((req, res) => __awaiter(void 0, void 0, v
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
 const updateBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _j;
+    var _e;
     let bodyData = {};
-    if (((_j = req === null || req === void 0 ? void 0 : req.query) === null || _j === void 0 ? void 0 : _j.payload) && typeof req.query.payload === "string") {
+    if (((_e = req === null || req === void 0 ? void 0 : req.query) === null || _e === void 0 ? void 0 : _e.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
     const billDoc = yield billService.updateBill({
@@ -162,9 +175,9 @@ const updateBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
 const addBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _k;
+    var _f;
     let bodyData = {};
-    if (((_k = req === null || req === void 0 ? void 0 : req.query) === null || _k === void 0 ? void 0 : _k.payload) && typeof req.query.payload === "string") {
+    if (((_f = req === null || req === void 0 ? void 0 : req.query) === null || _f === void 0 ? void 0 : _f.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
     const billDoc = yield billService.addBill({
@@ -251,7 +264,7 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
     }
 }));
 const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _l, _m, _o, _p, _q, _r, _s, _t;
+    var _g, _h, _j, _k;
     try {
         // Fetch bill from the database
         const billDoc = yield Bill.findById(req.params.id);
@@ -276,19 +289,17 @@ const downloadBill = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         const bill = {
             invoice_id: billDoc.invoice_id,
             sellerName: sellerDoc.agro_name,
-            sellerAddress: ((_l = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address) === null || _l === void 0 ? void 0 : _l.address_line) ||
-                ((_m = sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.shipping_address) === null || _m === void 0 ? void 0 : _m.address_line),
+            sellerAddress: formatAddress(sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc.billing_address),
             sellerEmail: sellerDoc.email,
             sellerPhone: sellerDoc.contact_number,
-            sellerGST: ((_o = sellerDoc._id) === null || _o === void 0 ? void 0 : _o.toString()) === ((_p = sellerDoc.gst_number) === null || _p === void 0 ? void 0 : _p.toString())
+            sellerGST: ((_g = sellerDoc._id) === null || _g === void 0 ? void 0 : _g.toString()) === ((_h = sellerDoc.gst_number) === null || _h === void 0 ? void 0 : _h.toString())
                 ? "-"
                 : sellerDoc.gst_number,
             buyerName: buyerDoc.agro_name,
-            buyerAddress: ((_q = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address) === null || _q === void 0 ? void 0 : _q.address_line) ||
-                ((_r = buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.shipping_address) === null || _r === void 0 ? void 0 : _r.address_line),
+            buyerAddress: formatAddress(buyerDoc === null || buyerDoc === void 0 ? void 0 : buyerDoc.billing_address),
             buyerEmail: buyerDoc.email,
             buyerPhone: buyerDoc.contact_number,
-            buyerGST: ((_s = buyerDoc._id) === null || _s === void 0 ? void 0 : _s.toString()) === ((_t = buyerDoc.gst_number) === null || _t === void 0 ? void 0 : _t.toString())
+            buyerGST: ((_j = buyerDoc._id) === null || _j === void 0 ? void 0 : _j.toString()) === ((_k = buyerDoc.gst_number) === null || _k === void 0 ? void 0 : _k.toString())
                 ? "-"
                 : buyerDoc.gst_number,
             items: convertItems,

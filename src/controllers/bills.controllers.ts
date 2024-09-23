@@ -80,6 +80,28 @@ const modifiedBillProducts = async (
   return calculatedProducts;
 };
 
+const formatAddress = (address: {
+  address_line?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  type?: string;
+  coordinates?: number[];
+}): string | null => {
+  const { address_line, city, state, pincode } = address;
+
+  // Create an array of available values
+  const parts: string[] = [];
+
+  if (address_line) parts.push(address_line);
+  if (city) parts.push(city);
+  if (state) parts.push(state);
+  if (pincode) parts.push(pincode);
+
+  // Join the parts with a comma and return
+  return parts.length > 0 ? parts.join(", ") : "";
+};
+
 const getBill = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const billDoc = await billService.getBill({
     billId: req.params.id,
@@ -110,9 +132,7 @@ const getBill = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const bill = {
     invoice_id: billDocOther.invoice_id,
     sellerName: sellerDoc.agro_name,
-    sellerAddress:
-      sellerDoc?.billing_address?.address_line ||
-      sellerDoc?.shipping_address?.address_line,
+    sellerAddress: formatAddress(sellerDoc?.billing_address),
     sellerEmail: sellerDoc.email,
     sellerPhone: sellerDoc.contact_number,
     sellerGST:
@@ -120,9 +140,7 @@ const getBill = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
         ? "-"
         : sellerDoc.gst_number,
     buyerName: buyerDoc.agro_name,
-    buyerAddress:
-      buyerDoc?.billing_address?.address_line ||
-      buyerDoc?.shipping_address?.address_line,
+    buyerAddress: formatAddress(buyerDoc?.billing_address),
     buyerEmail: buyerDoc.email,
     buyerPhone: buyerDoc.contact_number,
     buyerGST:
@@ -352,9 +370,7 @@ const downloadBill = catchAsync(
       const bill = {
         invoice_id: billDoc.invoice_id,
         sellerName: sellerDoc.agro_name,
-        sellerAddress:
-          sellerDoc?.billing_address?.address_line ||
-          sellerDoc?.shipping_address?.address_line,
+        sellerAddress: formatAddress(sellerDoc?.billing_address),
         sellerEmail: sellerDoc.email,
         sellerPhone: sellerDoc.contact_number,
         sellerGST:
@@ -362,9 +378,7 @@ const downloadBill = catchAsync(
             ? "-"
             : sellerDoc.gst_number,
         buyerName: buyerDoc.agro_name,
-        buyerAddress:
-          buyerDoc?.billing_address?.address_line ||
-          buyerDoc?.shipping_address?.address_line,
+        buyerAddress: formatAddress(buyerDoc?.billing_address),
         buyerEmail: buyerDoc.email,
         buyerPhone: buyerDoc.contact_number,
         buyerGST:

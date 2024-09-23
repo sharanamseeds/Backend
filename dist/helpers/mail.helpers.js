@@ -374,6 +374,13 @@ customerName) => `
 </body>
 </html>
 `;
+// ${
+//   isReturnBill
+//     ? `<div class="return-notice">
+//          <span><strong>Note:</strong> This is a return bill.</span>
+//        </div>`
+//     : ""
+// }
 export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -424,7 +431,10 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
       vertical-align: top;
     }
     .details p {
-      margin-top: 5px; /* Add some space between elements */
+      margin: 5px; /* Add some space between elements */
+    }
+    .company p {
+      margin: 5px; /* Add some space between elements */
     }
 
     /* Table styles */
@@ -449,6 +459,9 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
       font-size: 18px;
       font-weight: bold;
       margin-bottom: 10px;
+    }
+    .total{
+    margin: 10px;
     }
     .bank-details {
       display: table;
@@ -500,30 +513,24 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
     </div>
 
     <!-- Add Invoice Number -->
-    <p><strong>Invoice No:</strong> ${bill.invoice_id}</p>
-
-    ${isReturnBill
-    ? `<div class="return-notice">
-             <span><strong>Note:</strong> This is a return bill.</span>
-           </div>`
-    : ""}
+    <p><strong>Invoice No:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.invoice_id) || ""}</p>
 
     <div class="details">
       <div class="company">
         <p><strong>Seller Details:</strong></p>
-        <p><strong>Name:</strong> ${bill.sellerName}</p>
-        <p><strong>Address:</strong> ${bill.sellerAddress}</p>
-        <p><strong>Email:</strong> ${bill.sellerEmail}</p>
-        <p><strong>Phone:</strong> ${bill.sellerPhone}</p>
-        <p><strong>GST No:</strong> ${bill.sellerGST}</p>
+        <p><strong>Name:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.sellerName) || ""}</p>
+        <p><strong>Address:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.sellerAddress) || ""}</p>
+        <p><strong>Email:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.sellerEmail) || ""}</p>
+        <p><strong>Phone:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.sellerPhone) || ""}</p>
+        <p><strong>GST No:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.sellerGST) || ""}</p>
       </div>
       <div class="buyer">
         <p><strong>Buyer Details:</strong></p>
-        <p><strong>Name:</strong> ${bill.buyerName}</p>
-        <p><strong>Address:</strong> ${bill.buyerAddress}</p>
-        <p><strong>Email:</strong> ${bill.buyerEmail}</p>
-        <p><strong>Phone:</strong> ${bill.buyerPhone}</p>
-        <p><strong>GST No:</strong> ${bill.buyerGST}</p>
+        <p><strong>Name:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.buyerName) || ""}</p>
+        <p><strong>Address:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.buyerAddress) || ""}</p>
+        <p><strong>Email:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.buyerEmail) || ""}</p>
+        <p><strong>Phone:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.buyerPhone) || ""}</p>
+        <p><strong>GST No:</strong> ${(bill === null || bill === void 0 ? void 0 : bill.buyerGST) || ""}</p>
       </div>
     </div>
 
@@ -545,15 +552,15 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
         ${bill.items
     .map((item) => `
         <tr>
-          <td>${item.product_name}</td>
-          <td>${item.product_code}</td>
-          <td>${item.manufacture_date}</td>
-          <td>${item.expiry_date}</td>
-          <td>${item.quantity}</td>
-          <td>${item.rate}</td>
-          <td>${item.gstRate}</td>
-          <td>${item.gstAmount}</td>
-          <td>${item.discount}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.product_name) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.product_code) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.manufacture_date) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.expiry_date) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.quantity) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.rate) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.gstRate) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.gstAmount) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.discount) || ""}</td>
         </tr>
         `)
     .join("")}
@@ -561,21 +568,21 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
     </table>
 
     <div class="gst-summary">
-      <p class="total"><strong>Order Amount:</strong> ₹ ${bill.order_amount}</p>
-      <p><strong>Discount Amount:</strong> ₹ ${bill.discount_amount}</p>
-      <p><strong>Tax Amount:</strong> ₹ ${bill.tax_amount}</p>
+      <p class="total"><strong>Order Amount:</strong> ₹ ${(bill === null || bill === void 0 ? void 0 : bill.order_amount) || ""}</p>
+      <p class="total"><strong>Discount Amount:</strong> ₹ ${(bill === null || bill === void 0 ? void 0 : bill.discount_amount) || ""}</p>
+      <p class="total"><strong>Tax Amount:</strong> ₹ ${(bill === null || bill === void 0 ? void 0 : bill.tax_amount) || ""}</p>
       <p class="total">
-        <strong>${isReturnBill ? "Refund Amount" : "Billing Amount"}:</strong> ₹ ${bill.billing_amount}
+        <strong>${isReturnBill ? "Refund Amount" : "Billing Amount"}:</strong> ₹ ${(bill === null || bill === void 0 ? void 0 : bill.billing_amount) || ""}
       </p>
     </div>
 
     <div class="bank-details">
       <div class="bank-info">
         <p><strong>Bank Details:</strong></p>
-        <p><strong>Bank:</strong>${bill.sellerBankDetails.bankName}</p>
-        <p><strong>Account No:</strong>${bill.sellerBankDetails.accountNumber}</p>
-        <p><strong>IFSC:</strong>${bill.sellerBankDetails.ifscCode}</p>
-        <p><strong>Branch:</strong>${bill.sellerBankDetails.branchName}</p>
+        <p><strong>Bank:</strong>${bill.sellerBankDetails.bankName || ""}</p>
+        <p><strong>Account No:</strong>${bill.sellerBankDetails.accountNumber || ""}</p>
+        <p><strong>IFSC:</strong>${bill.sellerBankDetails.ifscCode || ""}</p>
+        <p><strong>Branch:</strong>${bill.sellerBankDetails.branchName || ""}</p>
       </div>
       <div class="qr-code">
         <p><strong>Pay using UPI:</strong></p>
@@ -595,7 +602,7 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
       <ul>
         ${isReturnBill
     ? "<li>Refunds will be processed within 7 business days.</li>"
-    : "<li>Payment is due within 30 days.</li>"}
+    : ""}
         <li>Goods once sold will not be taken back.</li>
       </ul>
     </div>

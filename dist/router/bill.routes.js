@@ -15,12 +15,14 @@ import { validateViaJoi } from "../validations/joi.validation.js";
 import { billMiddlewareSchemas } from "../validations/bill.validation.js";
 const router = express.Router();
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "bill", permission: "can_download" }]), billController.downloadExcel);
-router.get("/download-bill/:id", 
-// authenticateToken,
+router.get("/user/", authenticateToken, 
+// CHECKPERMISSION([{ module: "bill", permission: "can_read" }]),
+billController.getCustomerBillList);
+router.get("/user/download-bill/:id", authenticateToken, 
 // CHECKPERMISSION([{ module: "bill", permission: "can_download" }]),
 billController.downloadBill);
+router.get("/download-bill/:id", authenticateToken, CHECKPERMISSION([{ module: "bill", permission: "can_download" }]), billController.downloadBill);
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "bill", permission: "can_read" }]), billController.getBillList);
-router.get("/user/", authenticateToken, CHECKPERMISSION([{ module: "bill", permission: "can_read" }]), billController.getCustomerBillList);
 router.get("/:id", authenticateToken, CHECKPERMISSION([{ module: "bill", permission: "can_read" }]), billController.getBill);
 // router.post(
 //   "/",
