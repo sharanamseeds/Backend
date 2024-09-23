@@ -8,10 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import mongoose from "mongoose";
+import User from "../models/users.model.js";
 import Ledger from "../models/ledger.model.js";
 import Bill from "../models/bill.model.js";
 import Order from "../models/orders.model.js";
-import Product from "../models/products.model.js";
+import { masterConfig } from "../config/master.config.js";
 const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", user_id, bill_id, bill_amount, invoice_id, type, search, } = query;
@@ -182,11 +183,12 @@ const addLedger = ({ requestUser, bill_id, description, }) => __awaiter(void 0, 
             throw new Error("Bill is not Paid");
         }
         const orderDoc = yield Order.findById(billDoc.order_id);
-        const productDoc = yield Product.findById(orderDoc.products[0].product_id);
-        const sellerId = productDoc.added_by;
+        const sellerDoc = yield User.findOne({
+            email: masterConfig.superAdminConfig.email,
+        });
         const sellerLedger = new Ledger({
             bill_id: billDoc._id,
-            user_id: sellerId,
+            user_id: sellerDoc === null || sellerDoc === void 0 ? void 0 : sellerDoc._id,
             bill_amount: billDoc.bill_amount,
             payment_amount: billDoc.bill_amount,
             type: orderDoc.order_type === "buy" ? "credit" : "debit",

@@ -1,9 +1,10 @@
 import mongoose, { Document } from "mongoose";
-import { typeUser } from "../models/users.model.js";
+import User, { typeUser } from "../models/users.model.js";
 import Ledger, { typeLedger } from "../models/ledger.model.js";
 import Bill from "../models/bill.model.js";
 import Order from "../models/orders.model.js";
 import Product from "../models/products.model.js";
+import { masterConfig } from "../config/master.config.js";
 
 const getLedgerList = async ({
   query,
@@ -263,12 +264,13 @@ const addLedger = async ({
     }
 
     const orderDoc = await Order.findById(billDoc.order_id);
-    const productDoc = await Product.findById(orderDoc.products[0].product_id);
-    const sellerId = productDoc.added_by;
+    const sellerDoc = await User.findOne({
+      email: masterConfig.superAdminConfig.email,
+    });
 
     const sellerLedger = new Ledger({
       bill_id: billDoc._id,
-      user_id: sellerId,
+      user_id: sellerDoc?._id,
       bill_amount: billDoc.bill_amount,
       payment_amount: billDoc.bill_amount,
       type: orderDoc.order_type === "buy" ? "credit" : "debit",

@@ -529,7 +529,7 @@ const addOrder = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, fu
             order_type: "buy",
             status: "pending",
             user_id: userDoc._id,
-            added_by: requestUser._id,
+            added_by: (bodyData === null || bodyData === void 0 ? void 0 : bodyData.user_id) ? bodyData.user_id : requestUser._id,
             updated_by: requestUser._id,
             products: modifiedOrderItems,
             tax_amount: totalOrderAmount.tax_amount,
@@ -766,11 +766,11 @@ const returnOrder = ({ buy_order_id, requestUser, }) => __awaiter(void 0, void 0
         if (!sellOrderDoc.is_creditable) {
             throw new Error("This Order is Not Returnable");
         }
-        const isReturnedOder = yield Order.find({
-            order_type: "sell",
-            buy_order_id: new mongoose.Types.ObjectId(buy_order_id),
-        });
-        if (isReturnedOder) {
+        // const isReturnedOder = await Order.find({
+        //   order_type: "sell",
+        //   buy_order_id: new mongoose.Types.ObjectId(buy_order_id),
+        // });
+        if (sellOrderDoc.is_retuned) {
             throw new Error("This Order is Already Returned");
         }
         const sell_order_id = new mongoose.Types.ObjectId();

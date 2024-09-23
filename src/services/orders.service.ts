@@ -857,7 +857,7 @@ const addOrder = async ({
       order_type: "buy",
       status: "pending",
       user_id: userDoc._id,
-      added_by: requestUser._id,
+      added_by: bodyData?.user_id ? bodyData.user_id : requestUser._id,
       updated_by: requestUser._id,
       products: modifiedOrderItems,
       tax_amount: totalOrderAmount.tax_amount,
@@ -1182,11 +1182,11 @@ const returnOrder = async ({
     if (!sellOrderDoc.is_creditable) {
       throw new Error("This Order is Not Returnable");
     }
-    const isReturnedOder = await Order.find({
-      order_type: "sell",
-      buy_order_id: new mongoose.Types.ObjectId(buy_order_id),
-    });
-    if (isReturnedOder) {
+    // const isReturnedOder = await Order.find({
+    //   order_type: "sell",
+    //   buy_order_id: new mongoose.Types.ObjectId(buy_order_id),
+    // });
+    if (sellOrderDoc.is_retuned) {
       throw new Error("This Order is Already Returned");
     }
 
