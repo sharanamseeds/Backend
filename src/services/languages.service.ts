@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import Language, { typeLanguage } from "../models/languages.model.js";
 import { typeUser } from "../models/users.model.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 
 const getLanguageList = async ({
   query,
@@ -54,8 +54,8 @@ const getLanguageList = async ({
     // Apply search logic
     if (search) {
       filterQuery.$or = [
-        { lang_name: { $regex: search, $options: "i" } },
-        { lang_code: { $regex: search, $options: "i" } },
+        { lang_name: { $regex: escapeRegex(search), $options: "i" } },
+        { lang_code: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 

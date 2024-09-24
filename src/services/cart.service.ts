@@ -1,6 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import Cart, { typeCart } from "../models/cart.model.js";
 import { typeUser } from "../models/users.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const getCartList = async ({
   query,
@@ -47,7 +48,7 @@ const getCartList = async ({
       filterQuery.status = status;
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Cart.countDocuments(filterQuery);
@@ -137,7 +138,7 @@ const getUserCartList = async ({
       filterQuery.status = status;
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Cart.countDocuments(filterQuery);
@@ -251,7 +252,7 @@ const updateCart = async ({
 
 const deleteCart = async ({ cartId }: { cartId: string }): Promise<void> => {
   try {
-    await Cart.deleteOne({product_id: cartId});
+    await Cart.deleteOne({ product_id: cartId });
   } catch (error) {
     throw error;
   }

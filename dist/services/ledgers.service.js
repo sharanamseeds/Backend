@@ -13,6 +13,7 @@ import Ledger from "../models/ledger.model.js";
 import Bill from "../models/bill.model.js";
 import Order from "../models/orders.model.js";
 import { masterConfig } from "../config/master.config.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", user_id, bill_id, bill_amount, invoice_id, type, search, } = query;
@@ -49,8 +50,8 @@ const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
         }
         if (search) {
             filterQuery.$or = [
-                { type: { $regex: search, $options: "i" } },
-                { invoice_id: { $regex: search, $options: "i" } },
+                { type: { $regex: escapeRegex(search), $options: "i" } },
+                { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Ledger.countDocuments(filterQuery);
@@ -124,8 +125,8 @@ const getCustomerLedgerList = ({ query, requestUser, }) => __awaiter(void 0, voi
         }
         if (search) {
             filterQuery.$or = [
-                { type: { $regex: search, $options: "i" } },
-                { invoice_id: { $regex: search, $options: "i" } },
+                { type: { $regex: escapeRegex(search), $options: "i" } },
+                { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Ledger.countDocuments(filterQuery);

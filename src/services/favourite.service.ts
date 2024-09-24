@@ -1,6 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import Favourite, { typeFavourite } from "../models/favourite.model.js";
 import { typeUser } from "../models/users.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const getFavouriteList = async ({
   query,
@@ -43,7 +44,7 @@ const getFavouriteList = async ({
       filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Favourite.countDocuments(filterQuery);
@@ -127,7 +128,7 @@ const getUserFavouriteList = async ({
       filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Favourite.countDocuments(filterQuery);

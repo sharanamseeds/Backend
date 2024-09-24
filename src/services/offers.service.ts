@@ -12,7 +12,7 @@ import {
   updateField,
 } from "../helpers/language.management.helper.js";
 import { masterConfig } from "../config/master.config.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 
 const projectLocalizedOffer = (lang_code: string) => {
   return [
@@ -177,7 +177,7 @@ const getOfferList = async ({
     }
 
     if (offer_code) {
-      filterQuery.offer_code = new RegExp(offer_code, "i");
+      filterQuery.offer_code = new RegExp(escapeRegex(offer_code), "i");
     }
     if (offer_type) {
       filterQuery.offer_type = offer_type;
@@ -185,17 +185,23 @@ const getOfferList = async ({
 
     if (offer_name) {
       filterQuery.offer_name = {
-        $elemMatch: { lang_code, value: new RegExp(offer_name, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(offer_name), "i"),
+        },
       };
     }
     if (search) {
       filterQuery.$or = [
         {
           offer_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
-        { offer_code: { $regex: search, $options: "i" } },
+        { offer_code: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 
@@ -316,24 +322,30 @@ const getCustomerOfferList = async ({
     filterQuery.$or = orConditions;
 
     if (offer_code) {
-      filterQuery.offer_code = new RegExp(offer_code, "i");
+      filterQuery.offer_code = new RegExp(escapeRegex(offer_code), "i");
     }
     if (offer_type) {
       filterQuery.offer_type = offer_type;
     }
     if (offer_name) {
       filterQuery.offer_name = {
-        $elemMatch: { lang_code, value: new RegExp(offer_name, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(offer_name), "i"),
+        },
       };
     }
     if (search) {
       filterQuery.$or = [
         {
           offer_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
-        { offer_code: { $regex: search, $options: "i" } },
+        { offer_code: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
     const totalDocs = await Offer.countDocuments(filterQuery);

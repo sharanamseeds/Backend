@@ -8,6 +8,7 @@ import { billService } from "./bills.service.js";
 import { convertFiles } from "../helpers/files.management.js";
 import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
 import { masterConfig } from "../config/master.config.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const calculateDaysDifference = (startDate: Date, endDate: Date) => {
   // Convert the input dates to milliseconds
@@ -508,6 +509,7 @@ const getOrderList = async ({
       order_type,
       is_creditable,
       credit_duration,
+      search,
     } = query;
 
     let filterQuery: any = {};
@@ -547,6 +549,13 @@ const getOrderList = async ({
     if (billing_amount) {
       filterQuery.billing_amount = billing_amount;
     }
+
+    if (search) {
+      filterQuery.$or = [
+        { status: { $regex: escapeRegex(search), $options: "i" } },
+      ];
+    }
+
     const totalDocs = await Order.countDocuments(filterQuery);
 
     if (!pagination) {
@@ -621,6 +630,7 @@ const getCustomerOrderList = async ({
       order_type,
       is_creditable,
       credit_duration,
+      search,
     } = query;
 
     if (typeof limit === "string") {
@@ -677,6 +687,12 @@ const getCustomerOrderList = async ({
     if (billing_amount) {
       filterQuery.billing_amount = billing_amount;
     }
+    if (search) {
+      filterQuery.$or = [
+        { status: { $regex: escapeRegex(search), $options: "i" } },
+      ];
+    }
+
     const totalDocs = await Order.countDocuments(filterQuery);
 
     if (!pagination) {

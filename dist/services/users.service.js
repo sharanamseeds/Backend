@@ -11,7 +11,7 @@ import mongoose from "mongoose";
 import User from "../models/users.model.js";
 import { createPassword, generatePassword } from "../helpers/auth.helpers.js";
 import { convertFiles, createDocument, deleteDocument, } from "../helpers/files.management.js";
-import { sendUserAccountCreatedMail, sendUserAccountVerifiedMail, } from "../helpers/common.helpers..js";
+import { escapeRegex, sendUserAccountCreatedMail, sendUserAccountVerifiedMail, } from "../helpers/common.helpers..js";
 import { masterConfig } from "../config/master.config.js";
 import Money from "../models/money.model.js";
 import Ledger from "../models/ledger.model.js";
@@ -114,9 +114,9 @@ const getUserList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         // Apply search logic
         if (search) {
             filterQuery.$or = [
-                { name: { $regex: search, $options: "i" } },
-                { email: { $regex: search, $options: "i" } },
-                { contact_number: { $regex: search, $options: "i" } },
+                { name: { $regex: escapeRegex(search), $options: "i" } },
+                { email: { $regex: escapeRegex(search), $options: "i" } },
+                { contact_number: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield User.countDocuments(filterQuery);

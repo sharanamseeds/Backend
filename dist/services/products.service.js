@@ -13,6 +13,7 @@ import { transformFormData, updateField, } from "../helpers/language.management.
 import { convertFiles, createDocument, deleteDocument, } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { offerService } from "./offers.service.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 export class NotFoundError extends Error {
     constructor(message) {
         super(message);
@@ -324,20 +325,20 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
             filterQuery.$or = [
                 {
                     product_name: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
                     },
                 },
                 {
                     description: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
                     },
                 },
-                { product_code: { $regex: search, $options: "i" } },
+                { product_code: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         if (product_name) {
             filterQuery.product_name = {
-                $elemMatch: { lang_code, value: new RegExp(product_name, "i") },
+                $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
             };
         }
         if (product_code) {
@@ -432,7 +433,7 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
         };
         if (product_name) {
             filterQuery.product_name = {
-                $elemMatch: { lang_code, value: new RegExp(product_name, "i") },
+                $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
             };
         }
         if (product_code) {
@@ -451,15 +452,15 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
             filterQuery.$or = [
                 {
                     product_name: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
                     },
                 },
                 {
                     description: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
                     },
                 },
-                { product_code: { $regex: search, $options: "i" } },
+                { product_code: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         if (is_featured) {

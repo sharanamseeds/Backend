@@ -5,6 +5,7 @@ import Bill from "../models/bill.model.js";
 import Order from "../models/orders.model.js";
 import Product from "../models/products.model.js";
 import { masterConfig } from "../config/master.config.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const getLedgerList = async ({
   query,
@@ -72,8 +73,8 @@ const getLedgerList = async ({
     }
     if (search) {
       filterQuery.$or = [
-        { type: { $regex: search, $options: "i" } },
-        { invoice_id: { $regex: search, $options: "i" } },
+        { type: { $regex: escapeRegex(search), $options: "i" } },
+        { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
     const totalDocs = await Ledger.countDocuments(filterQuery);
@@ -183,8 +184,8 @@ const getCustomerLedgerList = async ({
     }
     if (search) {
       filterQuery.$or = [
-        { type: { $regex: search, $options: "i" } },
-        { invoice_id: { $regex: search, $options: "i" } },
+        { type: { $regex: escapeRegex(search), $options: "i" } },
+        { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 

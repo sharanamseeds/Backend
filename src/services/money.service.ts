@@ -1,6 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import Money, { typeMoney } from "../models/money.model.js";
 import { typeUser } from "../models/users.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const getMoneyList = async ({
   query = {},
@@ -52,8 +53,8 @@ const getMoneyList = async ({
 
     if (search) {
       filterQuery.$or = [
-        { description: { $regex: search, $options: "i" } },
-        { amount: { $regex: search, $options: "i" } },
+        { description: { $regex: escapeRegex(search), $options: "i" } },
+        { amount: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 
@@ -148,8 +149,8 @@ const getCustomerMoneyList = async ({
 
     if (search) {
       filterQuery.$or = [
-        { description: { $regex: search, $options: "i" } },
-        { amount: { $regex: search, $options: "i" } },
+        { description: { $regex: escapeRegex(search), $options: "i" } },
+        { amount: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 

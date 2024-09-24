@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import mongoose from "mongoose";
 import Cart from "../models/cart.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
@@ -27,7 +28,7 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
             filterQuery.status = status;
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {
@@ -83,7 +84,7 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
             filterQuery.status = status;
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import mongoose from "mongoose";
 import Money from "../models/money.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const getMoneyList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", user_id, search, } = query;
@@ -33,8 +34,8 @@ const getMoneyList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, func
         }
         if (search) {
             filterQuery.$or = [
-                { description: { $regex: search, $options: "i" } },
-                { amount: { $regex: search, $options: "i" } },
+                { description: { $regex: escapeRegex(search), $options: "i" } },
+                { amount: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Money.countDocuments(filterQuery);
@@ -96,8 +97,8 @@ const getCustomerMoneyList = ({ query = {}, requestUser, }) => __awaiter(void 0,
         };
         if (search) {
             filterQuery.$or = [
-                { description: { $regex: search, $options: "i" } },
-                { amount: { $regex: search, $options: "i" } },
+                { description: { $regex: escapeRegex(search), $options: "i" } },
+                { amount: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Money.countDocuments(filterQuery);

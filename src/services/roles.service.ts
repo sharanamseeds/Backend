@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import Role, { typeRole } from "../models/roles.model.js";
 import User, { typeUser } from "../models/users.model.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 
 const getRoleList = async ({
   query,
@@ -57,7 +57,9 @@ const getRoleList = async ({
     }
     // Apply search logic
     if (search) {
-      filterQuery.$or = [{ role_name: { $regex: search, $options: "i" } }];
+      filterQuery.$or = [
+        { role_name: { $regex: escapeRegex(search), $options: "i" } },
+      ];
     }
 
     const totalDocs = await Role.countDocuments(filterQuery);

@@ -7,6 +7,7 @@ import {
   deleteDocument,
 } from "../helpers/files.management.js";
 import {
+  escapeRegex,
   sendUserAccountCreatedMail,
   sendUserAccountVerifiedMail,
 } from "../helpers/common.helpers..js";
@@ -156,9 +157,9 @@ const getUserList = async ({
     // Apply search logic
     if (search) {
       filterQuery.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { contact_number: { $regex: search, $options: "i" } },
+        { name: { $regex: escapeRegex(search), $options: "i" } },
+        { email: { $regex: escapeRegex(search), $options: "i" } },
+        { contact_number: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 

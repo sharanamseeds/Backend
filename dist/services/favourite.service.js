@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import mongoose from "mongoose";
 import Favourite from "../models/favourite.model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const getFavouriteList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
@@ -24,7 +25,7 @@ const getFavouriteList = ({ query, }) => __awaiter(void 0, void 0, void 0, funct
             filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Favourite.countDocuments(filterQuery);
         if (!pagination) {
@@ -74,7 +75,7 @@ const getUserFavouriteList = ({ query, requestUser, }) => __awaiter(void 0, void
             filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Favourite.countDocuments(filterQuery);
         if (!pagination) {

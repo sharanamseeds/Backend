@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import Language from "../models/languages.model.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 const getLanguageList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", lang_name, search, } = query;
@@ -34,8 +34,8 @@ const getLanguageList = ({ query, }) => __awaiter(void 0, void 0, void 0, functi
         // Apply search logic
         if (search) {
             filterQuery.$or = [
-                { lang_name: { $regex: search, $options: "i" } },
-                { lang_code: { $regex: search, $options: "i" } },
+                { lang_name: { $regex: escapeRegex(search), $options: "i" } },
+                { lang_code: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Language.countDocuments(filterQuery);

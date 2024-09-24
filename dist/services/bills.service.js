@@ -13,6 +13,7 @@ import Order from "../models/orders.model.js";
 import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { ledgerService } from "./ledgers.service.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const createInvoiceNo = () => __awaiter(void 0, void 0, void 0, function* () {
     const prefix = masterConfig.billingConfig.invoicePrefix; // Ensure this is defined in your masterConfig
     const currentMonthYear = new Date().toISOString().slice(5, 7) + new Date().getFullYear();
@@ -61,8 +62,8 @@ const getBillList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, funct
         }
         if (search) {
             filterQuery.$or = [
-                { payment_status: { $regex: search, $options: "i" } },
-                { invoice_id: { $regex: search, $options: "i" } },
+                { payment_status: { $regex: escapeRegex(search), $options: "i" } },
+                { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Bill.countDocuments(filterQuery);
@@ -133,8 +134,8 @@ const getCustomerBillList = ({ query = {}, requestUser, }) => __awaiter(void 0, 
         }
         if (search) {
             filterQuery.$or = [
-                { payment_status: { $regex: search, $options: "i" } },
-                { invoice_id: { $regex: search, $options: "i" } },
+                { payment_status: { $regex: escapeRegex(search), $options: "i" } },
+                { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
             ];
         }
         const totalDocs = yield Bill.countDocuments(filterQuery);

@@ -12,7 +12,7 @@ import Brand from "../models/brands.model.js";
 import { convertFiles, createDocument, deleteDocument, } from "../helpers/files.management.js";
 import { transformFormData, updateField, } from "../helpers/language.management.helper.js";
 import { masterConfig } from "../config/master.config.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 const projectLocalizedBrand = (lang_code) => {
     return [
         {
@@ -106,24 +106,36 @@ const getBrandList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         let filterQuery = {};
         if (brand_name) {
             filterQuery.brand_name = {
-                $elemMatch: { lang_code, value: new RegExp(brand_name, "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(brand_name), "i"),
+                },
             };
         }
         if (tag_line) {
             filterQuery.tag_line = {
-                $elemMatch: { lang_code, value: new RegExp(tag_line, "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(tag_line), "i"),
+                },
             };
         }
         if (search) {
             filterQuery.$or = [
                 {
                     brand_name: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 {
                     tag_line: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
             ];

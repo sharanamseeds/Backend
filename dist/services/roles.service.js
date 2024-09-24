@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import Role from "../models/roles.model.js";
 import User from "../models/users.model.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 const getRoleList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", role_name, is_active, search, } = query;
@@ -37,7 +37,9 @@ const getRoleList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         }
         // Apply search logic
         if (search) {
-            filterQuery.$or = [{ role_name: { $regex: search, $options: "i" } }];
+            filterQuery.$or = [
+                { role_name: { $regex: escapeRegex(search), $options: "i" } },
+            ];
         }
         const totalDocs = yield Role.countDocuments(filterQuery);
         if (!pagination) {

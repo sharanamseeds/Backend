@@ -5,6 +5,7 @@ import Order, { typeOrder } from "../models/orders.model.js";
 import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { ledgerService } from "./ledgers.service.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const createInvoiceNo = async () => {
   const prefix = masterConfig.billingConfig.invoicePrefix; // Ensure this is defined in your masterConfig
@@ -89,8 +90,8 @@ const getBillList = async ({
 
     if (search) {
       filterQuery.$or = [
-        { payment_status: { $regex: search, $options: "i" } },
-        { invoice_id: { $regex: search, $options: "i" } },
+        { payment_status: { $regex: escapeRegex(search), $options: "i" } },
+        { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 
@@ -197,8 +198,8 @@ const getCustomerBillList = async ({
     }
     if (search) {
       filterQuery.$or = [
-        { payment_status: { $regex: search, $options: "i" } },
-        { invoice_id: { $regex: search, $options: "i" } },
+        { payment_status: { $regex: escapeRegex(search), $options: "i" } },
+        { invoice_id: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
     const totalDocs = await Bill.countDocuments(filterQuery);

@@ -12,7 +12,7 @@ import Category from "../models/categories.model.js";
 import { convertFiles, createDocument, deleteDocument, } from "../helpers/files.management.js";
 import { transformFormData, updateField, } from "../helpers/language.management.helper.js";
 import { masterConfig } from "../config/master.config.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 const projectLocalizedCategory = (lang_code) => {
     return [
         {
@@ -106,24 +106,36 @@ const getCategoryList = ({ query, }) => __awaiter(void 0, void 0, void 0, functi
         let filterQuery = {};
         if (category_name) {
             filterQuery.category_name = {
-                $elemMatch: { lang_code, value: new RegExp(category_name, "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(category_name), "i"),
+                },
             };
         }
         if (description) {
             filterQuery.description = {
-                $elemMatch: { lang_code, value: new RegExp(description, "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(description), "i"),
+                },
             };
         }
         if (search) {
             filterQuery.$or = [
                 {
                     category_name: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 {
                     description: {
-                        $elemMatch: { lang_code, value: new RegExp(search, "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
             ];

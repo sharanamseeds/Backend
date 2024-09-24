@@ -12,7 +12,7 @@ import {
 } from "../helpers/language.management.helper.js";
 import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
 import { masterConfig } from "../config/master.config.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 
 const projectLocalizedCategory = (lang_code: string) => {
   return [
@@ -136,24 +136,36 @@ const getCategoryList = async ({
 
     if (category_name) {
       filterQuery.category_name = {
-        $elemMatch: { lang_code, value: new RegExp(category_name, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(category_name), "i"),
+        },
       };
     }
     if (description) {
       filterQuery.description = {
-        $elemMatch: { lang_code, value: new RegExp(description, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(description), "i"),
+        },
       };
     }
     if (search) {
       filterQuery.$or = [
         {
           category_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         {
           description: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
       ];

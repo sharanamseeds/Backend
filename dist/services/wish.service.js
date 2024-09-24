@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import mongoose from "mongoose";
 import Wish from "../models/wish. model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const getWishList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
@@ -24,7 +25,7 @@ const getWishList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
             filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Wish.countDocuments(filterQuery);
         if (!pagination) {
@@ -74,7 +75,7 @@ const getUserWishList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
             filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
         }
         if (search) {
-            filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+            filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
         }
         const totalDocs = yield Wish.countDocuments(filterQuery);
         if (!pagination) {

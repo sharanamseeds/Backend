@@ -15,6 +15,7 @@ import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
 import { masterConfig } from "../config/master.config.js";
 import { offerService } from "./offers.service.js";
 import { typeOffer } from "../models/offers.models.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 export class NotFoundError extends Error {
   constructor(message) {
@@ -367,21 +368,21 @@ const getProductList = async ({
       filterQuery.$or = [
         {
           product_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
           },
         },
         {
           description: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
           },
         },
-        { product_code: { $regex: search, $options: "i" } },
+        { product_code: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
 
     if (product_name) {
       filterQuery.product_name = {
-        $elemMatch: { lang_code, value: new RegExp(product_name, "i") },
+        $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
       };
     }
     if (product_code) {
@@ -514,7 +515,7 @@ const getCustomerProductList = async ({
 
     if (product_name) {
       filterQuery.product_name = {
-        $elemMatch: { lang_code, value: new RegExp(product_name, "i") },
+        $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
       };
     }
     if (product_code) {
@@ -533,15 +534,15 @@ const getCustomerProductList = async ({
       filterQuery.$or = [
         {
           product_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
           },
         },
         {
           description: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
           },
         },
-        { product_code: { $regex: search, $options: "i" } },
+        { product_code: { $regex: escapeRegex(search), $options: "i" } },
       ];
     }
     if (is_featured) {

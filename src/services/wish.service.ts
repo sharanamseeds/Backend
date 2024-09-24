@@ -1,17 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import { typeUser } from "../models/users.model.js";
-import {
-  convertFiles,
-  createDocument,
-  deleteDocument,
-} from "../helpers/files.management.js";
-import {
-  transformFormData,
-  updateField,
-} from "../helpers/language.management.helper.js";
-import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
-import { masterConfig } from "../config/master.config.js";
 import Wish, { typeWish } from "../models/wish. model.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 
 const getWishList = async ({
   query,
@@ -54,7 +44,7 @@ const getWishList = async ({
       filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Wish.countDocuments(filterQuery);
@@ -138,7 +128,7 @@ const getUserWishList = async ({
       filterQuery.product_id = new mongoose.Types.ObjectId(product_id);
     }
     if (search) {
-      filterQuery.$or = [{ notes: new RegExp(search, "i") }];
+      filterQuery.$or = [{ notes: new RegExp(escapeRegex(search), "i") }];
     }
 
     const totalDocs = await Wish.countDocuments(filterQuery);

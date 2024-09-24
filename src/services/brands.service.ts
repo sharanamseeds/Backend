@@ -12,7 +12,7 @@ import {
 } from "../helpers/language.management.helper.js";
 import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
 import { masterConfig } from "../config/master.config.js";
-import { makeIdentifier } from "../helpers/common.helpers..js";
+import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 
 const projectLocalizedBrand = (lang_code: string) => {
   return [
@@ -136,24 +136,36 @@ const getBrandList = async ({
 
     if (brand_name) {
       filterQuery.brand_name = {
-        $elemMatch: { lang_code, value: new RegExp(brand_name, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(brand_name), "i"),
+        },
       };
     }
     if (tag_line) {
       filterQuery.tag_line = {
-        $elemMatch: { lang_code, value: new RegExp(tag_line, "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(tag_line), "i"),
+        },
       };
     }
     if (search) {
       filterQuery.$or = [
         {
           brand_name: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         {
           tag_line: {
-            $elemMatch: { lang_code, value: new RegExp(search, "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
       ];

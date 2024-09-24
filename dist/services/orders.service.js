@@ -16,6 +16,7 @@ import Product from "../models/products.model.js";
 import { billService } from "./bills.service.js";
 import { convertFiles } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
+import { escapeRegex } from "../helpers/common.helpers..js";
 const calculateDaysDifference = (startDate, endDate) => {
     // Convert the input dates to milliseconds
     const start = new Date(startDate).getTime();
@@ -252,7 +253,7 @@ const checkProductsInStock = (products) => __awaiter(void 0, void 0, void 0, fun
 });
 const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", buy_order_id, status, user_id, offer_id, product_id, bill_id, total_order_amount, billing_amount, order_type, is_creditable, credit_duration, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", buy_order_id, status, user_id, offer_id, product_id, bill_id, total_order_amount, billing_amount, order_type, is_creditable, credit_duration, search, } = query;
         let filterQuery = {};
         if (product_id) {
             filterQuery.products = {
@@ -288,6 +289,11 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         }
         if (billing_amount) {
             filterQuery.billing_amount = billing_amount;
+        }
+        if (search) {
+            filterQuery.$or = [
+                { status: { $regex: escapeRegex(search), $options: "i" } },
+            ];
         }
         const totalDocs = yield Order.countDocuments(filterQuery);
         if (!pagination) {
@@ -327,7 +333,7 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
 });
 const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", buy_order_id, status, offer_id, product_id, bill_id, total_order_amount, billing_amount, order_type, is_creditable, credit_duration, } = query;
+        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", buy_order_id, status, offer_id, product_id, bill_id, total_order_amount, billing_amount, order_type, is_creditable, credit_duration, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }
@@ -377,6 +383,11 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
         }
         if (billing_amount) {
             filterQuery.billing_amount = billing_amount;
+        }
+        if (search) {
+            filterQuery.$or = [
+                { status: { $regex: escapeRegex(search), $options: "i" } },
+            ];
         }
         const totalDocs = yield Order.countDocuments(filterQuery);
         if (!pagination) {

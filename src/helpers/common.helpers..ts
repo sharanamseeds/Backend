@@ -400,3 +400,113 @@ export const createDefaultDatabase = async () => {
 export const makeIdentifier = (word: string) => {
   return word.toLowerCase().replace(/\s+/g, "_");
 };
+
+export const escapeRegex = (string: string): string => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+// cron
+// const cron = require('node-cron');
+// const backupService = require('../services/admin/db_backup.service')
+
+// // Schedule daily backup at 2 AM
+// cron.schedule('0 2 * * *', async () => {
+//   console.log('Starting daily backup...');
+//   await backupService.addBackup()
+// });
+
+// clear
+// export const clear = async () => {
+//   const collections = await mongoose.connection.db.collections();
+
+//   for (let collection of collections) {
+//     await collection.drop();
+//   }
+// };
+
+// pupetter create pdf
+// Launch Puppeteer and generate the PDF
+// const browser = await puppeteer.launch({
+//   headless: true,
+//   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//   timeout: 600000,
+// });
+// const page = await browser.newPage();
+// await page.setContent(htmlTemplate, { waitUntil: "load" });
+
+// const pdfBuffer = await page.pdf({
+//   format: "A4",
+//   landscape: true,
+//   printBackground: true,
+//   displayHeaderFooter: true,
+//   headerTemplate: headerTemplate,
+//   footerTemplate: footerTemplate,
+//   margin: {
+//     top: "300px",
+//     bottom: "90px",
+//     left: "12px",
+//   },
+// });
+
+// // Set the response headers to indicate a PDF file
+// res.set({
+//   "Content-Type": "application/pdf",
+//   "Content-Disposition": attachment; filename=shipment_${shipmentId}.pdf,
+//   "Content-Length": pdfBuffer.length,
+// });
+
+// await browser.close();
+// // Send the PDF file as a response
+// res.end(pdfBuffer);
+
+// download pdf
+// const downloadShipmentPdf = async (id) => {
+//   try {
+//     const response = await axios.get(DOWNLOAD_PDF_SHIPMENT_ID + id, {
+//       responseType: 'blob' // Important for downloading files
+//     })
+
+//     // Create a new Blob object using the response data
+//     const blob = new Blob([response.data], { type: 'application/pdf' })
+
+//     // Create a link element
+//     const link = document.createElement('a')
+
+//     // Create a URL for the blob and set it as the href
+//     const url = window.URL.createObjectURL(blob)
+//     link.href = url
+
+//     // Set the download attribute with the desired file name
+//     link.download = shipment_${id}.pdf
+
+//     // Append the link to the document
+//     document.body.appendChild(link)
+
+//     // Programmatically click the link to trigger the download
+//     link.click()
+
+//     // Remove the link from the document
+//     link.parentNode.removeChild(link)
+
+//     // Release the object URL to free up memory
+//     window.URL.revokeObjectURL(url)
+//   } catch (error) {
+//     toast.error(error?.message)
+//   }
+// }
+
+// onerror load image
+//          <img
+//           className={classnames({
+//             [imgClassName]: imgClassName
+//           })}
+//           src={img}
+//           alt="avatar"
+//           onError={(e) => {
+//             e.target.onerror = null
+//             e.target.src =
+//               require('../../../assets/images/avatars/avatar-blank.png').default
+//           }}
+//           height={imgHeight && !size ? imgHeight : 32}
+//           width={imgWidth && !size ? imgWidth : 32}
+//         />
