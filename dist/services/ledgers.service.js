@@ -186,6 +186,7 @@ const addLedger = ({ requestUser, bill_id, description, }) => __awaiter(void 0, 
         const orderDoc = yield Order.findById(billDoc.order_id);
         const sellerDoc = yield User.findOne({
             email: masterConfig.superAdminConfig.email,
+            is_app_user: false,
         });
         const sellerLedger = new Ledger({
             bill_id: billDoc._id,

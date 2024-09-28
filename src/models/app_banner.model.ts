@@ -7,6 +7,8 @@ import {
 export interface typeAppBanner extends Document {
   _id: mongoose.Types.ObjectId;
   images: typeLocalizedString[];
+  banners: typeLocalizedString[];
+  is_active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -14,6 +16,8 @@ export interface typeAppBanner extends Document {
 const appBannerSchema = new mongoose.Schema(
   {
     images: { type: [localizedStringSchema], default: [] },
+    banners: { type: [localizedStringSchema], default: [] },
+    is_active: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

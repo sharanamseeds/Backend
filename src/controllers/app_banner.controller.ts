@@ -65,9 +65,33 @@ const deleteAppBannerImage = catchAsync(
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
   }
 );
+const deleteAppBannerBottomImage = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    let bodyData: any = {};
+    if (req?.query?.payload && typeof req.query.payload === "string") {
+      bodyData = JSON.parse(req.query.payload);
+    }
+
+    const bannerDoc = await appBannerService.deleteAppBannerBottomImage({
+      bannerId: req.params.id,
+      src: bodyData.src,
+    });
+
+    const data4responseObject = {
+      req: req,
+      code: httpStatus.OK,
+      message: "Banner Image Deleted Successfully!!",
+      payload: { result: bannerDoc },
+      logPayload: false,
+    };
+
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+  }
+);
 
 export const appBannerController = {
   updateAppBanner,
   deleteAppBannerImage,
   getAppBanner,
+  deleteAppBannerBottomImage,
 };

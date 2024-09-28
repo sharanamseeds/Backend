@@ -45,6 +45,25 @@ router.put(
   },
   appBannerController.deleteAppBannerImage
 );
+router.put(
+  "/delete_bottom_image/:id",
+  authenticateToken,
+  CHECKPERMISSION([{ module: "app banner", permission: "can_delete" }]),
+  async (req, res, next) => {
+    let validationData = {};
+    if (req?.query?.payload && typeof req.query.payload === "string") {
+      validationData = JSON.parse(req.query.payload);
+    }
+    validateViaJoi(
+      appBannerMiddlewareSchemas.deleteAppBannerImage,
+      validationData,
+      req,
+      res,
+      next
+    );
+  },
+  appBannerController.deleteAppBannerBottomImage
+);
 
 const appBannerRoutes = router;
 export default appBannerRoutes;

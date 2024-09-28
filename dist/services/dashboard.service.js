@@ -16,6 +16,7 @@ import Category from "../models/categories.model.js";
 import Offer from "../models/offers.models.js";
 import Languages from "../models/languages.model.js";
 import Ledger from "../models/ledger.model.js";
+import PurchaseOrder from "../models/purchase_orders.model.js";
 const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -87,6 +88,17 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                 returnRejectedOrderCount: 0,
                 returnFulfilledOrderCount: 0,
             },
+            accounts: {
+                paid: {
+                    purchaseAmount: 0,
+                    sellAmount: 0,
+                },
+                outstandings: {
+                    purchaseAmount: 0,
+                    sellAmount: 0,
+                },
+                on_hand: 0,
+            },
         };
         newData.users.total = yield User.countDocuments(filterQuery);
         newData.users.appUsers = yield User.countDocuments(Object.assign(Object.assign({}, filterQuery), { is_app_user: true }));
@@ -143,6 +155,51 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         newData.orders.returnAcceptedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_accepeted" }));
         newData.orders.returnRejectedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_rejected" }));
         newData.orders.returnFulfilledOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "return_fulfilled" }));
+        const billResult = yield Bill.aggregate([
+            {
+                $match: Object.assign({}, filterQuery),
+            },
+            {
+                $group: {
+                    _id: "$payment_status",
+                    totalAmount: { $sum: "$bill_amount" },
+                },
+            },
+        ]);
+        const billTotals = billResult.reduce((acc, curr) => {
+            if (curr._id === "paid") {
+                acc.paid = curr.totalAmount;
+            }
+            else if (curr._id === "unpaid") {
+                acc.unpaid = curr.totalAmount;
+            }
+            return acc;
+        }, { paid: 0, unpaid: 0 });
+        const poResult = yield PurchaseOrder.aggregate([
+            {
+                $match: Object.assign({}, filterQuery),
+            },
+            {
+                $group: {
+                    _id: "$payment_status",
+                    totalBillingAmount: { $sum: "$billing_amount" },
+                },
+            },
+        ]);
+        const poTotals = poResult.reduce((acc, curr) => {
+            if (curr._id === "paid") {
+                acc.paid = curr.totalBillingAmount;
+            }
+            else if (curr._id === "unpaid") {
+                acc.unpaid = curr.totalBillingAmount;
+            }
+            return acc;
+        }, { paid: 0, unpaid: 0 });
+        newData.accounts.paid.sellAmount = billTotals.paid;
+        newData.accounts.outstandings.sellAmount = billTotals.unpaid;
+        newData.accounts.paid.purchaseAmount = poTotals.paid;
+        newData.accounts.outstandings.purchaseAmount = poTotals.unpaid;
+        newData.accounts.on_hand = billTotals.paid - poTotals.paid;
         return { data: newData };
     }
     catch (error) {

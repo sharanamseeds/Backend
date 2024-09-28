@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import mongoose, { Schema } from "mongoose";
 const usersSchema = new Schema({
     added_by: { type: mongoose.Types.ObjectId, default: null, ref: "users" },
@@ -13,7 +22,7 @@ const usersSchema = new Schema({
     is_app_user: { type: Boolean, default: false },
     contact_number: { type: String },
     gst_number: { type: String, default: null },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     billing_address: {
         address_line: { type: String, default: null },
         city: { type: String, default: null },
@@ -37,7 +46,42 @@ const usersSchema = new Schema({
     bank_details: { type: String, default: null },
     other_document: { type: String, default: null },
 }, { timestamps: true });
-usersSchema.index({ email: 1 }, { unique: true });
+usersSchema.pre("save", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = this;
+        // If email or is_app_user fields are modified, perform the check
+        if (user.isModified("email") || user.isModified("is_app_user")) {
+            // Check if a user with the same email exists
+            const existingUser = yield User.findOne({ email: user.email });
+            // If a user exists and has the same `is_app_user` value, throw an error
+            if (existingUser && existingUser.is_app_user === user.is_app_user) {
+                return next(new Error("User with the same email and app status already exists"));
+            }
+        }
+        next();
+    });
+});
+usersSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const update = this.getUpdate();
+        // Check if the update is a standard update and contains email or is_app_user
+        if (update &&
+            typeof update === "object" &&
+            ("$set" in update || "email" in update)) {
+            const email = update.email || (update.$set && update.$set.email);
+            const is_app_user = update.is_app_user || (update.$set && update.$set.is_app_user);
+            if (email || is_app_user !== undefined) {
+                // Check if a user with the same email exists
+                const existingUser = yield User.findOne({ email });
+                if (existingUser && existingUser.is_app_user === is_app_user) {
+                    return next(new Error("User with the same email and app status already exists"));
+                }
+            }
+        }
+        next();
+    });
+});
+usersSchema.index({ email: 1 });
 usersSchema.index({ contact_number: 1 }, { unique: true });
 usersSchema.index({ gst_number: 1 });
 usersSchema.index({ role_id: 1 });

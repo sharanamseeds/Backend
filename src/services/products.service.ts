@@ -368,12 +368,18 @@ const getProductList = async ({
       filterQuery.$or = [
         {
           product_name: {
-            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         {
           description: {
-            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         { product_code: { $regex: escapeRegex(search), $options: "i" } },
@@ -382,7 +388,10 @@ const getProductList = async ({
 
     if (product_name) {
       filterQuery.product_name = {
-        $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(product_name), "i"),
+        },
       };
     }
     if (product_code) {
@@ -515,7 +524,10 @@ const getCustomerProductList = async ({
 
     if (product_name) {
       filterQuery.product_name = {
-        $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
+        $elemMatch: {
+          lang_code,
+          value: new RegExp(escapeRegex(product_name), "i"),
+        },
       };
     }
     if (product_code) {
@@ -534,12 +546,18 @@ const getCustomerProductList = async ({
       filterQuery.$or = [
         {
           product_name: {
-            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         {
           description: {
-            $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+            $elemMatch: {
+              lang_code,
+              value: new RegExp(escapeRegex(search), "i"),
+            },
           },
         },
         { product_code: { $regex: escapeRegex(search), $options: "i" } },
@@ -1062,6 +1080,49 @@ const addProductQuantity = async ({
   }
 };
 
+const addProductQuantityPO = async ({
+  productId,
+  requestUser,
+  quantity,
+  lot_no,
+  vendor_name,
+  grn_date,
+  expiry_date,
+  manufacture_date,
+}: {
+  productId: string;
+  quantity: number;
+  requestUser: typeUser | null;
+  lot_no: string;
+  vendor_name: string;
+  grn_date: Date;
+  expiry_date: Date;
+  manufacture_date: Date;
+}): Promise<Document<unknown, {}, typeProduct> | null> => {
+  try {
+    let productDoc = await Product.findById(productId);
+
+    if (!productDoc) {
+      throw new NotFoundError("Product not found");
+    }
+    productDoc.quantity = productDoc.quantity + quantity;
+    if (productDoc.quantity > 0) {
+      productDoc.in_stock = true;
+    }
+    // productDoc.updated_by = new mongoose.Types.ObjectId(requestUser?._id);
+    productDoc.lot_no = lot_no;
+    productDoc.vendor_name = vendor_name;
+    productDoc.grn_date = new Date(grn_date);
+    productDoc.expiry_date = new Date(expiry_date);
+    productDoc.manufacture_date = new Date(manufacture_date);
+    productDoc = await productDoc.save();
+
+    return productDoc;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const productService = {
   getProduct,
   addProduct,
@@ -1072,4 +1133,5 @@ export const productService = {
   addProductQuantity,
   removeProductQuantity,
   getCustomerProductList,
+  addProductQuantityPO,
 };

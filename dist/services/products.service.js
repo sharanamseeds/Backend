@@ -325,12 +325,18 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
             filterQuery.$or = [
                 {
                     product_name: {
-                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 {
                     description: {
-                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 { product_code: { $regex: escapeRegex(search), $options: "i" } },
@@ -338,7 +344,10 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
         }
         if (product_name) {
             filterQuery.product_name = {
-                $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(product_name), "i"),
+                },
             };
         }
         if (product_code) {
@@ -433,7 +442,10 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
         };
         if (product_name) {
             filterQuery.product_name = {
-                $elemMatch: { lang_code, value: new RegExp(escapeRegex(product_name), "i") },
+                $elemMatch: {
+                    lang_code,
+                    value: new RegExp(escapeRegex(product_name), "i"),
+                },
             };
         }
         if (product_code) {
@@ -452,12 +464,18 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
             filterQuery.$or = [
                 {
                     product_name: {
-                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 {
                     description: {
-                        $elemMatch: { lang_code, value: new RegExp(escapeRegex(search), "i") },
+                        $elemMatch: {
+                            lang_code,
+                            value: new RegExp(escapeRegex(search), "i"),
+                        },
                     },
                 },
                 { product_code: { $regex: escapeRegex(search), $options: "i" } },
@@ -863,6 +881,29 @@ const addProductQuantity = ({ productId, requestUser, quantity, }) => __awaiter(
         throw error;
     }
 });
+const addProductQuantityPO = ({ productId, requestUser, quantity, lot_no, vendor_name, grn_date, expiry_date, manufacture_date, }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let productDoc = yield Product.findById(productId);
+        if (!productDoc) {
+            throw new NotFoundError("Product not found");
+        }
+        productDoc.quantity = productDoc.quantity + quantity;
+        if (productDoc.quantity > 0) {
+            productDoc.in_stock = true;
+        }
+        // productDoc.updated_by = new mongoose.Types.ObjectId(requestUser?._id);
+        productDoc.lot_no = lot_no;
+        productDoc.vendor_name = vendor_name;
+        productDoc.grn_date = new Date(grn_date);
+        productDoc.expiry_date = new Date(expiry_date);
+        productDoc.manufacture_date = new Date(manufacture_date);
+        productDoc = yield productDoc.save();
+        return productDoc;
+    }
+    catch (error) {
+        throw error;
+    }
+});
 export const productService = {
     getProduct,
     addProduct,
@@ -873,5 +914,6 @@ export const productService = {
     addProductQuantity,
     removeProductQuantity,
     getCustomerProductList,
+    addProductQuantityPO,
 };
 //# sourceMappingURL=products.service.js.map

@@ -28,6 +28,21 @@ const projectLocalizedBanner = (lang_code: string) => {
             in: "$$item.value",
           },
         },
+        banners: {
+          $map: {
+            input: {
+              $filter: {
+                input: "$banners",
+                as: "item",
+                cond: {
+                  $eq: ["$$item.lang_code", lang_code],
+                },
+              },
+            },
+            as: "item",
+            in: "$$item.value",
+          },
+        },
       },
     },
   ];
@@ -86,6 +101,7 @@ const addAppBanner = async ({
     let basicData = {
       _id: appBannerId,
       images: [],
+      banners: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -142,7 +158,7 @@ const updateAppBanner = async ({
     }
 
     const files = convertFiles(req.files);
-    const { images } = files;
+    const { images, banners } = files;
 
     if (Array.isArray(images) && images.length > 0) {
       const savedFilesPromises = images.map(async (image) => {
@@ -161,6 +177,29 @@ const updateAppBanner = async ({
             value: savedFile.path,
           };
           appBannerDoc.images.push(localizedImagePath);
+        }
+      });
+
+      await Promise.all(savedFilesPromises);
+    }
+
+    if (Array.isArray(banners) && banners.length > 0) {
+      const savedFilesPromises = banners.map(async (image) => {
+        const savedFile = await createDocument({
+          document: image,
+          documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+          documentPath:
+            masterConfig.fileStystem.folderPaths.APP_BANNERS +
+            appBannerDoc._id +
+            "/" +
+            masterConfig.fileStystem.folderPaths.IMAGES,
+        });
+        if (savedFile) {
+          const localizedImagePath: typeLocalizedString = {
+            lang_code: req.query.lang_code,
+            value: savedFile.path,
+          };
+          appBannerDoc.banners.push(localizedImagePath);
         }
       });
 
@@ -213,9 +252,47 @@ const deleteAppBannerImage = async ({
   }
 };
 
+const deleteAppBannerBottomImage = async ({
+  bannerId,
+  src,
+}: {
+  bannerId: string;
+  src: string;
+}): Promise<Document<unknown, {}, typeAppBanner> | null> => {
+  try {
+    let appBannerDoc = await AppBanner.findById(bannerId);
+
+    if (!appBannerDoc) {
+      throw new Error("App Banner not found");
+    }
+
+    const imageIndex = appBannerDoc.banners.findIndex(
+      (item) => item.value === src
+    );
+
+    if (imageIndex >= 0) {
+      // Remove image
+      appBannerDoc.banners.splice(imageIndex, 1);
+      await deleteDocument({
+        documentPath: src,
+      });
+    } else {
+      throw new Error("Image not found");
+    }
+
+    appBannerDoc.updatedAt = new Date();
+    appBannerDoc = await appBannerDoc.save();
+
+    return appBannerDoc;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const appBannerService = {
   addAppBanner,
   updateAppBanner,
   deleteAppBannerImage,
   getAppBanner,
+  deleteAppBannerBottomImage,
 };

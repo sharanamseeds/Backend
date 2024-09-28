@@ -28,6 +28,14 @@ router.put("/delete_image/:id", authenticateToken, CHECKPERMISSION([{ module: "a
     }
     validateViaJoi(appBannerMiddlewareSchemas.deleteAppBannerImage, validationData, req, res, next);
 }), appBannerController.deleteAppBannerImage);
+router.put("/delete_bottom_image/:id", authenticateToken, CHECKPERMISSION([{ module: "app banner", permission: "can_delete" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    let validationData = {};
+    if (((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.payload) && typeof req.query.payload === "string") {
+        validationData = JSON.parse(req.query.payload);
+    }
+    validateViaJoi(appBannerMiddlewareSchemas.deleteAppBannerImage, validationData, req, res, next);
+}), appBannerController.deleteAppBannerBottomImage);
 const appBannerRoutes = router;
 export default appBannerRoutes;
 //# sourceMappingURL=app_banner.routes.js.map

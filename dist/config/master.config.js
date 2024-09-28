@@ -12,12 +12,11 @@ export const masterConfig = {
         VerificationCodeExpires: 180,
     },
     mongodbConfig: {
-        url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-        // url: "mongodb://admin:$ecureP4ssw0rd%402024@45.113.106.134:27017/",
-        // url: "mongodb://localhost:27017/",
+        // url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        url: "mongodb://localhost:27017/",
     },
     superAdminConfig: {
-        email: "milank7376@gmail.com",
+        email: "sharanamseeds@gmail.com",
         password: "Admin@1234",
         name: "Sharanam Seeds",
         contact_number: "9537712126",
@@ -35,10 +34,12 @@ export const masterConfig = {
             "Bill",
             "Offer",
             "Permissions",
-            "Company",
             "Language",
             "Ledger",
             "App Banner",
+            "Purchase Order",
+            "Vendors",
+            // "Company",
         ],
         languageConfig: {
             lang_name: "English",
@@ -85,6 +86,7 @@ export const masterConfig = {
         folderPaths: {
             BASE_FOLDER: "uploads/",
             DEFAULT_FOLDER: "default_images/",
+            PURCHSE_ORDER: "purchse_orders/",
             DOCUMENTS: "documents/",
             USER: "users/",
             PRODUCTS: "products/",

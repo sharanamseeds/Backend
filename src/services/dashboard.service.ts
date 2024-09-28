@@ -7,6 +7,7 @@ import Category from "../models/categories.model.js";
 import Offer from "../models/offers.models.js";
 import Languages from "../models/languages.model.js";
 import Ledger from "../models/ledger.model.js";
+import PurchaseOrder from "../models/purchase_orders.model.js";
 
 const getDashboard = async ({
   query,
@@ -45,7 +46,7 @@ const getDashboard = async ({
       categories: 0,
       ledgers: 0,
       users: {
-        total: 0, // Replace with actual value
+        total: 0,
         appUsers: 0,
         adminUsers: 0,
         blockedUsers: 0,
@@ -84,6 +85,17 @@ const getDashboard = async ({
         returnAcceptedOrderCount: 0,
         returnRejectedOrderCount: 0,
         returnFulfilledOrderCount: 0,
+      },
+      accounts: {
+        paid: {
+          purchaseAmount: 0,
+          sellAmount: 0,
+        },
+        outstandings: {
+          purchaseAmount: 0,
+          sellAmount: 0,
+        },
+        on_hand: 0,
       },
     };
 
@@ -221,6 +233,60 @@ const getDashboard = async ({
       ...filterQuery,
       status: "return_fulfilled",
     });
+
+    const billResult = await Bill.aggregate([
+      {
+        $match: { ...filterQuery },
+      },
+      {
+        $group: {
+          _id: "$payment_status",
+          totalAmount: { $sum: "$bill_amount" },
+        },
+      },
+    ]);
+
+    const billTotals = billResult.reduce(
+      (acc, curr) => {
+        if (curr._id === "paid") {
+          acc.paid = curr.totalAmount;
+        } else if (curr._id === "unpaid") {
+          acc.unpaid = curr.totalAmount;
+        }
+        return acc;
+      },
+      { paid: 0, unpaid: 0 }
+    );
+
+    const poResult = await PurchaseOrder.aggregate([
+      {
+        $match: { ...filterQuery },
+      },
+      {
+        $group: {
+          _id: "$payment_status",
+          totalBillingAmount: { $sum: "$billing_amount" },
+        },
+      },
+    ]);
+
+    const poTotals = poResult.reduce(
+      (acc, curr) => {
+        if (curr._id === "paid") {
+          acc.paid = curr.totalBillingAmount;
+        } else if (curr._id === "unpaid") {
+          acc.unpaid = curr.totalBillingAmount;
+        }
+        return acc;
+      },
+      { paid: 0, unpaid: 0 }
+    );
+
+    newData.accounts.paid.sellAmount = billTotals.paid;
+    newData.accounts.outstandings.sellAmount = billTotals.unpaid;
+    newData.accounts.paid.purchaseAmount = poTotals.paid;
+    newData.accounts.outstandings.purchaseAmount = poTotals.unpaid;
+    newData.accounts.on_hand = billTotals.paid - poTotals.paid;
 
     return { data: newData };
   } catch (error) {

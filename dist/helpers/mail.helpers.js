@@ -397,7 +397,6 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
     }
     .container {
       padding: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     /* Header styles */
@@ -609,6 +608,244 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
 
     <div class="signature">
       <p>Authorized Signatory</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+const formatAddress = (address) => {
+    const { address_line, city, state, pincode } = address;
+    // Create an array of available values
+    const parts = [];
+    if (address_line)
+        parts.push(address_line);
+    if (city)
+        parts.push(city);
+    if (state)
+        parts.push(state);
+    if (pincode)
+        parts.push(pincode);
+    // Join the parts with a comma and return
+    return parts.length > 0 ? parts.join(", ") : "";
+};
+export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modifiedProducts) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      padding: 20px;
+    }
+
+    /* Header styles */
+    .header {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .header img {
+      max-width: 150px; /* Adjust logo size */
+      vertical-align: middle;
+    }
+    .header h1 {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: right;
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Details section styles */
+    .details {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .details .company,
+    .details .buyer {
+      display: table-cell;
+      width: 50%; /* Adjust width for even distribution */
+      vertical-align: top;
+    }
+    .details p {
+      margin: 5px; /* Add some space between elements */
+    }
+    .company p {
+      margin: 5px; /* Add some space between elements */
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+    }
+
+    /* Summary and Bank Details styles */
+    .total,
+    .gst-summary {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .total{
+    margin: 10px;
+    }
+    .bank-details {
+      display: table;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .bank-details .bank-info,
+    .bank-details .qr-code {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+    }
+    .bank-details .qr-code {
+      text-align: right;
+    }
+
+    /* Signature and Page Break styles */
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Return bill notice */
+    .return-notice {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+  <title>Purchase Order Tax Invoice</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src=${"data:" +
+    getLocalImageB64(masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+        .primary_logo_path).mimeType +
+    ";base64," +
+    getLocalImageB64(masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+        .primary_logo_path).b64Data} alt="Company Logo" />
+      <h1>Purchase Order Tax Invoice</h1>
+    </div>
+
+    <!-- Add Invoice Number -->
+    <p><strong>Invoice No:</strong> ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.invoice_no) || ""}</p>
+
+    <div class="details">
+      <div class="company">
+        <p><strong>Seller Details:</strong></p>
+        <p><strong>Name:</strong> ${(vendor === null || vendor === void 0 ? void 0 : vendor.agro_name) || ""}</p>
+        <p><strong>Address:</strong> ${formatAddress(vendor === null || vendor === void 0 ? void 0 : vendor.address) || ""}</p>
+        <p><strong>Email:</strong> ${(vendor === null || vendor === void 0 ? void 0 : vendor.email) || ""}</p>
+        <p><strong>Phone:</strong> ${(vendor === null || vendor === void 0 ? void 0 : vendor.contact_number) || ""}</p>
+        <p><strong>GST No:</strong> ${(vendor === null || vendor === void 0 ? void 0 : vendor.gst_number) || ""}</p>
+      </div>
+      <div class="buyer">
+        <p><strong>Buyer Details:</strong></p>
+        <p><strong>Name:</strong> ${(admin === null || admin === void 0 ? void 0 : admin.agro_name) || ""}</p>
+        <p><strong>Address:</strong> ${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
+        <p><strong>Email:</strong> ${(admin === null || admin === void 0 ? void 0 : admin.email) || ""}</p>
+        <p><strong>Phone:</strong> ${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
+        <p><strong>GST No:</strong> ${(admin === null || admin === void 0 ? void 0 : admin.gst_number) || ""}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Product Code</th>
+            <th>Man. Date</th>
+            <th>Exe. Date</th>
+            <th>Quantity</th>
+            <th>Rate</th>
+            <th>GST Rate</th>
+            <th>GST Amount</th>
+            <th>Discount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${modifiedProducts
+    // product_id: Types.ObjectId;
+    // quantity: number;
+    // offer_discount: number;
+    // total_amount: number;
+    // gst_rate: number;
+    // purchase_price: number;
+    // gst_amount: number;
+    // manufacture_date: Date;
+    // expiry_date: Date;
+    // lot_no: string;
+    .map((item) => `
+        <tr>
+          <td>${(item === null || item === void 0 ? void 0 : item.product_name) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.product_code) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.manufacture_date) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.expiry_date) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.quantity) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.purchase_price) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.gst_rate) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.gst_amount) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.offer_discount) || ""}</td>
+        </tr>
+        `)
+    .join("")}
+      </tbody>
+    </table>
+
+    <div class="gst-summary">
+       <p class="total"><strong>Advance Payment:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.advance_payment_amount) || "0"}</p>
+      <p class="total"><strong>Order Amount:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.order_amount) || "0"}</p>
+      <p class="total"><strong>Discount Amount:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.discount_amount) || "0"}</p>
+      <p class="total"><strong>Tax Amount:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.tax_amount) || "0"}</p>
+      <p class="total">
+        <strong>Billing Amount:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.billing_amount) || "0"}
+      </p>
+       <p class="total">
+        <strong>Final Amount:</strong> ₹ ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.billing_amount) -
+    (purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.advance_payment_amount) || "0"}
+      </p>
+    </div>
+
+    <div class="bank-details">
+      <div class="bank-info">
+        <p><strong>Bank Details:</strong></p>
+        <p><strong>Bank:</strong>${vendor.bank_details.bankName || ""}</p>
+        <p><strong>Account No:</strong>${vendor.bank_details.accountNumber || ""}</p>
+        <p><strong>IFSC:</strong>${vendor.bank_details.ifscCode || ""}</p>
+        <p><strong>Branch:</strong>${vendor.bank_details.branchName || ""}</p>
+      </div>
+      <div class="qr-code">
+      
+      </div>
     </div>
   </div>
 </body>

@@ -56,9 +56,29 @@ const deleteAppBannerImage = catchAsync((req, res) => __awaiter(void 0, void 0, 
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
+const deleteAppBannerBottomImage = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    let bodyData = {};
+    if (((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.payload) && typeof req.query.payload === "string") {
+        bodyData = JSON.parse(req.query.payload);
+    }
+    const bannerDoc = yield appBannerService.deleteAppBannerBottomImage({
+        bannerId: req.params.id,
+        src: bodyData.src,
+    });
+    const data4responseObject = {
+        req: req,
+        code: httpStatus.OK,
+        message: "Banner Image Deleted Successfully!!",
+        payload: { result: bannerDoc },
+        logPayload: false,
+    };
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+}));
 export const appBannerController = {
     updateAppBanner,
     deleteAppBannerImage,
     getAppBanner,
+    deleteAppBannerBottomImage,
 };
 //# sourceMappingURL=app_banner.controller.js.map

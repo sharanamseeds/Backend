@@ -267,6 +267,7 @@ const addLedger = async ({
     const orderDoc = await Order.findById(billDoc.order_id);
     const sellerDoc = await User.findOne({
       email: masterConfig.superAdminConfig.email,
+      is_app_user: false,
     });
 
     const sellerLedger = new Ledger({

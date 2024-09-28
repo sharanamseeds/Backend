@@ -31,6 +31,21 @@ const projectLocalizedBanner = (lang_code) => {
                         in: "$$item.value",
                     },
                 },
+                banners: {
+                    $map: {
+                        input: {
+                            $filter: {
+                                input: "$banners",
+                                as: "item",
+                                cond: {
+                                    $eq: ["$$item.lang_code", lang_code],
+                                },
+                            },
+                        },
+                        as: "item",
+                        in: "$$item.value",
+                    },
+                },
             },
         },
     ];
@@ -73,6 +88,7 @@ const addAppBanner = ({ req, }) => __awaiter(void 0, void 0, void 0, function* (
         let basicData = {
             _id: appBannerId,
             images: [],
+            banners: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         };
@@ -113,7 +129,7 @@ const updateAppBanner = ({ bannerId, req, }) => __awaiter(void 0, void 0, void 0
             throw new Error("App Banner not found");
         }
         const files = convertFiles(req.files);
-        const { images } = files;
+        const { images, banners } = files;
         if (Array.isArray(images) && images.length > 0) {
             const savedFilesPromises = images.map((image) => __awaiter(void 0, void 0, void 0, function* () {
                 const savedFile = yield createDocument({
@@ -130,6 +146,26 @@ const updateAppBanner = ({ bannerId, req, }) => __awaiter(void 0, void 0, void 0
                         value: savedFile.path,
                     };
                     appBannerDoc.images.push(localizedImagePath);
+                }
+            }));
+            yield Promise.all(savedFilesPromises);
+        }
+        if (Array.isArray(banners) && banners.length > 0) {
+            const savedFilesPromises = banners.map((image) => __awaiter(void 0, void 0, void 0, function* () {
+                const savedFile = yield createDocument({
+                    document: image,
+                    documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+                    documentPath: masterConfig.fileStystem.folderPaths.APP_BANNERS +
+                        appBannerDoc._id +
+                        "/" +
+                        masterConfig.fileStystem.folderPaths.IMAGES,
+                });
+                if (savedFile) {
+                    const localizedImagePath = {
+                        lang_code: req.query.lang_code,
+                        value: savedFile.path,
+                    };
+                    appBannerDoc.banners.push(localizedImagePath);
                 }
             }));
             yield Promise.all(savedFilesPromises);
@@ -167,10 +203,36 @@ const deleteAppBannerImage = ({ bannerId, src, }) => __awaiter(void 0, void 0, v
         throw error;
     }
 });
+const deleteAppBannerBottomImage = ({ bannerId, src, }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appBannerDoc = yield AppBanner.findById(bannerId);
+        if (!appBannerDoc) {
+            throw new Error("App Banner not found");
+        }
+        const imageIndex = appBannerDoc.banners.findIndex((item) => item.value === src);
+        if (imageIndex >= 0) {
+            // Remove image
+            appBannerDoc.banners.splice(imageIndex, 1);
+            yield deleteDocument({
+                documentPath: src,
+            });
+        }
+        else {
+            throw new Error("Image not found");
+        }
+        appBannerDoc.updatedAt = new Date();
+        appBannerDoc = yield appBannerDoc.save();
+        return appBannerDoc;
+    }
+    catch (error) {
+        throw error;
+    }
+});
 export const appBannerService = {
     addAppBanner,
     updateAppBanner,
     deleteAppBannerImage,
     getAppBanner,
+    deleteAppBannerBottomImage,
 };
 //# sourceMappingURL=app_banner.service.js.map

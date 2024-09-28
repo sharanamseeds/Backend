@@ -20,6 +20,8 @@ import wishsRoutes from "./wish.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import moneyRoutes from "./money.routes.js";
 import appBannerRoutes from "./app_banner.routes.js";
+import vendorsRoutes from "./vendor.routes.js";
+import purchaseOrderRoutes from "./purchse_order.routes.js";
 
 const router = express.Router();
 
@@ -33,6 +35,8 @@ router.use("/offers", offersRoutes);
 router.use("/orders", ordersRoutes);
 router.use("/products", productsRoutes);
 router.use("/users", usersRoutes);
+router.use("/vendors", vendorsRoutes);
+router.use("/purchase_order", purchaseOrderRoutes);
 router.use("/modules", moduleRoutes);
 router.use("/documents", documentRoutes);
 router.use("/bills", billsRoutes);
