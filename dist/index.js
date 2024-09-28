@@ -59,4 +59,5 @@ process
     .on("uncaughtException", (err) => {
     logger.error(err);
 });
+// Test
 //# sourceMappingURL=index.js.map
