@@ -62,3 +62,12 @@ initializeDatabase()
   .catch((e) => {
     logger.error(e);
   });
+
+process
+  .on("unhandledRejection", (response, p) => {
+    console.log(response);
+    console.log(p);
+  })
+  .on("uncaughtException", (err) => {
+    logger.error(err);
+  });
