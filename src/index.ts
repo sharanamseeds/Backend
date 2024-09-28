@@ -39,7 +39,6 @@ const logger = PinoLogger.pino(
   pinoms.multistream(streams)
 );
 
-// PinoLogger.destination(join(dirName, "../logs/info.log"));
 global.logger = logger;
 
 initializeDatabase()
