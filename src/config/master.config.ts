@@ -15,8 +15,8 @@ export const masterConfig = {
     VerificationCodeExpires: 180,
   },
   mongodbConfig: {
-    // url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-    url: "mongodb://localhost:27017/",
+    url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    // url: "mongodb://localhost:27017/",
   },
   superAdminConfig: {
     email: "sharanamseeds@gmail.com",
