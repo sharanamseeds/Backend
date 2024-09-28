@@ -21,9 +21,23 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache:
+            "npm"
+            # Backup the uploads folder if it exists
+      - name: Backup existing uploads folder
+        run: |
+          if [ -d "./uploads" ]; then
+            cp -r ./uploads /tmp/uploads-backup
+          fi
       - run: npm ci
-      - run: npm run build
+      - run:
+          npm run build
+          # Restore the uploads folder after the build
+      - name: Restore uploads folder after build
+        run: |
+          if [ -d "/tmp/uploads-backup" ]; then
+            cp -r /tmp/uploads-backup ./uploads
+          fi
       - name: Stop and delete existing PM2 processes
         run: |
           pm2 stop all || true
