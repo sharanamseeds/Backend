@@ -30,7 +30,6 @@ const logger = PinoLogger.pino({
         },
     },
 }, pinoms.multistream(streams));
-// PinoLogger.destination(join(dirName, "../logs/info.log"));
 global.logger = logger;
 initializeDatabase()
     .then(() => {
@@ -51,5 +50,13 @@ initializeDatabase()
 })
     .catch((e) => {
     logger.error(e);
+});
+process
+    .on("unhandledRejection", (response, p) => {
+    console.log(response);
+    console.log(p);
+})
+    .on("uncaughtException", (err) => {
+    logger.error(err);
 });
 //# sourceMappingURL=index.js.map

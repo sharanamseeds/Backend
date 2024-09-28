@@ -2,7 +2,8 @@ import { fileURLToPath } from "url";
 import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-export const rootDir = path.resolve(__dirname, "../..");
+export const rootDir = "/home/milan";
+// export const rootDir2 = path.resolve(__dirname, "../..");
 export const masterConfig = {
     server_type: "production",
     server_base_url: "https://sharanamagritech.com:8080/",
@@ -12,8 +13,8 @@ export const masterConfig = {
         VerificationCodeExpires: 180,
     },
     mongodbConfig: {
-        // url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-        url: "mongodb://localhost:27017/",
+        url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        // url: "mongodb://localhost:27017/",
     },
     superAdminConfig: {
         email: "sharanamseeds@gmail.com",
@@ -143,10 +144,10 @@ export const masterConfig = {
         },
     },
     super_admin_bank_details: {
-        bankName: "Yes Bank",
-        accountNumber: "6789999222445",
-        ifscCode: "YESBINB4467",
-        branchName: "Somajiguda",
+        bankName: "Axis Bank",
+        accountNumber: "923020023452363",
+        ifscCode: "UTIB0004734",
+        branchName: "MENDARDA",
     },
 };
 // https://myaccount.google.com/apppasswords

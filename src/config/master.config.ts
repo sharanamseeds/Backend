@@ -4,7 +4,8 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const rootDir = path.resolve(__dirname, "../..");
+export const rootDir = "/home/milan";
+// export const rootDir2 = path.resolve(__dirname, "../..");
 
 export const masterConfig = {
   server_type: "production",
