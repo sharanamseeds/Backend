@@ -146,10 +146,10 @@ export const masterConfig = {
     },
   },
   super_admin_bank_details: {
-    bankName: "Yes Bank",
-    accountNumber: "6789999222445",
-    ifscCode: "YESBINB4467",
-    branchName: "Somajiguda",
+    bankName: "Axis Bank",
+    accountNumber: "923020023452363",
+    ifscCode: "UTIB0004734",
+    branchName: "MENDARDA",
   },
 };
 
