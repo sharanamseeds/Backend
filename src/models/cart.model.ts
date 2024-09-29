@@ -4,6 +4,7 @@ export interface typeCart extends Document {
   _id: mongoose.Types.ObjectId;
   user_id: mongoose.Types.ObjectId;
   product_id: mongoose.Types.ObjectId;
+  selectedOffer: mongoose.Types.ObjectId | null;
   quantity: number;
   status: "active" | "ordered" | "abandoned" | "completed";
   //   session_id?: mongoose.Types.ObjectId;
@@ -19,6 +20,11 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "products",
       required: true,
+    },
+    selectedOffer: {
+      type: mongoose.Types.ObjectId,
+      ref: "offers",
+      default: null,
     },
     quantity: { type: Number, required: true, default: 1 },
     status: {

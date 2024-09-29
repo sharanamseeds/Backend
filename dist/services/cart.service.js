@@ -10,6 +10,125 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import mongoose from "mongoose";
 import Cart from "../models/cart.model.js";
 import { escapeRegex } from "../helpers/common.helpers..js";
+const projectLocalizedCartProducts = (lang_code) => {
+    return [
+        {
+            $lookup: {
+                from: "products",
+                localField: "product_id",
+                foreignField: "_id",
+                pipeline: [
+                    {
+                        $project: {
+                            added_by: 1,
+                            updated_by: 1,
+                            product_code: 1,
+                            offers: 1,
+                            brand_id: 1,
+                            category_id: 1,
+                            in_stock: 1,
+                            gst_percent: 1,
+                            price: 1,
+                            quantity: 1,
+                            is_active: 1,
+                            is_verified: 1,
+                            manufacture_date: 1,
+                            expiry_date: 1,
+                            is_featured: 1,
+                            base_unit: 1,
+                            lot_no: 1,
+                            vendor_name: 1,
+                            grn_date: 1,
+                            std_qty: 1,
+                            logo: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$logo",
+                                                    as: "item",
+                                                    cond: {
+                                                        $eq: ["$$item.lang_code", lang_code],
+                                                    },
+                                                },
+                                            },
+                                            as: "item",
+                                            in: "$$item.value",
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                            description: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$description",
+                                                    as: "item",
+                                                    cond: {
+                                                        $eq: ["$$item.lang_code", lang_code],
+                                                    },
+                                                },
+                                            },
+                                            as: "item",
+                                            in: "$$item.value",
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                            product_name: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$product_name",
+                                                    as: "item",
+                                                    cond: {
+                                                        $eq: ["$$item.lang_code", lang_code],
+                                                    },
+                                                },
+                                            },
+                                            as: "item",
+                                            in: "$$item.value",
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                            images: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: "$images",
+                                            as: "item",
+                                            cond: {
+                                                $eq: ["$$item.lang_code", lang_code],
+                                            },
+                                        },
+                                    },
+                                    as: "item",
+                                    in: "$$item.value",
+                                },
+                            },
+                        },
+                    },
+                ],
+                as: "product",
+            },
+        },
+        {
+            $unwind: {
+                path: "$product",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+    ];
+};
 const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lang_code = query.lang_code;
@@ -32,11 +151,12 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {
-            const cartDoc = yield Cart.find(filterQuery)
-                .sort({
+            const cartDoc = yield Cart.aggregate([
+                { $match: filterQuery },
+                ...projectLocalizedCartProducts(lang_code),
+            ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
-            })
-                .populate("products");
+            });
             return {
                 data: cartDoc,
                 meta: {
@@ -48,11 +168,14 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
                 },
             };
         }
-        const cartDoc = yield Cart.find(filterQuery)
+        const cartDoc = yield Cart.aggregate([
+            { $match: filterQuery },
+            ...projectLocalizedCartProducts(lang_code),
+        ])
             .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
             .skip((page - 1) * limit)
-            .limit(limit)
-            .populate("products");
+            .limit(limit);
+        // .populate("products");
         const total_pages = Math.ceil(totalDocs / limit);
         const meta = {
             docsFound: totalDocs,
@@ -88,11 +211,13 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
         }
         const totalDocs = yield Cart.countDocuments(filterQuery);
         if (!pagination) {
-            const cartDoc = yield Cart.find(filterQuery)
-                .sort({
+            const cartDoc = yield Cart.aggregate([
+                { $match: filterQuery },
+                ...projectLocalizedCartProducts(lang_code),
+            ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
-            })
-                .populate("products");
+            });
+            // .populate("products");
             return {
                 data: cartDoc,
                 meta: {
@@ -104,11 +229,14 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
                 },
             };
         }
-        const cartDoc = yield Cart.find(filterQuery)
+        const cartDoc = yield Cart.aggregate([
+            { $match: filterQuery },
+            ...projectLocalizedCartProducts(lang_code),
+        ])
             .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
             .skip((page - 1) * limit)
-            .limit(limit)
-            .populate("products");
+            .limit(limit);
+        // .populate("products");
         const total_pages = Math.ceil(totalDocs / limit);
         const meta = {
             docsFound: totalDocs,
@@ -123,9 +251,14 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
         throw error;
     }
 });
-const getCart = ({ cartId, }) => __awaiter(void 0, void 0, void 0, function* () {
+const getCart = ({ cartId, query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return yield Cart.findById(cartId).populate("products");
+        const lang_code = query.lang_code;
+        const docs = yield Cart.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(cartId) } },
+            ...projectLocalizedCartProducts(lang_code),
+        ]);
+        return docs[0];
     }
     catch (error) {
         throw error;

@@ -3,6 +3,129 @@ import Cart, { typeCart } from "../models/cart.model.js";
 import { typeUser } from "../models/users.model.js";
 import { escapeRegex } from "../helpers/common.helpers..js";
 
+const projectLocalizedCartProducts = (lang_code: string) => {
+  return [
+    {
+      $lookup: {
+        from: "products",
+        localField: "product_id",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              added_by: 1,
+              updated_by: 1,
+              product_code: 1,
+              offers: 1,
+              brand_id: 1,
+              category_id: 1,
+              in_stock: 1,
+              gst_percent: 1,
+              price: 1,
+              quantity: 1,
+              is_active: 1,
+              is_verified: 1,
+              manufacture_date: 1,
+              expiry_date: 1,
+              is_featured: 1,
+              base_unit: 1,
+              lot_no: 1,
+              vendor_name: 1,
+              grn_date: 1,
+              std_qty: 1,
+
+              logo: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: "$logo",
+                          as: "item",
+                          cond: {
+                            $eq: ["$$item.lang_code", lang_code],
+                          },
+                        },
+                      },
+                      as: "item",
+                      in: "$$item.value",
+                    },
+                  },
+                  0,
+                ],
+              },
+              description: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: "$description",
+                          as: "item",
+                          cond: {
+                            $eq: ["$$item.lang_code", lang_code],
+                          },
+                        },
+                      },
+                      as: "item",
+                      in: "$$item.value",
+                    },
+                  },
+                  0,
+                ],
+              },
+
+              product_name: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: "$product_name",
+                          as: "item",
+                          cond: {
+                            $eq: ["$$item.lang_code", lang_code],
+                          },
+                        },
+                      },
+                      as: "item",
+                      in: "$$item.value",
+                    },
+                  },
+                  0,
+                ],
+              },
+
+              images: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$images",
+                      as: "item",
+                      cond: {
+                        $eq: ["$$item.lang_code", lang_code],
+                      },
+                    },
+                  },
+                  as: "item",
+                  in: "$$item.value",
+                },
+              },
+            },
+          },
+        ],
+        as: "product",
+      },
+    },
+    {
+      $unwind: {
+        path: "$product",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ];
+};
+
 const getCartList = async ({
   query,
 }: {
@@ -54,11 +177,13 @@ const getCartList = async ({
     const totalDocs = await Cart.countDocuments(filterQuery);
 
     if (!pagination) {
-      const cartDoc = await Cart.find(filterQuery)
-        .sort({
-          [sortBy]: sortOrder === "asc" ? 1 : -1,
-        })
-        .populate("products");
+      const cartDoc = await Cart.aggregate([
+        { $match: filterQuery },
+        ...projectLocalizedCartProducts(lang_code),
+      ]).sort({
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      });
+
       return {
         data: cartDoc,
         meta: {
@@ -71,11 +196,14 @@ const getCartList = async ({
       };
     }
 
-    const cartDoc = await Cart.find(filterQuery)
+    const cartDoc = await Cart.aggregate([
+      { $match: filterQuery },
+      ...projectLocalizedCartProducts(lang_code),
+    ])
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("products");
+      .limit(limit);
+    // .populate("products");
 
     const total_pages = Math.ceil(totalDocs / limit);
 
@@ -144,11 +272,13 @@ const getUserCartList = async ({
     const totalDocs = await Cart.countDocuments(filterQuery);
 
     if (!pagination) {
-      const cartDoc = await Cart.find(filterQuery)
-        .sort({
-          [sortBy]: sortOrder === "asc" ? 1 : -1,
-        })
-        .populate("products");
+      const cartDoc = await Cart.aggregate([
+        { $match: filterQuery },
+        ...projectLocalizedCartProducts(lang_code),
+      ]).sort({
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      });
+      // .populate("products");
       return {
         data: cartDoc,
         meta: {
@@ -161,11 +291,14 @@ const getUserCartList = async ({
       };
     }
 
-    const cartDoc = await Cart.find(filterQuery)
+    const cartDoc = await Cart.aggregate([
+      { $match: filterQuery },
+      ...projectLocalizedCartProducts(lang_code),
+    ])
       .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("products");
+      .limit(limit);
+    // .populate("products");
 
     const total_pages = Math.ceil(totalDocs / limit);
 
@@ -185,11 +318,20 @@ const getUserCartList = async ({
 
 const getCart = async ({
   cartId,
+  query,
 }: {
   cartId: string;
+  query?: any;
 }): Promise<Document<unknown, {}, typeCart> | null> => {
   try {
-    return await Cart.findById(cartId).populate("products");
+    const lang_code = query.lang_code as string;
+
+    const docs = await Cart.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(cartId) } },
+      ...projectLocalizedCartProducts(lang_code),
+    ]);
+
+    return docs[0];
   } catch (error) {
     throw error;
   }

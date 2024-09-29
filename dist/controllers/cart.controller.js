@@ -15,6 +15,7 @@ import { cartService } from "../services/cart.service.js";
 const getCart = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const cartDoc = yield cartService.getCart({
         cartId: req.params.id,
+        query: req.query,
     });
     const data4responseObject = {
         req: req,

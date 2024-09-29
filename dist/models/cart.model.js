@@ -6,6 +6,11 @@ const cartSchema = new mongoose.Schema({
         ref: "products",
         required: true,
     },
+    selectedOffer: {
+        type: mongoose.Types.ObjectId,
+        ref: "offers",
+        default: null,
+    },
     quantity: { type: Number, required: true, default: 1 },
     status: {
         type: String,
