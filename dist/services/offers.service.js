@@ -13,6 +13,7 @@ import { convertFiles, createDocument, deleteDocument, } from "../helpers/files.
 import { transformFormData, updateField, } from "../helpers/language.management.helper.js";
 import { masterConfig } from "../config/master.config.js";
 import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
+import Cart from "../models/cart.model.js";
 const projectLocalizedOffer = (lang_code) => {
     return [
         {
@@ -391,11 +392,36 @@ const updateOffer = ({ offerId, requestUser, req, }) => __awaiter(void 0, void 0
         }
         if ("is_active" in formatedBodyData) {
             offerDoc.is_active = formatedBodyData.is_active;
+            if (offerDoc.is_active === false) {
+                yield Cart.updateMany({ selectedOffer: offerDoc._id }, { $set: { selectedOffer: null } });
+            }
         }
         const files = convertFiles(req.files);
         const { image } = files;
+        // if (Array.isArray(image) && image.length > 0) {
+        //   const existingImage = offerDoc.image?.find(
+        //     (item) => item.lang_code === lang_code
+        //   );
+        //   const savedFile = await createDocument({
+        //     document: image[0],
+        //     documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+        //     documentPath:
+        //       masterConfig.fileStystem.folderPaths.OFFERS +
+        //       offerDoc._id +
+        //       "/" +
+        //       masterConfig.fileStystem.folderPaths.IMAGES,
+        //     // oldPath: existingImage ? existingImage.value : null,
+        //   });
+        //   if (savedFile) {
+        //     const localizedLogoPath: typeLocalizedString = {
+        //       lang_code: lang_code,
+        //       value: savedFile.path,
+        //     };
+        //     offerDoc.image = [localizedLogoPath];
+        //   }
+        // }
         if (Array.isArray(image) && image.length > 0) {
-            const existingImage = (_c = offerDoc.image) === null || _c === void 0 ? void 0 : _c.find((item) => item.lang_code === lang_code);
+            const existingLogo = (_c = offerDoc.image) === null || _c === void 0 ? void 0 : _c.find((item) => item.lang_code === lang_code);
             const savedFile = yield createDocument({
                 document: image[0],
                 documentType: masterConfig.fileStystem.fileTypes.IMAGE,
@@ -403,14 +429,24 @@ const updateOffer = ({ offerId, requestUser, req, }) => __awaiter(void 0, void 0
                     offerDoc._id +
                     "/" +
                     masterConfig.fileStystem.folderPaths.IMAGES,
-                oldPath: existingImage ? existingImage.value : null,
+                oldPath: existingLogo ? existingLogo.value : null,
             });
             if (savedFile) {
                 const localizedLogoPath = {
-                    lang_code: lang_code,
+                    lang_code: req.query.lang_code,
                     value: savedFile.path,
                 };
-                offerDoc.image = [localizedLogoPath];
+                if (existingLogo) {
+                    existingLogo.value = savedFile.path;
+                }
+                else {
+                    if (!offerDoc.image) {
+                        offerDoc.image = [localizedLogoPath];
+                    }
+                    else {
+                        offerDoc.image.push(localizedLogoPath);
+                    }
+                }
             }
         }
         const updatedOffer = yield offerDoc.save();

@@ -13,6 +13,7 @@ import {
 } from "../helpers/language.management.helper.js";
 import { masterConfig } from "../config/master.config.js";
 import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
+import Cart from "../models/cart.model.js";
 
 const projectLocalizedOffer = (lang_code: string) => {
   return [
@@ -524,6 +525,12 @@ const updateOffer = async ({
     }
     if ("is_active" in formatedBodyData) {
       offerDoc.is_active = formatedBodyData.is_active;
+      if (offerDoc.is_active === false) {
+        await Cart.updateMany(
+          { selectedOffer: offerDoc._id },
+          { $set: { selectedOffer: null } }
+        );
+      }
     }
 
     const files = convertFiles(req.files);

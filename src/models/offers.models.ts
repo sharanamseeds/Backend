@@ -3,7 +3,6 @@ import {
   localizedStringSchema,
   typeLocalizedString,
 } from "../schema/localizedLanguage.schema.js";
-import Cart from "./cart.model.js";
 
 export interface typeOffer extends Document {
   added_by?: mongoose.Types.ObjectId | null;
@@ -124,16 +123,6 @@ offerSchema.index({ offer_name: 1 });
 offerSchema.index({ product_specified: 1 });
 offerSchema.index({ category_specified: 1 });
 offerSchema.index({ offer_type: 1 });
-
-offerSchema.post("findOneAndUpdate", async function (doc, next) {
-  if (doc && doc.is_active === false) {
-    await Cart.updateMany(
-      { selectedOffer: doc._id },
-      { $set: { selectedOffer: null } }
-    );
-  }
-  next();
-});
 
 const Offer = mongoose.model<typeOffer>("offers", offerSchema);
 
