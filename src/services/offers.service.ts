@@ -529,26 +529,57 @@ const updateOffer = async ({
     const files = convertFiles(req.files);
     const { image } = files;
 
+    // if (Array.isArray(image) && image.length > 0) {
+    //   const existingImage = offerDoc.image?.find(
+    //     (item) => item.lang_code === lang_code
+    //   );
+    //   const savedFile = await createDocument({
+    //     document: image[0],
+    //     documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+    //     documentPath:
+    //       masterConfig.fileStystem.folderPaths.OFFERS +
+    //       offerDoc._id +
+    //       "/" +
+    //       masterConfig.fileStystem.folderPaths.IMAGES,
+    //     // oldPath: existingImage ? existingImage.value : null,
+    //   });
+    //   if (savedFile) {
+    //     const localizedLogoPath: typeLocalizedString = {
+    //       lang_code: lang_code,
+    //       value: savedFile.path,
+    //     };
+    //     offerDoc.image = [localizedLogoPath];
+    //   }
+    // }
     if (Array.isArray(image) && image.length > 0) {
-      const existingImage = offerDoc.image?.find(
+      const existingLogo = offerDoc.image?.find(
         (item) => item.lang_code === lang_code
       );
+
       const savedFile = await createDocument({
         document: image[0],
         documentType: masterConfig.fileStystem.fileTypes.IMAGE,
         documentPath:
-          masterConfig.fileStystem.folderPaths.OFFERS +
+          masterConfig.fileStystem.folderPaths.BRANDS +
           offerDoc._id +
           "/" +
-          masterConfig.fileStystem.folderPaths.IMAGES,
-        oldPath: existingImage ? existingImage.value : null,
+          masterConfig.fileStystem.folderPaths.LOGO,
+        oldPath: existingLogo ? existingLogo.value : null,
       });
       if (savedFile) {
         const localizedLogoPath: typeLocalizedString = {
-          lang_code: lang_code,
+          lang_code: req.query.lang_code,
           value: savedFile.path,
         };
-        offerDoc.image = [localizedLogoPath];
+        if (existingLogo) {
+          existingLogo.value = savedFile.path;
+        } else {
+          if (!offerDoc.image) {
+            offerDoc.image = [localizedLogoPath];
+          } else {
+            offerDoc.image.push(localizedLogoPath);
+          }
+        }
       }
     }
 
