@@ -560,10 +560,10 @@ const updateOffer = async ({
         document: image[0],
         documentType: masterConfig.fileStystem.fileTypes.IMAGE,
         documentPath:
-          masterConfig.fileStystem.folderPaths.BRANDS +
+          masterConfig.fileStystem.folderPaths.OFFERS +
           offerDoc._id +
           "/" +
-          masterConfig.fileStystem.folderPaths.LOGO,
+          masterConfig.fileStystem.folderPaths.IMAGES,
         oldPath: existingLogo ? existingLogo.value : null,
       });
       if (savedFile) {
