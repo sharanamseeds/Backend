@@ -181,16 +181,19 @@ const calculateDiscount = async (
   const offerDoc = await Offer.findById(product.offer_id);
 
   if (!offerDoc) {
-    throw new Error("Offer Not Found");
+    // throw new Error("Offer Not Found");
+    return discount;
   }
   if (!offerDoc.is_active) {
-    throw new Error("This Offer Is Inactive");
+    // throw new Error("This Offer Is Inactive");
+    return discount;
   }
 
   switch (offerDoc.offer_type) {
     case "percentage":
       if (!offerDoc.percentage_discount) {
-        throw new Error("Discount Percent Is not Defined");
+        // throw new Error("Discount Percent Is not Defined");
+        return discount;
       }
       discount = calculatePercentageDiscount(
         amountBeforeGST,
@@ -200,7 +203,8 @@ const calculateDiscount = async (
 
     case "fixed_amount":
       if (!offerDoc.fixed_amount_discount) {
-        throw new Error("Fixed Amount Discount Is not Defined");
+        // throw new Error("Fixed Amount Discount Is not Defined");
+        return discount;
       }
       discount = calculateFixedAmountDiscount(
         amountBeforeGST,
@@ -210,7 +214,8 @@ const calculateDiscount = async (
 
     case "referral":
       if (!offerDoc.referral_amount) {
-        throw new Error("Referral Amount Is not Defined");
+        // throw new Error("Referral Amount Is not Defined");
+        return discount;
       }
       discount = calculateReferralDiscount(
         amountBeforeGST,
@@ -220,7 +225,8 @@ const calculateDiscount = async (
 
     case "coupon":
       if (!offerDoc.coupon_details) {
-        throw new Error("Coupon Details Are not Defined");
+        // throw new Error("Coupon Details Are not Defined");
+        return discount;
       }
       discount = calculateCouponDiscount(
         amountBeforeGST,
@@ -230,7 +236,8 @@ const calculateDiscount = async (
 
     case "tiered":
       if (!offerDoc.tiers) {
-        throw new Error("Tiers Are not Defined");
+        // throw new Error("Tiers Are not Defined");
+        return discount;
       }
       discount = calculateTieredDiscount(amountBeforeGST, offerDoc.tiers);
       return discount;
@@ -240,7 +247,8 @@ const calculateDiscount = async (
         offerDoc.buy_quantity === undefined ||
         offerDoc.get_quantity === undefined
       ) {
-        throw new Error("Buy Quantity or Get Quantity Is not Defined");
+        // throw new Error("Buy Quantity or Get Quantity Is not Defined");
+        return discount;
       }
       discount = calculateBuyXGetYDiscount(
         amountBeforeGST,
@@ -253,7 +261,8 @@ const calculateDiscount = async (
 
     case "bundle":
       if (!offerDoc.bundle_items) {
-        throw new Error("Bundle Items Are not Defined");
+        // throw new Error("Bundle Items Are not Defined");
+        return discount;
       }
       discount = calculateBundleDiscount(
         amountBeforeGST,
@@ -263,7 +272,8 @@ const calculateDiscount = async (
       return discount;
 
     default:
-      throw new Error(`Unknown offer type: ${offerDoc.offer_type}`);
+      // throw new Error(`Unknown offer type: ${offerDoc.offer_type}`);
+      return discount;
   }
 };
 
