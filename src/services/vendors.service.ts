@@ -98,6 +98,7 @@ const getVendorList = async ({
     if (!pagination) {
       const vendorDoc = await Vendor.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       }); // Sorting logic
       return {
         data: vendorDoc,
@@ -112,7 +113,7 @@ const getVendorList = async ({
     }
 
     const vendorDoc = await Vendor.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }) // Sorting logic
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 }) // Sorting logic
       .skip((page - 1) * limit)
       .limit(limit);
 

@@ -67,6 +67,7 @@ const getRoleList = async ({
     if (!pagination) {
       const roleDoc = await Role.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       }); // Sorting logic
       return {
         data: roleDoc,
@@ -81,7 +82,7 @@ const getRoleList = async ({
     }
 
     const roleDoc = await Role.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }) // Sorting logic
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 }) // Sorting logic
       .skip((page - 1) * limit)
       .limit(limit);
 

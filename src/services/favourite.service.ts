@@ -52,6 +52,7 @@ const getFavouriteList = async ({
     if (!pagination) {
       const favouriteDoc = await Favourite.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: favouriteDoc,
@@ -66,7 +67,7 @@ const getFavouriteList = async ({
     }
 
     const favouriteDoc = await Favourite.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -136,6 +137,7 @@ const getUserFavouriteList = async ({
     if (!pagination) {
       const favouriteDoc = await Favourite.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: favouriteDoc,
@@ -150,7 +152,7 @@ const getUserFavouriteList = async ({
     }
 
     const favouriteDoc = await Favourite.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 

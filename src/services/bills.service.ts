@@ -100,6 +100,7 @@ const getBillList = async ({
     if (!pagination) {
       const billDoc = await Bill.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: billDoc,
@@ -116,6 +117,7 @@ const getBillList = async ({
     const billDoc = await Bill.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -207,6 +209,7 @@ const getCustomerBillList = async ({
     if (!pagination) {
       const billDoc = await Bill.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: billDoc,
@@ -223,6 +226,7 @@ const getCustomerBillList = async ({
     const billDoc = await Bill.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

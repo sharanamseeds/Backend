@@ -24,134 +24,6 @@ export class NotFoundError extends Error {
   }
 }
 
-// {
-//   $lookup: {
-//     from: "offers", // Collection name
-//     let: {
-//       productId: "$_id",
-//       categoryId: "$category_id",
-//       isActive: isActive, // Pass the isActive variable
-//     },
-//     pipeline: [
-//       {
-//         $match: {
-//           $expr: {
-//             $or: [
-//               // Conditionally include the isActive condition
-//               {
-//                 $cond: [
-//                   { $ne: [null, "$$isActive"] },
-//                   { $eq: ["$is_active", "$$isActive"] },
-//                   true,
-//                 ],
-//               },
-//               // Check if productId is in products
-//               {
-//                 $cond: [
-//                   { $ne: [null, "$$productId"] },
-//                   { $in: ["$$productId", "$products"] },
-//                   true,
-//                 ],
-//               },
-//               // Check if categoryId is in categories
-//               {
-//                 $cond: [
-//                   { $ne: [null, "$$categoryId"] },
-//                   { $in: ["$$categoryId", "$categories"] },
-//                   true,
-//                 ],
-//               },
-//             ],
-//           },
-//         },
-//       },
-//       // Add projection stages as in projectLocalizedOffer
-// {
-//   $project: {
-//     added_by: 1,
-//     updated_by: 1,
-//     offer_code: 1,
-//     identifier: 1,
-//     is_active: 1,
-//     product_specified: 1,
-//     products: 1,
-//     category_specified: 1,
-//     categories: 1,
-//     offer_type: 1,
-//     percentage_discount: 1,
-//     fixed_amount_discount: 1,
-//     tiers: 1,
-//     buy_quantity: 1,
-//     get_quantity: 1,
-//     bundle_items: 1,
-//     referral_code: 1,
-//     referral_amount: 1,
-//     coupon_code: 1,
-//     coupon_details: 1,
-//     createdAt: 1,
-//     updatedAt: 1,
-//     image: {
-//       $map: {
-//         input: {
-//           $filter: {
-//             input: "$image",
-//             as: "item",
-//             cond: {
-//               $eq: ["$$item.lang_code", lang_code],
-//             },
-//           },
-//         },
-//         as: "item",
-//         in: "$$item.value",
-//       },
-//     },
-//     description: {
-//       $arrayElemAt: [
-//         {
-//           $map: {
-//             input: {
-//               $filter: {
-//                 input: "$description",
-//                 as: "item",
-//                 cond: {
-//                   $eq: ["$$item.lang_code", lang_code],
-//                 },
-//               },
-//             },
-//             as: "item",
-//             in: "$$item.value",
-//           },
-//         },
-//         0,
-//       ],
-//     },
-//     offer_name: {
-//       $arrayElemAt: [
-//         {
-//           $map: {
-//             input: {
-//               $filter: {
-//                 input: "$offer_name",
-//                 as: "item",
-//                 cond: {
-//                   $eq: ["$$item.lang_code", lang_code],
-//                 },
-//               },
-//             },
-//             as: "item",
-//             in: "$$item.value",
-//           },
-//         },
-//         0,
-//       ],
-//     },
-//   },
-// },
-//     ],
-//     as: "offers",
-//   },
-// },
-
 const projectLocalizedProducts = (lang_code: string, isActive?: boolean) => {
   return [
     {
@@ -509,6 +381,7 @@ const getProductList = async ({
         ...projectLocalizedProducts(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: productDoc,
@@ -528,6 +401,7 @@ const getProductList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -657,6 +531,7 @@ const getCustomerProductList = async ({
         ...projectLocalizedProducts(lang_code, true),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: productDoc,
@@ -676,6 +551,7 @@ const getCustomerProductList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

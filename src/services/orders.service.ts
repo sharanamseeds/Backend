@@ -571,6 +571,7 @@ const getOrderList = async ({
     if (!pagination) {
       const orderDoc = await Order.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: orderDoc,
@@ -587,6 +588,7 @@ const getOrderList = async ({
     const orderDoc = await Order.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -713,6 +715,7 @@ const getCustomerOrderList = async ({
         })
         .sort({
           [sortBy]: sortOrder === "asc" ? 1 : -1,
+          _id: 1,
         });
       return {
         data: orderDoc,
@@ -733,6 +736,7 @@ const getCustomerOrderList = async ({
       })
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

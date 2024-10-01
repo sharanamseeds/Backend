@@ -179,6 +179,7 @@ const getBrandList = async ({
         ...projectLocalizedBrand(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: brandDoc,
@@ -198,6 +199,7 @@ const getBrandList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

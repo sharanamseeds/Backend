@@ -179,6 +179,7 @@ const getCategoryList = async ({
         ...projectLocalizedCategory(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: categoryDoc,
@@ -198,6 +199,7 @@ const getCategoryList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

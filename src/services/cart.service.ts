@@ -182,6 +182,7 @@ const getCartList = async ({
         ...projectLocalizedCartProducts(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
 
       return {
@@ -200,7 +201,7 @@ const getCartList = async ({
       { $match: filterQuery },
       ...projectLocalizedCartProducts(lang_code),
     ])
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
     // .populate("products");
@@ -277,6 +278,7 @@ const getUserCartList = async ({
         ...projectLocalizedCartProducts(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       // .populate("products");
       return {
@@ -295,7 +297,7 @@ const getUserCartList = async ({
       { $match: filterQuery },
       ...projectLocalizedCartProducts(lang_code),
     ])
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
     // .populate("products");

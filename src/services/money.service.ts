@@ -63,6 +63,7 @@ const getMoneyList = async ({
     if (!pagination) {
       const moneyDoc = await Money.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: moneyDoc,
@@ -79,6 +80,7 @@ const getMoneyList = async ({
     const moneyDoc = await Money.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -159,6 +161,7 @@ const getCustomerMoneyList = async ({
     if (!pagination) {
       const moneyDoc = await Money.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: moneyDoc,
@@ -175,6 +178,7 @@ const getCustomerMoneyList = async ({
     const moneyDoc = await Money.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

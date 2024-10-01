@@ -214,6 +214,7 @@ const getOfferList = async ({
         ...projectLocalizedOffer(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: offerDoc,
@@ -233,6 +234,7 @@ const getOfferList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -357,6 +359,7 @@ const getCustomerOfferList = async ({
         ...projectLocalizedOffer(lang_code),
       ]).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: offerDoc,
@@ -376,6 +379,7 @@ const getCustomerOfferList = async ({
     ])
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

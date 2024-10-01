@@ -85,6 +85,7 @@ const getCompanyList = async ({
     if (!pagination) {
       const companyDoc = await Company.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: companyDoc,
@@ -101,6 +102,7 @@ const getCompanyList = async ({
     const companyDoc = await Company.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);

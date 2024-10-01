@@ -52,6 +52,7 @@ const getWishList = async ({
     if (!pagination) {
       const wishDoc = await Wish.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: wishDoc,
@@ -66,7 +67,7 @@ const getWishList = async ({
     }
 
     const wishDoc = await Wish.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -136,6 +137,7 @@ const getUserWishList = async ({
     if (!pagination) {
       const wishDoc = await Wish.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: wishDoc,
@@ -150,7 +152,7 @@ const getUserWishList = async ({
     }
 
     const wishDoc = await Wish.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 

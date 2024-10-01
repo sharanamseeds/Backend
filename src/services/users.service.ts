@@ -168,6 +168,7 @@ const getUserList = async ({
     if (!pagination) {
       const userDoc = await User.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       }); // Sorting logic
       return {
         data: userDoc,
@@ -182,7 +183,7 @@ const getUserList = async ({
     }
 
     const userDoc = await User.find(filterQuery)
-      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }) // Sorting logic
+      .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 }) // Sorting logic
       .skip((page - 1) * limit)
       .limit(limit);
 

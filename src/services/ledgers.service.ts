@@ -82,6 +82,7 @@ const getLedgerList = async ({
     if (!pagination) {
       const ledgerDoc = await Ledger.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: ledgerDoc,
@@ -98,6 +99,7 @@ const getLedgerList = async ({
     const ledgerDoc = await Ledger.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -194,6 +196,7 @@ const getCustomerLedgerList = async ({
     if (!pagination) {
       const ledgerDoc = await Ledger.find(filterQuery).sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       });
       return {
         data: ledgerDoc,
@@ -210,6 +213,7 @@ const getCustomerLedgerList = async ({
     const ledgerDoc = await Ledger.find(filterQuery)
       .sort({
         [sortBy]: sortOrder === "asc" ? 1 : -1,
+        _id: 1,
       })
       .skip((page - 1) * limit)
       .limit(limit);
