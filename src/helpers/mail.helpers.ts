@@ -639,11 +639,11 @@ export const generateBillCodeHtml = (
           <td>${item?.product_code || ""}</td>
           <td>${item?.manufacture_date || ""}</td>
           <td>${item?.expiry_date || ""}</td>
-          <td>${item?.quantity || ""}</td>
-          <td>${item?.rate || ""}</td>
-          <td>${item?.gstRate || ""}</td>
-          <td>${item?.gstAmount || ""}</td>
-          <td>${item?.discount || ""}</td>
+          <td>${item?.quantity || 0}</td>
+          <td>${item?.rate || 0}</td>
+          <td>${item?.gstRate || 0}</td>
+          <td>${item?.gstAmount || 0}</td>
+          <td>${item?.discount || 0}</td>
         </tr>
         `
           )
@@ -653,18 +653,18 @@ export const generateBillCodeHtml = (
 
     <div class="gst-summary">
       <p class="total"><strong>Order Amount:</strong> ₹ ${
-        bill?.order_amount || ""
+        bill?.order_amount || 0
       }</p>
       <p class="total"><strong>Discount Amount:</strong> ₹ ${
-        bill?.discount_amount || ""
+        bill?.discount_amount || 0
       }</p>
       <p class="total"><strong>Tax Amount:</strong> ₹ ${
-        bill?.tax_amount || ""
+        bill?.tax_amount || 0
       }</p>
       <p class="total">
         <strong>${
           isReturnBill ? "Refund Amount" : "Billing Amount"
-        }:</strong> ₹ ${bill?.billing_amount || ""}
+        }:</strong> ₹ ${bill?.billing_amount || 0}
       </p>
     </div>
 
