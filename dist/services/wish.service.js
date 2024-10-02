@@ -31,6 +31,7 @@ const getWishList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
         if (!pagination) {
             const wishDoc = yield Wish.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: wishDoc,
@@ -44,7 +45,7 @@ const getWishList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
             };
         }
         const wishDoc = yield Wish.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);
@@ -81,6 +82,7 @@ const getUserWishList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
         if (!pagination) {
             const wishDoc = yield Wish.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: wishDoc,
@@ -94,7 +96,7 @@ const getUserWishList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
             };
         }
         const wishDoc = yield Wish.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);

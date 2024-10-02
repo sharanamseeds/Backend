@@ -70,6 +70,7 @@ const getBillList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, funct
         if (!pagination) {
             const billDoc = yield Bill.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: billDoc,
@@ -85,6 +86,7 @@ const getBillList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, funct
         const billDoc = yield Bill.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -142,6 +144,7 @@ const getCustomerBillList = ({ query = {}, requestUser, }) => __awaiter(void 0, 
         if (!pagination) {
             const billDoc = yield Bill.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: billDoc,
@@ -157,6 +160,7 @@ const getCustomerBillList = ({ query = {}, requestUser, }) => __awaiter(void 0, 
         const billDoc = yield Bill.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

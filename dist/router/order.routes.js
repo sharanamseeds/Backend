@@ -46,7 +46,7 @@ router.post("/calculate_bill", authenticateToken, (req, res, next) => __awaiter(
     if (((_d = req === null || req === void 0 ? void 0 : req.query) === null || _d === void 0 ? void 0 : _d.payload) && typeof req.query.payload === "string") {
         validationData = JSON.parse(req.query.payload);
     }
-    validateViaJoi(orderMiddlewareSchemas.addOrder, validationData, req, res, next);
+    validateViaJoi(orderMiddlewareSchemas.calulateOrder, validationData, req, res, next);
 }), orderController.calculateBill);
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_download" }]), orderController.downloadExcel);
 router.post("/return/:id", authenticateToken, CHECKPERMISSION([{ module: "order", permission: "can_update" }]), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

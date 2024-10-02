@@ -31,6 +31,7 @@ const getFavouriteList = ({ query, }) => __awaiter(void 0, void 0, void 0, funct
         if (!pagination) {
             const favouriteDoc = yield Favourite.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: favouriteDoc,
@@ -44,7 +45,7 @@ const getFavouriteList = ({ query, }) => __awaiter(void 0, void 0, void 0, funct
             };
         }
         const favouriteDoc = yield Favourite.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);
@@ -81,6 +82,7 @@ const getUserFavouriteList = ({ query, requestUser, }) => __awaiter(void 0, void
         if (!pagination) {
             const favouriteDoc = yield Favourite.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: favouriteDoc,
@@ -94,7 +96,7 @@ const getUserFavouriteList = ({ query, requestUser, }) => __awaiter(void 0, void
             };
         }
         const favouriteDoc = yield Favourite.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);

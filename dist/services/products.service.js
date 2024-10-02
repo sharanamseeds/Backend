@@ -22,57 +22,6 @@ export class NotFoundError extends Error {
 }
 const projectLocalizedProducts = (lang_code, isActive) => {
     return [
-        // {
-        //   $lookup: {
-        //     from: "offers", // Collection name
-        //     let: {
-        //       productId: "$_id",
-        //       categoryId: "$category_id",
-        //       isActive: isActive, // Pass the isActive variable
-        //     },
-        //     pipeline: [
-        //       {
-        //         $match: {
-        //           $expr: {
-        //             $and: [
-        //               // Conditionally include the isActive condition
-        //               {
-        //                 $cond: [
-        //                   { $ne: [null, "$$isActive"] },
-        //                   { $eq: ["$is_active", "$$isActive"] },
-        //                   true,
-        //                 ],
-        //               },
-        //               // Check if productId is in products
-        //               {
-        //                 $cond: [
-        //                   { $ne: [null, "$$productId"] },
-        //                   { $in: ["$$productId", "$products"] },
-        //                   true,
-        //                 ],
-        //               },
-        //               // Check if categoryId is in categories
-        //               {
-        //                 $cond: [
-        //                   { $ne: [null, "$$categoryId"] },
-        //                   { $in: ["$$categoryId", "$categories"] },
-        //                   true,
-        //                 ],
-        //               },
-        //             ],
-        //           },
-        //         },
-        //       },
-        //     ],
-        //     as: "offers",
-        //   },
-        // },
-        // {
-        //   $unwind: {
-        //     path: "$offers",
-        //     preserveNullAndEmptyArrays: true, // Preserve products even if no matching offer is found
-        //   },
-        // },
         {
             $lookup: {
                 from: "offers",
@@ -85,36 +34,41 @@ const projectLocalizedProducts = (lang_code, isActive) => {
                     {
                         $match: {
                             $expr: {
-                                $or: [
+                                $and: [
+                                    // Ensure offer.is_active is true
+                                    { $eq: ["$is_active", true] },
                                     // Conditionally include the isActive condition
                                     {
-                                        $cond: [
-                                            { $ne: [null, "$$isActive"] },
-                                            { $eq: ["$is_active", "$$isActive"] },
-                                            true,
-                                        ],
-                                    },
-                                    // Check if productId is in products
-                                    {
-                                        $cond: [
-                                            { $ne: [null, "$$productId"] },
-                                            { $in: ["$$productId", "$products"] },
-                                            true,
-                                        ],
-                                    },
-                                    // Check if categoryId is in categories
-                                    {
-                                        $cond: [
-                                            { $ne: [null, "$$categoryId"] },
-                                            { $in: ["$$categoryId", "$categories"] },
-                                            true,
+                                        $or: [
+                                            {
+                                                $cond: [
+                                                    { $ne: [null, "$$isActive"] },
+                                                    { $eq: ["$is_active", "$$isActive"] },
+                                                    true,
+                                                ],
+                                            },
+                                            // Check if productId is in products
+                                            {
+                                                $cond: [
+                                                    { $ne: [null, "$$productId"] },
+                                                    { $in: ["$$productId", "$products"] },
+                                                    true,
+                                                ],
+                                            },
+                                            // Check if categoryId is in categories
+                                            {
+                                                $cond: [
+                                                    { $ne: [null, "$$categoryId"] },
+                                                    { $in: ["$$categoryId", "$categories"] },
+                                                    true,
+                                                ],
+                                            },
                                         ],
                                     },
                                 ],
                             },
                         },
                     },
-                    // Add projection stages as in projectLocalizedOffer
                     {
                         $project: {
                             added_by: 1,
@@ -381,6 +335,7 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
                 ...projectLocalizedProducts(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: productDoc,
@@ -399,6 +354,7 @@ const getProductList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
         ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -491,6 +447,7 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
                 ...projectLocalizedProducts(lang_code, true),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: productDoc,
@@ -505,10 +462,11 @@ const getCustomerProductList = ({ query, }) => __awaiter(void 0, void 0, void 0,
         }
         const productDoc = yield Product.aggregate([
             { $match: filterQuery },
-            ...projectLocalizedProducts(lang_code),
+            ...projectLocalizedProducts(lang_code, true),
         ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

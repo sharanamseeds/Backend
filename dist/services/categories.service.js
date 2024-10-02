@@ -147,6 +147,7 @@ const getCategoryList = ({ query, }) => __awaiter(void 0, void 0, void 0, functi
                 ...projectLocalizedCategory(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: categoryDoc,
@@ -165,6 +166,7 @@ const getCategoryList = ({ query, }) => __awaiter(void 0, void 0, void 0, functi
         ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

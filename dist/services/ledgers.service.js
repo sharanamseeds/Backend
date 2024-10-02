@@ -58,6 +58,7 @@ const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
         if (!pagination) {
             const ledgerDoc = yield Ledger.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: ledgerDoc,
@@ -73,6 +74,7 @@ const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
         const ledgerDoc = yield Ledger.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -133,6 +135,7 @@ const getCustomerLedgerList = ({ query, requestUser, }) => __awaiter(void 0, voi
         if (!pagination) {
             const ledgerDoc = yield Ledger.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: ledgerDoc,
@@ -148,6 +151,7 @@ const getCustomerLedgerList = ({ query, requestUser, }) => __awaiter(void 0, voi
         const ledgerDoc = yield Ledger.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

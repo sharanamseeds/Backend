@@ -14,6 +14,20 @@ const addOrderSchema = Joi.object({
     .required(),
 });
 
+const calulateOrderSchema = Joi.object({
+  user_id: Joi.string().allow(""),
+  products: Joi.array()
+    .items(
+      Joi.object({
+        product_id: Joi.string().required(),
+        offer_id: Joi.string().optional().allow(null),
+        quantity: Joi.number().required(),
+      })
+    )
+    .min(1)
+    .required(),
+});
+
 const updateOrderSchema = Joi.object({
   status: Joi.string()
     .valid(
@@ -61,6 +75,7 @@ const returnOrderSchema = Joi.object({
 
 export const orderMiddlewareSchemas = {
   addOrder: addOrderSchema,
+  calulateOrder: calulateOrderSchema,
   updateOrder: updateOrderSchema,
   returnOrder: returnOrderSchema,
 };

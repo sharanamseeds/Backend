@@ -99,57 +99,67 @@ const calculateDiscount = (product, amountBeforeGST, product_price) => __awaiter
     }
     const offerDoc = yield Offer.findById(product.offer_id);
     if (!offerDoc) {
-        throw new Error("Offer Not Found");
+        // throw new Error("Offer Not Found");
+        return discount;
     }
     if (!offerDoc.is_active) {
-        throw new Error("This Offer Is Inactive");
+        // throw new Error("This Offer Is Inactive");
+        return discount;
     }
     switch (offerDoc.offer_type) {
         case "percentage":
             if (!offerDoc.percentage_discount) {
-                throw new Error("Discount Percent Is not Defined");
+                // throw new Error("Discount Percent Is not Defined");
+                return discount;
             }
             discount = calculatePercentageDiscount(amountBeforeGST, offerDoc.percentage_discount);
             return discount;
         case "fixed_amount":
             if (!offerDoc.fixed_amount_discount) {
-                throw new Error("Fixed Amount Discount Is not Defined");
+                // throw new Error("Fixed Amount Discount Is not Defined");
+                return discount;
             }
             discount = calculateFixedAmountDiscount(amountBeforeGST, offerDoc.fixed_amount_discount);
             return discount;
         case "referral":
             if (!offerDoc.referral_amount) {
-                throw new Error("Referral Amount Is not Defined");
+                // throw new Error("Referral Amount Is not Defined");
+                return discount;
             }
             discount = calculateReferralDiscount(amountBeforeGST, offerDoc.referral_amount);
             return discount;
         case "coupon":
             if (!offerDoc.coupon_details) {
-                throw new Error("Coupon Details Are not Defined");
+                // throw new Error("Coupon Details Are not Defined");
+                return discount;
             }
             discount = calculateCouponDiscount(amountBeforeGST, offerDoc.coupon_details);
             return discount;
         case "tiered":
             if (!offerDoc.tiers) {
-                throw new Error("Tiers Are not Defined");
+                // throw new Error("Tiers Are not Defined");
+                return discount;
             }
             discount = calculateTieredDiscount(amountBeforeGST, offerDoc.tiers);
             return discount;
         case "buy_x_get_y":
             if (offerDoc.buy_quantity === undefined ||
                 offerDoc.get_quantity === undefined) {
-                throw new Error("Buy Quantity or Get Quantity Is not Defined");
+                // throw new Error("Buy Quantity or Get Quantity Is not Defined");
+                return discount;
             }
             discount = calculateBuyXGetYDiscount(amountBeforeGST, offerDoc.buy_quantity, offerDoc.get_quantity, product, product_price);
             return discount;
         case "bundle":
             if (!offerDoc.bundle_items) {
-                throw new Error("Bundle Items Are not Defined");
+                // throw new Error("Bundle Items Are not Defined");
+                return discount;
             }
             discount = calculateBundleDiscount(amountBeforeGST, offerDoc.bundle_items, product);
             return discount;
         default:
-            throw new Error(`Unknown offer type: ${offerDoc.offer_type}`);
+            // throw new Error(`Unknown offer type: ${offerDoc.offer_type}`);
+            return discount;
     }
 });
 const calculateReturnDiscount = (product, amountBeforeGST, product_price) => __awaiter(void 0, void 0, void 0, function* () {
@@ -299,6 +309,7 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         if (!pagination) {
             const orderDoc = yield Order.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: orderDoc,
@@ -314,6 +325,7 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         const orderDoc = yield Order.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -398,6 +410,7 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
             })
                 .sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: orderDoc,
@@ -417,6 +430,7 @@ const getCustomerOrderList = ({ query, requestUser, }) => __awaiter(void 0, void
         })
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

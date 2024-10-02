@@ -69,6 +69,7 @@ const getPurchaseOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, f
         if (!pagination) {
             const purchaseOrderDoc = yield PurchaseOrder.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             }); // Sorting logic
             return {
                 data: purchaseOrderDoc,
@@ -82,7 +83,7 @@ const getPurchaseOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, f
             };
         }
         const purchaseOrderDoc = yield PurchaseOrder.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }) // Sorting logic
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 }) // Sorting logic
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);

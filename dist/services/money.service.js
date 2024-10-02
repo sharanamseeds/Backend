@@ -42,6 +42,7 @@ const getMoneyList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, func
         if (!pagination) {
             const moneyDoc = yield Money.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: moneyDoc,
@@ -57,6 +58,7 @@ const getMoneyList = ({ query = {}, }) => __awaiter(void 0, void 0, void 0, func
         const moneyDoc = yield Money.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -105,6 +107,7 @@ const getCustomerMoneyList = ({ query = {}, requestUser, }) => __awaiter(void 0,
         if (!pagination) {
             const moneyDoc = yield Money.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: moneyDoc,
@@ -120,6 +123,7 @@ const getCustomerMoneyList = ({ query = {}, requestUser, }) => __awaiter(void 0,
         const moneyDoc = yield Money.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

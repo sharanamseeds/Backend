@@ -65,6 +65,7 @@ const getVendorList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
         if (!pagination) {
             const vendorDoc = yield Vendor.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             }); // Sorting logic
             return {
                 data: vendorDoc,
@@ -78,7 +79,7 @@ const getVendorList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
             };
         }
         const vendorDoc = yield Vendor.find(filterQuery)
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }) // Sorting logic
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 }) // Sorting logic
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);

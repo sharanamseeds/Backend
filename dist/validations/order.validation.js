@@ -10,6 +10,17 @@ const addOrderSchema = Joi.object({
         .min(1)
         .required(),
 });
+const calulateOrderSchema = Joi.object({
+    user_id: Joi.string().allow(""),
+    products: Joi.array()
+        .items(Joi.object({
+        product_id: Joi.string().required(),
+        offer_id: Joi.string().optional().allow(null),
+        quantity: Joi.number().required(),
+    }))
+        .min(1)
+        .required(),
+});
 const updateOrderSchema = Joi.object({
     status: Joi.string()
         .valid("confirm", "rejected", "pending", "delivered", "cancelled", "return_requested", "return_accepeted", "return_rejected", "return_fulfilled")
@@ -43,6 +54,7 @@ const returnOrderSchema = Joi.object({
 });
 export const orderMiddlewareSchemas = {
     addOrder: addOrderSchema,
+    calulateOrder: calulateOrderSchema,
     updateOrder: updateOrderSchema,
     returnOrder: returnOrderSchema,
 };

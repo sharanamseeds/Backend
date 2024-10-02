@@ -77,7 +77,7 @@ router.post(
       validationData = JSON.parse(req.query.payload);
     }
     validateViaJoi(
-      orderMiddlewareSchemas.addOrder,
+      orderMiddlewareSchemas.calulateOrder,
       validationData,
       req,
       res,

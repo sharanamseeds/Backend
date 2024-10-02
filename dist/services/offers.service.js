@@ -166,6 +166,7 @@ const getOfferList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                 ...projectLocalizedOffer(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: offerDoc,
@@ -184,6 +185,7 @@ const getOfferList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -263,6 +265,7 @@ const getCustomerOfferList = ({ query, }) => __awaiter(void 0, void 0, void 0, f
                 ...projectLocalizedOffer(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: offerDoc,
@@ -281,6 +284,7 @@ const getCustomerOfferList = ({ query, }) => __awaiter(void 0, void 0, void 0, f
         ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);

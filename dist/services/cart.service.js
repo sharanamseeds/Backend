@@ -156,6 +156,7 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
                 ...projectLocalizedCartProducts(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: cartDoc,
@@ -172,7 +173,7 @@ const getCartList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* 
             { $match: filterQuery },
             ...projectLocalizedCartProducts(lang_code),
         ])
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         // .populate("products");
@@ -216,6 +217,7 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
                 ...projectLocalizedCartProducts(lang_code),
             ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             // .populate("products");
             return {
@@ -233,7 +235,7 @@ const getUserCartList = ({ query, requestUser, }) => __awaiter(void 0, void 0, v
             { $match: filterQuery },
             ...projectLocalizedCartProducts(lang_code),
         ])
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1, _id: 1 })
             .skip((page - 1) * limit)
             .limit(limit);
         // .populate("products");
@@ -300,7 +302,7 @@ const updateCart = ({ cartId, requestUser, req, }) => __awaiter(void 0, void 0, 
 });
 const deleteCart = ({ cartId }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield Cart.deleteOne({ product_id: cartId });
+        yield Cart.findByIdAndDelete(cartId);
     }
     catch (error) {
         throw error;

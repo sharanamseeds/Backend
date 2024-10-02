@@ -58,6 +58,7 @@ const getCompanyList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
         if (!pagination) {
             const companyDoc = yield Company.find(filterQuery).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
+                _id: 1,
             });
             return {
                 data: companyDoc,
@@ -73,6 +74,7 @@ const getCompanyList = ({ query, }) => __awaiter(void 0, void 0, void 0, functio
         const companyDoc = yield Company.find(filterQuery)
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
         })
             .skip((page - 1) * limit)
             .limit(limit);
