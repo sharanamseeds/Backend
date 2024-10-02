@@ -409,7 +409,7 @@ const modifiedProducts = async (
 
       let discount = 0;
 
-      if (product.offer_id) {
+      if (product?.offer_id) {
         discount = await calculateDiscount(
           product,
           total_amount,

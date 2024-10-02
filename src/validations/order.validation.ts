@@ -6,7 +6,7 @@ const addOrderSchema = Joi.object({
     .items(
       Joi.object({
         product_id: Joi.string().required(),
-        offer_id: Joi.string().optional(),
+        offer_id: Joi.string().optional().allow(null),
         quantity: Joi.number().required(),
       })
     )
