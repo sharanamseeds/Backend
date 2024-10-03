@@ -842,6 +842,7 @@ const getOrder = async ({
       credit_duration: orderDoc.credit_duration,
       order_notes: orderDoc.order_notes,
       reason: orderDoc.reason,
+      is_retuned: orderDoc.is_retuned,
     };
 
     // Return the order with localized products

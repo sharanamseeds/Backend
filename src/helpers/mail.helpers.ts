@@ -741,6 +741,272 @@ const formatAddress = (address: {
   return parts.length > 0 ? parts.join(", ") : "";
 };
 
+// export const generatePurchaseOrderCodeHtml = (
+//   purchaseOrder: typePurchaseOrder,
+//   vendor: typeVendor,
+//   admin: typeUser,
+//   modifiedProducts: {
+//     product_id: mongoose.Types.ObjectId;
+//     quantity: number;
+//     offer_discount: number;
+//     total_amount: number;
+//     gst_rate: number;
+//     purchase_price: number;
+//     gst_amount: number;
+//     manufacture_date: string;
+//     expiry_date: string;
+//     lot_no: string;
+//     product_name: string;
+//     product_code: string;
+//   }[]
+// ) => `
+// <!DOCTYPE html>
+// <html lang="en">
+// <head>
+//   <meta charset="UTF-8">
+//   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//   <style>
+//     /* Base styles */
+//     body {
+//       font-family: Arial, sans-serif;
+//       margin: 0;
+//       padding: 0;
+//       color: #333;
+//     }
+//     .container {
+//       padding: 20px;
+//     }
+
+//     /* Header styles */
+//     .header {
+//       display: table;
+//       width: 100%;
+//       margin-bottom: 20px;
+//     }
+//     .header img {
+//       max-width: 150px; /* Adjust logo size */
+//       vertical-align: middle;
+//     }
+//     .header h1 {
+//       display: table-cell;
+//       vertical-align: middle;
+//       text-align: right;
+//       margin: 0;
+//       font-size: 24px;
+//     }
+
+//     /* Details section styles */
+//     .details {
+//       display: table;
+//       width: 100%;
+//       margin-bottom: 20px;
+//     }
+//     .details .company,
+//     .details .buyer {
+//       display: table-cell;
+//       width: 50%; /* Adjust width for even distribution */
+//       vertical-align: top;
+//     }
+//     .details p {
+//       margin: 5px; /* Add some space between elements */
+//     }
+//     .company p {
+//       margin: 5px; /* Add some space between elements */
+//     }
+
+//     /* Table styles */
+//     table {
+//       width: 100%;
+//       border-collapse: collapse;
+//       margin-bottom: 20px;
+//     }
+//     th, td {
+//       padding: 10px;
+//       border: 1px solid #ddd;
+//       text-align: left;
+//     }
+//     th {
+//       font-weight: bold;
+//     }
+
+//     /* Summary and Bank Details styles */
+//     .total,
+//     .gst-summary {
+//       text-align: right;
+//       font-size: 18px;
+//       font-weight: bold;
+//       margin-bottom: 10px;
+//     }
+//     .total{
+//     margin: 10px;
+//     }
+//     .bank-details {
+//       display: table;
+//       width: 100%;
+//       margin-top: 20px;
+//     }
+//     .bank-details .bank-info,
+//     .bank-details .qr-code {
+//       display: table-cell;
+//       width: 50%;
+//       vertical-align: top;
+//     }
+//     .bank-details .qr-code {
+//       text-align: right;
+//     }
+
+//     /* Signature and Page Break styles */
+//     .signature {
+//       text-align: right;
+//       margin-top: 40px;
+//     }
+//     .page-break {
+//       page-break-before: always;
+//     }
+
+//     /* Return bill notice */
+//     .return-notice {
+//       background-color: #f8d7da;
+//       color: #721c24;
+//       padding: 10px;
+//       margin-bottom: 20px;
+//       border: 1px solid #f5c6cb;
+//     }
+//   </style>
+//   <title>Purchase Order Tax Invoice</title>
+// </head>
+// <body>
+//   <div class="container">
+//     <div class="header">
+//       <img src=${
+//         "data:" +
+//         getLocalImageB64(
+//           masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+//             .primary_logo_path
+//         ).mimeType +
+//         ";base64," +
+//         getLocalImageB64(
+//           masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+//             .primary_logo_path
+//         ).b64Data
+//       } alt="Company Logo" />
+//       <h1>Purchase Order Tax Invoice</h1>
+//     </div>
+
+//     <!-- Add Invoice Number -->
+//     <p><strong>Invoice No:</strong> ${purchaseOrder?.invoice_no || ""}</p>
+
+//     <div class="details">
+//       <div class="company">
+//         <p><strong>Seller Details:</strong></p>
+//         <p><strong>Name:</strong> ${vendor?.agro_name || ""}</p>
+//         <p><strong>Address:</strong> ${formatAddress(vendor?.address) || ""}</p>
+//         <p><strong>Email:</strong> ${vendor?.email || ""}</p>
+//         <p><strong>Phone:</strong> ${vendor?.contact_number || ""}</p>
+//         <p><strong>GST No:</strong> ${vendor?.gst_number || ""}</p>
+//       </div>
+//       <div class="buyer">
+//         <p><strong>Buyer Details:</strong></p>
+//         <p><strong>Name:</strong> ${admin?.agro_name || ""}</p>
+//         <p><strong>Address:</strong> ${
+//           formatAddress(admin?.billing_address) || ""
+//         }</p>
+//         <p><strong>Email:</strong> ${admin?.email || ""}</p>
+//         <p><strong>Phone:</strong> ${admin?.contact_number || ""}</p>
+//         <p><strong>GST No:</strong> ${admin?.gst_number || ""}</p>
+//       </div>
+//     </div>
+
+//     <table>
+//       <thead>
+//         <tr>
+//             <th>Item Name</th>
+//             <th>Product Code</th>
+//             <th>Man. Date</th>
+//             <th>Exe. Date</th>
+//             <th>Quantity</th>
+//             <th>Rate</th>
+//             <th>GST Rate</th>
+//             <th>GST Amount</th>
+//             <th>Discount</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         ${modifiedProducts
+//           // product_id: Types.ObjectId;
+//           // quantity: number;
+//           // offer_discount: number;
+//           // total_amount: number;
+//           // gst_rate: number;
+//           // purchase_price: number;
+//           // gst_amount: number;
+//           // manufacture_date: Date;
+//           // expiry_date: Date;
+//           // lot_no: string;
+//           .map(
+//             (item) => `
+//         <tr>
+//           <td>${item?.product_name || ""}</td>
+//           <td>${item?.product_code || ""}</td>
+//           <td>${item?.manufacture_date || ""}</td>
+//           <td>${item?.expiry_date || ""}</td>
+//           <td>${item?.quantity || ""}</td>
+//           <td>${item?.purchase_price || ""}</td>
+//           <td>${item?.gst_rate || ""}</td>
+//           <td>${item?.gst_amount || ""}</td>
+//           <td>${item?.offer_discount || ""}</td>
+//         </tr>
+//         `
+//           )
+//           .join("")}
+//       </tbody>
+//     </table>
+
+//     <div class="gst-summary">
+//        <p class="total"><strong>Advance Payment:</strong> ₹ ${
+//          purchaseOrder?.advance_payment_amount || "0"
+//        }</p>
+//       <p class="total"><strong>Order Amount:</strong> ₹ ${
+//         purchaseOrder?.order_amount || "0"
+//       }</p>
+//       <p class="total"><strong>Discount Amount:</strong> ₹ ${
+//         purchaseOrder?.discount_amount || "0"
+//       }</p>
+//       <p class="total"><strong>Tax Amount:</strong> ₹ ${
+//         purchaseOrder?.tax_amount || "0"
+//       }</p>
+//       <p class="total">
+//         <strong>Billing Amount:</strong> ₹ ${
+//           purchaseOrder?.billing_amount || "0"
+//         }
+//       </p>
+//        <p class="total">
+//         <strong>Final Amount:</strong> ₹ ${
+//           purchaseOrder?.billing_amount -
+//             purchaseOrder?.advance_payment_amount || "0"
+//         }
+//       </p>
+//     </div>
+
+//     <div class="bank-details">
+//       <div class="bank-info">
+//         <p><strong>Bank Details:</strong></p>
+//         <p><strong>Bank:</strong>${vendor.bank_details.bankName || ""}</p>
+//         <p><strong>Account No:</strong>${
+//           vendor.bank_details.accountNumber || ""
+//         }</p>
+//         <p><strong>IFSC:</strong>${vendor.bank_details.ifscCode || ""}</p>
+//         <p><strong>Branch:</strong>${vendor.bank_details.branchName || ""}</p>
+//       </div>
+//       <div class="qr-code">
+
+//       </div>
+//     </div>
+//   </div>
+// </body>
+// </html>
+// `;
+
 export const generatePurchaseOrderCodeHtml = (
   purchaseOrder: typePurchaseOrder,
   vendor: typeVendor,
@@ -766,7 +1032,6 @@ export const generatePurchaseOrderCodeHtml = (
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Base styles */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -777,44 +1042,34 @@ export const generatePurchaseOrderCodeHtml = (
       padding: 20px;
     }
 
-    /* Header styles */
     .header {
-      display: table;
-      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
     .header img {
-      max-width: 150px; /* Adjust logo size */
-      vertical-align: middle;
+      max-width: 150px;
     }
     .header h1 {
-      display: table-cell;
-      vertical-align: middle;
-      text-align: right;
-      margin: 0;
       font-size: 24px;
+      text-align: right;
     }
 
-    /* Details section styles */
     .details {
-      display: table;
       width: 100%;
+      display: flex;
+      justify-content: space-between;
       margin-bottom: 20px;
     }
-    .details .company,
-    .details .buyer {
-      display: table-cell;
-      width: 50%; /* Adjust width for even distribution */
-      vertical-align: top;
-    }
-    .details p {
-      margin: 5px; /* Add some space between elements */
-    }
-    .company p {
-      margin: 5px; /* Add some space between elements */
+    .details div {
+      width: 48%;
     }
 
-    /* Table styles */
+    .details p {
+      margin: 5px 0;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -829,51 +1084,20 @@ export const generatePurchaseOrderCodeHtml = (
       font-weight: bold;
     }
 
-    /* Summary and Bank Details styles */
-    .total,
-    .gst-summary {
-      text-align: right;
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .total{
-    margin: 10px;
-    }
-    .bank-details {
-      display: table;
-      width: 100%;
+    .terms {
       margin-top: 20px;
     }
-    .bank-details .bank-info,
-    .bank-details .qr-code {
-      display: table-cell;
-      width: 50%;
-      vertical-align: top;
-    }
-    .bank-details .qr-code {
-      text-align: right;
-    }
 
-    /* Signature and Page Break styles */
+    .footer {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+    }
     .signature {
       text-align: right;
-      margin-top: 40px;
-    }
-    .page-break {
-      page-break-before: always;
-    }
-
-    /* Return bill notice */
-    .return-notice {
-      background-color: #f8d7da;
-      color: #721c24;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #f5c6cb;
     }
   </style>
-  <title>Purchase Order Tax Invoice</title>
+  <title>Purchase Order</title>
 </head>
 <body>
   <div class="container">
@@ -890,71 +1114,49 @@ export const generatePurchaseOrderCodeHtml = (
             .primary_logo_path
         ).b64Data
       } alt="Company Logo" />
-      <h1>Purchase Order Tax Invoice</h1>
+      <h1>Purchase Order</h1>
     </div>
 
-    <!-- Add Invoice Number -->
-    <p><strong>Invoice No:</strong> ${purchaseOrder?.invoice_no || ""}</p>
-
     <div class="details">
-      <div class="company">
-        <p><strong>Seller Details:</strong></p>
-        <p><strong>Name:</strong> ${vendor?.agro_name || ""}</p>
-        <p><strong>Address:</strong> ${formatAddress(vendor?.address) || ""}</p>
-        <p><strong>Email:</strong> ${vendor?.email || ""}</p>
-        <p><strong>Phone:</strong> ${vendor?.contact_number || ""}</p>
-        <p><strong>GST No:</strong> ${vendor?.gst_number || ""}</p>
+      <div>
+        <p><strong>Vendor Details:</strong></p>
+        <p>${vendor?.agro_name || ""}</p>
+        <p>${formatAddress(vendor?.address) || ""}</p>
+        <p>${vendor?.contact_number || ""}</p>
+        <p>${vendor?.gst_number || ""}</p>
+        <p>PAN: ${vendor?.pan_number || ""}</p>
       </div>
-      <div class="buyer">
-        <p><strong>Buyer Details:</strong></p>
-        <p><strong>Name:</strong> ${admin?.agro_name || ""}</p>
-        <p><strong>Address:</strong> ${
-          formatAddress(admin?.billing_address) || ""
-        }</p>
-        <p><strong>Email:</strong> ${admin?.email || ""}</p>
-        <p><strong>Phone:</strong> ${admin?.contact_number || ""}</p>
-        <p><strong>GST No:</strong> ${admin?.gst_number || ""}</p>
+      <div>
+        <p><strong>Purchase Order Details:</strong></p>
+        <p>PO No: ${purchaseOrder?.invoice_no || ""}</p>
+        <p>PO Date: ${purchaseOrder?.createdAt || ""}</p>
+        <p>Bill To: ${formatAddress(vendor?.address) || ""}</p>
+        <p>Ship To: ${formatAddress(vendor?.address) || ""}</p>
       </div>
     </div>
 
     <table>
       <thead>
         <tr>
-            <th>Item Name</th>
-            <th>Product Code</th>
-            <th>Man. Date</th>
-            <th>Exe. Date</th>
-            <th>Quantity</th>
-            <th>Rate</th>
-            <th>GST Rate</th>
-            <th>GST Amount</th>
-            <th>Discount</th>
+          <th>HSN / SAC Code</th>
+          <th>Item Description</th>
+          <th>Delivery Date</th>
+          <th>Quantity</th>
+          <th>UoM</th>
+          <th>Quantity (in Kg/Ltr)</th>
         </tr>
       </thead>
       <tbody>
         ${modifiedProducts
-          // product_id: Types.ObjectId;
-          // quantity: number;
-          // offer_discount: number;
-          // total_amount: number;
-          // gst_rate: number;
-          // purchase_price: number;
-          // gst_amount: number;
-          // manufacture_date: Date;
-          // expiry_date: Date;
-          // lot_no: string;
           .map(
             (item) => `
         <tr>
-          <td>${item?.product_name || ""}</td>
           <td>${item?.product_code || ""}</td>
-          <td>${item?.manufacture_date || ""}</td>
-          <td>${item?.expiry_date || ""}</td>
+          <td>${item?.product_name || ""}</td>
+          <td>${purchaseOrder?.purchase_date || ""}</td>
           <td>${item?.quantity || ""}</td>
-          <td>${item?.purchase_price || ""}</td>
-          <td>${item?.gst_rate || ""}</td>
-          <td>${item?.gst_amount || ""}</td>
-          <td>${item?.offer_discount || ""}</td>
+          <td>${"Each"}</td>
+          <td>${item?.quantity || ""}</td>
         </tr>
         `
           )
@@ -962,45 +1164,14 @@ export const generatePurchaseOrderCodeHtml = (
       </tbody>
     </table>
 
-    <div class="gst-summary">
-       <p class="total"><strong>Advance Payment:</strong> ₹ ${
-         purchaseOrder?.advance_payment_amount || "0"
-       }</p>
-      <p class="total"><strong>Order Amount:</strong> ₹ ${
-        purchaseOrder?.order_amount || "0"
-      }</p>
-      <p class="total"><strong>Discount Amount:</strong> ₹ ${
-        purchaseOrder?.discount_amount || "0"
-      }</p>
-      <p class="total"><strong>Tax Amount:</strong> ₹ ${
-        purchaseOrder?.tax_amount || "0"
-      }</p>
-      <p class="total">
-        <strong>Billing Amount:</strong> ₹ ${
-          purchaseOrder?.billing_amount || "0"
-        }
-      </p>
-       <p class="total">
-        <strong>Final Amount:</strong> ₹ ${
-          purchaseOrder?.billing_amount -
-            purchaseOrder?.advance_payment_amount || "0"
-        }
-      </p>
+    <div class="terms">
+      <p><strong>Other Terms & Conditions:</strong></p>
+      <p>1) The PO should be valid for the next 4 days from the creation date of PO.</p>
+      <p>2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
     </div>
 
-    <div class="bank-details">
-      <div class="bank-info">
-        <p><strong>Bank Details:</strong></p>
-        <p><strong>Bank:</strong>${vendor.bank_details.bankName || ""}</p>
-        <p><strong>Account No:</strong>${
-          vendor.bank_details.accountNumber || ""
-        }</p>
-        <p><strong>IFSC:</strong>${vendor.bank_details.ifscCode || ""}</p>
-        <p><strong>Branch:</strong>${vendor.bank_details.branchName || ""}</p>
-      </div>
-      <div class="qr-code">
-      
-      </div>
+    <div class="footer">
+      <p class="signature">Authorized Signatory</p>
     </div>
   </div>
 </body>

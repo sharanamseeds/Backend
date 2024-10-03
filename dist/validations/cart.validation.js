@@ -1,7 +1,7 @@
 import Joi from "joi";
 const addCartSchema = Joi.object({
     product_id: Joi.string().required(),
-    selectedOffer: Joi.string(),
+    selectedOffer: Joi.string().allow(null).optional(),
     quantity: Joi.number().min(1).default(1),
     status: Joi.string()
         .valid("active", "ordered", "abandoned", "completed")
@@ -11,7 +11,7 @@ const addCartSchema = Joi.object({
 const updateCartSchema = Joi.object({
     product_id: Joi.string(),
     quantity: Joi.number().min(1),
-    selectedOffer: Joi.string(),
+    selectedOffer: Joi.string().allow(null).optional(),
     status: Joi.string().valid("active", "ordered", "abandoned", "completed"),
     notes: Joi.string().allow(""),
 });

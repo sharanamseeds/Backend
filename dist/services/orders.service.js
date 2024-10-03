@@ -227,7 +227,7 @@ const modifiedProducts = (products) => __awaiter(void 0, void 0, void 0, functio
         }
         const total_amount = productDoc.price * product.quantity;
         let discount = 0;
-        if (product.offer_id) {
+        if (product === null || product === void 0 ? void 0 : product.offer_id) {
             discount = yield calculateDiscount(product, total_amount, productDoc.price);
         }
         let final_amount = total_amount - discount;
@@ -521,6 +521,7 @@ const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, func
             credit_duration: orderDoc.credit_duration,
             order_notes: orderDoc.order_notes,
             reason: orderDoc.reason,
+            is_retuned: orderDoc.is_retuned,
         };
         // Return the order with localized products
         return modifiedOrder;
