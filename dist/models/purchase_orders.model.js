@@ -9,13 +9,17 @@ const purchaseOrderSchema = new Schema({
         type: String,
         required: true,
     },
-    purchase_invoice: {
-        type: String,
-        default: null,
-    },
     purchase_date: {
         type: Date,
         default: new Date(),
+    },
+    contact_name: {
+        type: String,
+        required: true,
+    },
+    contact_number: {
+        type: String,
+        required: true,
     },
     products: [
         {
@@ -28,24 +32,12 @@ const purchaseOrderSchema = new Schema({
                 type: Number,
                 required: true,
             },
-            offer_discount: {
-                type: Number,
-                default: 0,
-            },
-            total_amount: {
-                type: Number,
+            uom: {
+                type: String,
                 required: true,
             },
-            gst_rate: {
-                type: Number,
-                required: true,
-            },
-            purchase_price: {
-                type: Number,
-                required: true,
-            },
-            gst_amount: {
-                type: Number,
+            final_quantity: {
+                type: String,
                 required: true,
             },
             lot_no: {
@@ -62,22 +54,6 @@ const purchaseOrderSchema = new Schema({
             },
         },
     ],
-    order_amount: {
-        type: Number,
-        required: true,
-    },
-    discount_amount: {
-        type: Number,
-        default: 0,
-    },
-    billing_amount: {
-        type: Number,
-        required: true,
-    },
-    tax_amount: {
-        type: Number,
-        required: true,
-    },
     advance_payment_amount: {
         type: Number,
         default: 0,
@@ -98,20 +74,16 @@ const purchaseOrderSchema = new Schema({
         enum: ["paid", "unpaid"],
         required: true,
     },
-    is_creditable: {
-        type: Boolean,
-        default: false,
-    },
-    credit_duration: {
-        type: Number,
-        default: 0,
-    },
     order_notes: {
         type: String,
         default: "",
     },
 }, { timestamps: true });
 purchaseOrderSchema.index({ vendor_id: 1 });
+purchaseOrderSchema.index({ invoice_no: 1 });
+purchaseOrderSchema.index({ purchase_date: 1 });
+purchaseOrderSchema.index({ status: 1 });
+purchaseOrderSchema.index({ advance_payment_amount: 1 });
 const PurchaseOrder = mongoose.model("purchase_orders", purchaseOrderSchema);
 export default PurchaseOrder;
 //# sourceMappingURL=purchase_orders.model.js.map

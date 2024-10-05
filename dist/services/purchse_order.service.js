@@ -10,13 +10,48 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import mongoose from "mongoose";
 import { escapeRegex } from "../helpers/common.helpers..js";
 import PurchaseOrder from "../models/purchase_orders.model.js";
-import { convertFiles, createDocument } from "../helpers/files.management.js";
+// import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { productService } from "./products.service.js";
 import Vendor from "../models/verdors.model.js";
 import { generatePurchaseOrderCodeHtml } from "../helpers/mail.helpers.js";
 import User from "../models/users.model.js";
 import Product from "../models/products.model.js";
+const createInvoiceNo = () => __awaiter(void 0, void 0, void 0, function* () {
+    const prefix = masterConfig.billingConfig.poInvoicePrefix;
+    const currentMonthYear = new Date().toISOString().slice(5, 7) + new Date().getFullYear();
+    // Find the last invoice from the Bill collection
+    const lastBill = yield PurchaseOrder.findOne().sort({ createdAt: -1 });
+    if (lastBill && lastBill.invoice_no) {
+        const lastInvoiceNo = lastBill.invoice_no;
+        const [lastPrefix, lastSeq, lastMonthYear] = lastInvoiceNo.split("-");
+        if (lastMonthYear === currentMonthYear) {
+            const newSeq = (parseInt(lastSeq, 10) + 1).toString().padStart(4, "0");
+            return `${prefix}-${newSeq}-${currentMonthYear}`;
+        }
+    }
+    return `${prefix}-0001-${currentMonthYear}`;
+});
+function calculateStandardQty(base_unit, quantity) {
+    let std_qty = "";
+    switch (base_unit) {
+        case "GM":
+            std_qty = (quantity / 1000).toFixed(2) + " KG";
+            break;
+        case "ML":
+            std_qty = (quantity / 1000).toFixed(2) + " LTR";
+            break;
+        case "KG":
+            std_qty = quantity.toFixed(2) + " KG";
+            break;
+        case "LTR":
+            std_qty = quantity.toFixed(2) + " LTR";
+            break;
+        default:
+            std_qty = quantity.toString();
+    }
+    return std_qty;
+}
 const getPurchaseOrder = ({ purchaseOrderId, query, }) => __awaiter(void 0, void 0, void 0, function* () {
     const purchaseOrder = yield PurchaseOrder.findById(purchaseOrderId);
     if (!purchaseOrder) {
@@ -106,74 +141,131 @@ const updatePurchaseOrder = ({ purchaseOrderId, req, }) => __awaiter(void 0, voi
     if (!purchaseOrder) {
         throw new Error("PurchaseOrder not found");
     }
+    const vendor = yield Vendor.findById(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.vendor_id);
+    if (!vendor) {
+        throw new Error("Vendor not found");
+    }
     let bodyData = {};
     if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
-    const files = convertFiles(req.files);
-    const { purchase_invoice } = files;
-    if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
-        let data = {
-            document: purchase_invoice[0],
-            documentType: masterConfig.fileStystem.fileTypes.IMAGE,
-            documentPath: masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
-                purchaseOrderId +
-                "/" +
-                masterConfig.fileStystem.folderPaths.LOGO,
-        };
-        if (purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.purchase_invoice) {
-            data = Object.assign(Object.assign({}, data), { oldPath: purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.purchase_invoice });
+    let updateData = {};
+    if (purchaseOrder.status === "completed") {
+        if ("contact_name" in bodyData) {
+            updateData.contact_name = bodyData.contact_name;
         }
-        const savedFile = yield createDocument(data);
-        if (savedFile) {
-            bodyData.purchase_invoice = savedFile.path;
+        if ("contact_number" in bodyData) {
+            updateData.contact_number = bodyData.contact_number;
+        }
+        if ("payment_status" in bodyData) {
+            updateData.payment_status = bodyData.payment_status;
+        }
+        if ("order_notes" in bodyData) {
+            updateData.order_notes = bodyData.order_notes;
         }
     }
-    yield PurchaseOrder.findByIdAndUpdate(purchaseOrderId, bodyData);
+    else {
+        if ("contact_name" in bodyData) {
+            updateData.contact_name = bodyData.contact_name;
+        }
+        if ("contact_number" in bodyData) {
+            updateData.contact_number = bodyData.contact_number;
+        }
+        if ("payment_status" in bodyData) {
+            updateData.payment_status = bodyData.payment_status;
+        }
+        if ("order_notes" in bodyData) {
+            updateData.order_notes = bodyData.order_notes;
+        }
+        if ("products" in bodyData) {
+            let modifiedProducts = [];
+            yield Promise.all(bodyData.products.map((orderProduct) => __awaiter(void 0, void 0, void 0, function* () {
+                const productDoc = yield Product.findById(orderProduct.product_id);
+                const data = {
+                    product_id: new mongoose.Types.ObjectId(orderProduct.product_id),
+                    quantity: Number(orderProduct.quantity),
+                    manufacture_date: new Date(orderProduct.manufacture_date),
+                    expiry_date: new Date(orderProduct.expiry_date),
+                    lot_no: orderProduct.lot_no,
+                    uom: productDoc.base_unit,
+                    final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity)),
+                };
+                modifiedProducts.push(data);
+            })));
+            updateData.products = modifiedProducts;
+        }
+        if ("status" in bodyData) {
+            updateData.status = bodyData.status;
+            if (bodyData.status === "completed") {
+                const editProducts = (updateData === null || updateData === void 0 ? void 0 : updateData.products)
+                    ? updateData.products
+                    : purchaseOrder.products;
+                yield Promise.all(editProducts.map((orderProduct) => __awaiter(void 0, void 0, void 0, function* () {
+                    var _b;
+                    yield productService.addProductQuantityPO({
+                        productId: (_b = orderProduct.product_id) === null || _b === void 0 ? void 0 : _b.toString(),
+                        quantity: orderProduct.quantity,
+                        requestUser: req.user,
+                        lot_no: orderProduct.lot_no,
+                        vendor_name: vendor.name,
+                        grn_date: purchaseOrder.purchase_date,
+                        expiry_date: orderProduct.expiry_date,
+                        manufacture_date: orderProduct.manufacture_date,
+                    });
+                })));
+            }
+        }
+    }
+    yield PurchaseOrder.findByIdAndUpdate(purchaseOrderId, updateData);
     const purchaseOrderUpdate = yield PurchaseOrder.findById(purchaseOrderId);
     return purchaseOrderUpdate;
+    // const { purchase_invoice } = files;
+    // if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
+    //   let data: any = {
+    //     document: purchase_invoice[0],
+    //     documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+    //     documentPath:
+    //       masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
+    //       purchaseOrderId +
+    //       "/" +
+    //       masterConfig.fileStystem.folderPaths.LOGO,
+    //   };
+    //   if (purchaseOrder?.purchase_invoice) {
+    //     data = {
+    //       ...data,
+    //       oldPath: purchaseOrder?.purchase_invoice,
+    //     };
+    //   }
+    //   const savedFile = await createDocument(data);
+    //   if (savedFile) {
+    //     bodyData.purchase_invoice = savedFile.path;
+    //   }
+    // }
 });
 const addPurchaseOrder = ({ req }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _c;
     let bodyData = {};
-    const purchseOrderId = new mongoose.Types.ObjectId();
-    if (((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.payload) && typeof req.query.payload === "string") {
+    if (((_c = req === null || req === void 0 ? void 0 : req.query) === null || _c === void 0 ? void 0 : _c.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
-    const vendor = yield Vendor.findById(bodyData === null || bodyData === void 0 ? void 0 : bodyData.vendor_id);
-    if (!vendor) {
-        throw new Error("Vendor not found");
-    }
-    const files = convertFiles(req.files);
-    const { purchase_invoice } = files;
-    if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
-        const savedFile = yield createDocument({
-            document: purchase_invoice[0],
-            documentType: masterConfig.fileStystem.fileTypes.IMAGE,
-            documentPath: masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
-                purchseOrderId +
-                "/" +
-                masterConfig.fileStystem.folderPaths.LOGO,
-        });
-        if (savedFile) {
-            bodyData.purchase_invoice = savedFile.path;
-        }
-    }
-    const newPurchaseOrder = new PurchaseOrder(bodyData);
-    yield newPurchaseOrder.save();
-    yield Promise.all(newPurchaseOrder.products.map((orderProduct) => __awaiter(void 0, void 0, void 0, function* () {
-        var _c;
-        yield productService.addProductQuantityPO({
-            productId: (_c = orderProduct.product_id) === null || _c === void 0 ? void 0 : _c.toString(),
-            quantity: orderProduct.quantity,
-            requestUser: req.user,
+    let modifiedProducts = [];
+    yield Promise.all(bodyData.products.map((orderProduct) => __awaiter(void 0, void 0, void 0, function* () {
+        const productDoc = yield Product.findById(orderProduct.product_id);
+        const data = {
+            product_id: new mongoose.Types.ObjectId(orderProduct.product_id),
+            quantity: Number(orderProduct.quantity),
+            manufacture_date: new Date(orderProduct.manufacture_date),
+            expiry_date: new Date(orderProduct.expiry_date),
             lot_no: orderProduct.lot_no,
-            vendor_name: vendor.name,
-            grn_date: newPurchaseOrder.purchase_date,
-            expiry_date: orderProduct.expiry_date,
-            manufacture_date: orderProduct.manufacture_date,
-        });
+            uom: productDoc.base_unit,
+            final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity)),
+        };
+        modifiedProducts.push(data);
     })));
+    delete bodyData.products;
+    const invoice_no = yield createInvoiceNo();
+    const newPurchaseOrder = new PurchaseOrder(Object.assign(Object.assign({}, bodyData), { invoice_no: invoice_no, products: modifiedProducts }));
+    yield newPurchaseOrder.save();
     return newPurchaseOrder;
 });
 const deletePurchaseOrder = ({ purchaseOrderId, }) => __awaiter(void 0, void 0, void 0, function* () {
@@ -214,17 +306,14 @@ const downloadPdf = ({ purchaseOrderId, res, }) => __awaiter(void 0, void 0, voi
             const data = {
                 product_id: orderProduct.product_id,
                 quantity: orderProduct.quantity,
-                offer_discount: orderProduct.offer_discount,
-                total_amount: orderProduct.total_amount,
-                gst_rate: orderProduct.gst_rate,
-                purchase_price: orderProduct.purchase_price,
-                gst_amount: orderProduct.gst_amount,
                 manufacture_date: formatDate(new Date(orderProduct.manufacture_date)),
                 expiry_date: formatDate(new Date(orderProduct.expiry_date)),
                 lot_no: orderProduct.lot_no,
                 product_name: ((_d = productDoc.product_name.find((item) => item.lang_code ===
                     masterConfig.defaultDataConfig.languageConfig.lang_code)) === null || _d === void 0 ? void 0 : _d.value) || productDoc.product_name[0].value,
                 product_code: productDoc.product_code,
+                uom: orderProduct.uom,
+                final_quantity: orderProduct.final_quantity,
             };
             modifiedProducts.push(data);
         })));

@@ -741,6 +741,14 @@ const formatAddress = (address: {
   return parts.length > 0 ? parts.join(", ") : "";
 };
 
+const formatDate = (date: Date) => {
+  if (!date) return "";
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${year}-${month}-${day}`;
+};
 // export const generatePurchaseOrderCodeHtml = (
 //   purchaseOrder: typePurchaseOrder,
 //   vendor: typeVendor,
@@ -1014,14 +1022,11 @@ export const generatePurchaseOrderCodeHtml = (
   modifiedProducts: {
     product_id: mongoose.Types.ObjectId;
     quantity: number;
-    offer_discount: number;
-    total_amount: number;
-    gst_rate: number;
-    purchase_price: number;
-    gst_amount: number;
     manufacture_date: string;
     expiry_date: string;
     lot_no: string;
+    uom: string;
+    final_quantity: string;
     product_name: string;
     product_code: string;
   }[]
@@ -1117,23 +1122,47 @@ export const generatePurchaseOrderCodeHtml = (
       <h1>Purchase Order</h1>
     </div>
 
+      <div>
+      <h6 style="margin:8px 0px;text-align:center;">${
+        admin?.agro_name || ""
+      }</h6>
+        <p style="margin:8px 0px;text-align:center;">${
+          formatAddress(admin?.billing_address) || ""
+        }</p>
+        <p style="margin:8px 0px;text-align:center;">${
+          admin?.contact_number || ""
+        }</p>
+      </div>
+
+
     <div class="details">
       <div>
         <p><strong>Vendor Details:</strong></p>
-        <p>${vendor?.agro_name || ""}</p>
-        <p>${formatAddress(vendor?.address) || ""}</p>
-        <p>${vendor?.contact_number || ""}</p>
-        <p>${vendor?.gst_number || ""}</p>
+        <p>Name: ${vendor?.agro_name || ""}</p>
+        <p>Address: ${formatAddress(vendor?.address) || ""}</p>
+        <p>Phone No.: ${vendor?.contact_number || ""}</p>
+        <p>GST Number : ${vendor?.gst_number || ""}</p>
         <p>PAN: ${vendor?.pan_number || ""}</p>
       </div>
       <div>
         <p><strong>Purchase Order Details:</strong></p>
         <p>PO No: ${purchaseOrder?.invoice_no || ""}</p>
-        <p>PO Date: ${purchaseOrder?.createdAt || ""}</p>
-        <p>Bill To: ${formatAddress(vendor?.address) || ""}</p>
-        <p>Ship To: ${formatAddress(vendor?.address) || ""}</p>
+        <p>PO Date: ${formatDate(purchaseOrder?.purchase_date) || ""}</p>
+        <p>Contact Person Name: ${purchaseOrder?.contact_name || ""}</p>
+        <p>Contact Person Phone : ${purchaseOrder?.contact_number || ""}</p>
+        <p>Bill To: ${formatAddress(admin?.billing_address) || ""}</p>
+        <p>Ship To: ${
+          admin.billing_equals_shipping
+            ? formatAddress(admin?.billing_address)
+            : formatAddress(admin?.shipping_address) || ""
+        }</p>
       </div>
     </div>
+
+      <div>
+        <p style="margin:8px 0px;">Dear Sir/Madam,</p>
+        <p style="margin:8px 0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
+      </div>
 
     <table>
       <thead>

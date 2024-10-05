@@ -3,24 +3,18 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface typePurchaseOrder extends Document {
   vendor_id: mongoose.Types.ObjectId;
   invoice_no: string;
-  purchase_invoice: string;
+  contact_name: string;
+  contact_number: string;
   purchase_date: Date;
   products: {
     product_id: mongoose.Types.ObjectId;
     quantity: number;
-    offer_discount: number;
-    total_amount: number;
-    gst_rate: number;
-    purchase_price: number;
-    gst_amount: number;
+    uom: string;
+    final_quantity: string;
     manufacture_date: Date;
     expiry_date: Date;
     lot_no: string;
   }[];
-  order_amount: number;
-  discount_amount: number;
-  billing_amount: number;
-  tax_amount: number;
   advance_payment_amount: number;
   status:
     | "transit"
@@ -29,8 +23,6 @@ export interface typePurchaseOrder extends Document {
     | "routing_payment"
     | "advance_payment";
   payment_status: "paid" | "unpaid";
-  is_creditable: boolean;
-  credit_duration: number;
   order_notes: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -47,13 +39,17 @@ const purchaseOrderSchema: Schema = new Schema(
       type: String,
       required: true,
     },
-    purchase_invoice: {
-      type: String,
-      default: null,
-    },
     purchase_date: {
       type: Date,
       default: new Date(),
+    },
+    contact_name: {
+      type: String,
+      required: true,
+    },
+    contact_number: {
+      type: String,
+      required: true,
     },
     products: [
       {
@@ -66,24 +62,12 @@ const purchaseOrderSchema: Schema = new Schema(
           type: Number,
           required: true,
         },
-        offer_discount: {
-          type: Number,
-          default: 0,
-        },
-        total_amount: {
-          type: Number,
+        uom: {
+          type: String,
           required: true,
         },
-        gst_rate: {
-          type: Number,
-          required: true,
-        },
-        purchase_price: {
-          type: Number,
-          required: true,
-        },
-        gst_amount: {
-          type: Number,
+        final_quantity: {
+          type: String,
           required: true,
         },
         lot_no: {
@@ -100,22 +84,6 @@ const purchaseOrderSchema: Schema = new Schema(
         },
       },
     ],
-    order_amount: {
-      type: Number,
-      required: true,
-    },
-    discount_amount: {
-      type: Number,
-      default: 0,
-    },
-    billing_amount: {
-      type: Number,
-      required: true,
-    },
-    tax_amount: {
-      type: Number,
-      required: true,
-    },
     advance_payment_amount: {
       type: Number,
       default: 0,
@@ -136,14 +104,6 @@ const purchaseOrderSchema: Schema = new Schema(
       enum: ["paid", "unpaid"],
       required: true,
     },
-    is_creditable: {
-      type: Boolean,
-      default: false,
-    },
-    credit_duration: {
-      type: Number,
-      default: 0,
-    },
     order_notes: {
       type: String,
       default: "",
@@ -153,6 +113,10 @@ const purchaseOrderSchema: Schema = new Schema(
 );
 
 purchaseOrderSchema.index({ vendor_id: 1 });
+purchaseOrderSchema.index({ invoice_no: 1 });
+purchaseOrderSchema.index({ purchase_date: 1 });
+purchaseOrderSchema.index({ status: 1 });
+purchaseOrderSchema.index({ advance_payment_amount: 1 });
 
 const PurchaseOrder = mongoose.model<typePurchaseOrder>(
   "purchase_orders",

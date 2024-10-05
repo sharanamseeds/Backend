@@ -628,6 +628,15 @@ const formatAddress = (address) => {
     // Join the parts with a comma and return
     return parts.length > 0 ? parts.join(", ") : "";
 };
+const formatDate = (date) => {
+    if (!date)
+        return "";
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+};
 // export const generatePurchaseOrderCodeHtml = (
 //   purchaseOrder: typePurchaseOrder,
 //   vendor: typeVendor,
@@ -967,23 +976,39 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
       <h1>Purchase Order</h1>
     </div>
 
+      <div>
+      <h6 style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.agro_name) || ""}</h6>
+        <p style="margin:8px 0px;text-align:center;">${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
+        <p style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
+      </div>
+
+
     <div class="details">
       <div>
         <p><strong>Vendor Details:</strong></p>
-        <p>${(vendor === null || vendor === void 0 ? void 0 : vendor.agro_name) || ""}</p>
-        <p>${formatAddress(vendor === null || vendor === void 0 ? void 0 : vendor.address) || ""}</p>
-        <p>${(vendor === null || vendor === void 0 ? void 0 : vendor.contact_number) || ""}</p>
-        <p>${(vendor === null || vendor === void 0 ? void 0 : vendor.gst_number) || ""}</p>
+        <p>Name: ${(vendor === null || vendor === void 0 ? void 0 : vendor.agro_name) || ""}</p>
+        <p>Address: ${formatAddress(vendor === null || vendor === void 0 ? void 0 : vendor.address) || ""}</p>
+        <p>Phone No.: ${(vendor === null || vendor === void 0 ? void 0 : vendor.contact_number) || ""}</p>
+        <p>GST Number : ${(vendor === null || vendor === void 0 ? void 0 : vendor.gst_number) || ""}</p>
         <p>PAN: ${(vendor === null || vendor === void 0 ? void 0 : vendor.pan_number) || ""}</p>
       </div>
       <div>
         <p><strong>Purchase Order Details:</strong></p>
         <p>PO No: ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.invoice_no) || ""}</p>
-        <p>PO Date: ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.createdAt) || ""}</p>
-        <p>Bill To: ${formatAddress(vendor === null || vendor === void 0 ? void 0 : vendor.address) || ""}</p>
-        <p>Ship To: ${formatAddress(vendor === null || vendor === void 0 ? void 0 : vendor.address) || ""}</p>
+        <p>PO Date: ${formatDate(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.purchase_date) || ""}</p>
+        <p>Contact Person Name: ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.contact_name) || ""}</p>
+        <p>Contact Person Phone : ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.contact_number) || ""}</p>
+        <p>Bill To: ${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
+        <p>Ship To: ${admin.billing_equals_shipping
+    ? formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address)
+    : formatAddress(admin === null || admin === void 0 ? void 0 : admin.shipping_address) || ""}</p>
       </div>
     </div>
+
+      <div>
+        <p style="margin:8px 0px;">Dear Sir/Madam,</p>
+        <p style="margin:8px 0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
+      </div>
 
     <table>
       <thead>

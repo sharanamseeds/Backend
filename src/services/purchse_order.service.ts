@@ -3,7 +3,7 @@ import { escapeRegex } from "../helpers/common.helpers..js";
 import PurchaseOrder, {
   typePurchaseOrder,
 } from "../models/purchase_orders.model.js";
-import { convertFiles, createDocument } from "../helpers/files.management.js";
+// import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { productService } from "./products.service.js";
 import Vendor from "../models/verdors.model.js";
@@ -11,6 +11,48 @@ import { Response } from "express";
 import { generatePurchaseOrderCodeHtml } from "../helpers/mail.helpers.js";
 import User from "../models/users.model.js";
 import Product from "../models/products.model.js";
+
+const createInvoiceNo = async () => {
+  const prefix = masterConfig.billingConfig.poInvoicePrefix;
+  const currentMonthYear =
+    new Date().toISOString().slice(5, 7) + new Date().getFullYear();
+
+  // Find the last invoice from the Bill collection
+  const lastBill = await PurchaseOrder.findOne().sort({ createdAt: -1 });
+
+  if (lastBill && lastBill.invoice_no) {
+    const lastInvoiceNo = lastBill.invoice_no;
+    const [lastPrefix, lastSeq, lastMonthYear] = lastInvoiceNo.split("-");
+
+    if (lastMonthYear === currentMonthYear) {
+      const newSeq = (parseInt(lastSeq, 10) + 1).toString().padStart(4, "0");
+      return `${prefix}-${newSeq}-${currentMonthYear}`;
+    }
+  }
+
+  return `${prefix}-0001-${currentMonthYear}`;
+};
+
+function calculateStandardQty(base_unit: string, quantity: number): string {
+  let std_qty = "";
+  switch (base_unit) {
+    case "GM":
+      std_qty = (quantity / 1000).toFixed(2) + " KG";
+      break;
+    case "ML":
+      std_qty = (quantity / 1000).toFixed(2) + " LTR";
+      break;
+    case "KG":
+      std_qty = quantity.toFixed(2) + " KG";
+      break;
+    case "LTR":
+      std_qty = quantity.toFixed(2) + " LTR";
+      break;
+    default:
+      std_qty = quantity.toString();
+  }
+  return std_qty;
+}
 
 const getPurchaseOrder = async ({
   purchaseOrderId,
@@ -154,96 +196,179 @@ const updatePurchaseOrder = async ({
     throw new Error("PurchaseOrder not found");
   }
 
-  let bodyData: any = {};
-  if (req?.query?.payload && typeof req.query.payload === "string") {
-    bodyData = JSON.parse(req.query.payload);
-  }
-
-  const files = convertFiles(req.files);
-  const { purchase_invoice } = files;
-
-  if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
-    let data: any = {
-      document: purchase_invoice[0],
-      documentType: masterConfig.fileStystem.fileTypes.IMAGE,
-      documentPath:
-        masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
-        purchaseOrderId +
-        "/" +
-        masterConfig.fileStystem.folderPaths.LOGO,
-    };
-
-    if (purchaseOrder?.purchase_invoice) {
-      data = {
-        ...data,
-        oldPath: purchaseOrder?.purchase_invoice,
-      };
-    }
-
-    const savedFile = await createDocument(data);
-    if (savedFile) {
-      bodyData.purchase_invoice = savedFile.path;
-    }
-  }
-
-  await PurchaseOrder.findByIdAndUpdate(purchaseOrderId, bodyData);
-
-  const purchaseOrderUpdate = await PurchaseOrder.findById(purchaseOrderId);
-
-  return purchaseOrderUpdate;
-};
-
-const addPurchaseOrder = async ({ req }: { req: any }) => {
-  let bodyData: any = {};
-
-  const purchseOrderId = new mongoose.Types.ObjectId();
-
-  if (req?.query?.payload && typeof req.query.payload === "string") {
-    bodyData = JSON.parse(req.query.payload);
-  }
-
-  const vendor = await Vendor.findById(bodyData?.vendor_id);
+  const vendor = await Vendor.findById(purchaseOrder?.vendor_id);
 
   if (!vendor) {
     throw new Error("Vendor not found");
   }
 
-  const files = convertFiles(req.files);
-  const { purchase_invoice } = files;
+  let bodyData: any = {};
+  if (req?.query?.payload && typeof req.query.payload === "string") {
+    bodyData = JSON.parse(req.query.payload);
+  }
 
-  if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
-    const savedFile = await createDocument({
-      document: purchase_invoice[0],
-      documentType: masterConfig.fileStystem.fileTypes.IMAGE,
-      documentPath:
-        masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
-        purchseOrderId +
-        "/" +
-        masterConfig.fileStystem.folderPaths.LOGO,
-    });
-    if (savedFile) {
-      bodyData.purchase_invoice = savedFile.path;
+  let updateData: any = {};
+
+  if (purchaseOrder.status === "completed") {
+    if ("contact_name" in bodyData) {
+      updateData.contact_name = bodyData.contact_name;
+    }
+    if ("contact_number" in bodyData) {
+      updateData.contact_number = bodyData.contact_number;
+    }
+    if ("payment_status" in bodyData) {
+      updateData.payment_status = bodyData.payment_status;
+    }
+    if ("order_notes" in bodyData) {
+      updateData.order_notes = bodyData.order_notes;
+    }
+  } else {
+    if ("contact_name" in bodyData) {
+      updateData.contact_name = bodyData.contact_name;
+    }
+    if ("contact_number" in bodyData) {
+      updateData.contact_number = bodyData.contact_number;
+    }
+    if ("payment_status" in bodyData) {
+      updateData.payment_status = bodyData.payment_status;
+    }
+    if ("order_notes" in bodyData) {
+      updateData.order_notes = bodyData.order_notes;
+    }
+    if ("products" in bodyData) {
+      let modifiedProducts: {
+        product_id: mongoose.Types.ObjectId;
+        quantity: number;
+        manufacture_date: Date;
+        expiry_date: Date;
+        lot_no: string;
+        uom: "GM" | "ML" | "KG" | "LTR";
+        final_quantity: string;
+      }[] = [];
+      await Promise.all(
+        bodyData.products.map(async (orderProduct) => {
+          const productDoc = await Product.findById(orderProduct.product_id);
+          const data = {
+            product_id: new mongoose.Types.ObjectId(orderProduct.product_id),
+            quantity: Number(orderProduct.quantity),
+            manufacture_date: new Date(orderProduct.manufacture_date),
+            expiry_date: new Date(orderProduct.expiry_date),
+            lot_no: orderProduct.lot_no,
+            uom: productDoc.base_unit,
+            final_quantity: calculateStandardQty(
+              productDoc.base_unit,
+              Number(orderProduct.quantity)
+            ),
+          };
+          modifiedProducts.push(data);
+        })
+      );
+
+      updateData.products = modifiedProducts;
+    }
+    if ("status" in bodyData) {
+      updateData.status = bodyData.status;
+      if (bodyData.status === "completed") {
+        const editProducts = updateData?.products
+          ? updateData.products
+          : purchaseOrder.products;
+
+        await Promise.all(
+          editProducts.map(async (orderProduct) => {
+            await productService.addProductQuantityPO({
+              productId: orderProduct.product_id?.toString(),
+              quantity: orderProduct.quantity,
+              requestUser: req.user,
+              lot_no: orderProduct.lot_no,
+              vendor_name: vendor.name,
+              grn_date: purchaseOrder.purchase_date,
+              expiry_date: orderProduct.expiry_date,
+              manufacture_date: orderProduct.manufacture_date,
+            });
+          })
+        );
+      }
     }
   }
 
-  const newPurchaseOrder = new PurchaseOrder(bodyData);
+  await PurchaseOrder.findByIdAndUpdate(purchaseOrderId, updateData);
 
-  await newPurchaseOrder.save();
+  const purchaseOrderUpdate = await PurchaseOrder.findById(purchaseOrderId);
 
+  return purchaseOrderUpdate;
+
+  // const { purchase_invoice } = files;
+
+  // if (Array.isArray(purchase_invoice) && purchase_invoice.length > 0) {
+  //   let data: any = {
+  //     document: purchase_invoice[0],
+  //     documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+  //     documentPath:
+  //       masterConfig.fileStystem.folderPaths.PURCHSE_ORDER +
+  //       purchaseOrderId +
+  //       "/" +
+  //       masterConfig.fileStystem.folderPaths.LOGO,
+  //   };
+
+  //   if (purchaseOrder?.purchase_invoice) {
+  //     data = {
+  //       ...data,
+  //       oldPath: purchaseOrder?.purchase_invoice,
+  //     };
+  //   }
+
+  //   const savedFile = await createDocument(data);
+  //   if (savedFile) {
+  //     bodyData.purchase_invoice = savedFile.path;
+  //   }
+  // }
+};
+
+const addPurchaseOrder = async ({ req }: { req: any }) => {
+  let bodyData: any = {};
+
+  if (req?.query?.payload && typeof req.query.payload === "string") {
+    bodyData = JSON.parse(req.query.payload);
+  }
+
+  let modifiedProducts: {
+    product_id: mongoose.Types.ObjectId;
+    quantity: number;
+    manufacture_date: Date;
+    expiry_date: Date;
+    lot_no: string;
+    uom: "GM" | "ML" | "KG" | "LTR";
+    final_quantity: string;
+  }[] = [];
   await Promise.all(
-    newPurchaseOrder.products.map(async (orderProduct) => {
-      await productService.addProductQuantityPO({
-        productId: orderProduct.product_id?.toString(),
-        quantity: orderProduct.quantity,
-        requestUser: req.user,
+    bodyData.products.map(async (orderProduct) => {
+      const productDoc = await Product.findById(orderProduct.product_id);
+      const data = {
+        product_id: new mongoose.Types.ObjectId(orderProduct.product_id),
+        quantity: Number(orderProduct.quantity),
+        manufacture_date: new Date(orderProduct.manufacture_date),
+        expiry_date: new Date(orderProduct.expiry_date),
         lot_no: orderProduct.lot_no,
-        vendor_name: vendor.name,
-        grn_date: newPurchaseOrder.purchase_date,
-        expiry_date: orderProduct.expiry_date,
-        manufacture_date: orderProduct.manufacture_date,
-      });
+        uom: productDoc.base_unit,
+        final_quantity: calculateStandardQty(
+          productDoc.base_unit,
+          Number(orderProduct.quantity)
+        ),
+      };
+      modifiedProducts.push(data);
     })
   );
+
+  delete bodyData.products;
+
+  const invoice_no = await createInvoiceNo();
+  const newPurchaseOrder = new PurchaseOrder({
+    ...bodyData,
+    invoice_no: invoice_no,
+    products: modifiedProducts,
+  });
+
+  await newPurchaseOrder.save();
 
   return newPurchaseOrder;
 };
@@ -301,14 +426,11 @@ const downloadPdf = async ({
     let modifiedProducts: {
       product_id: mongoose.Types.ObjectId;
       quantity: number;
-      offer_discount: number;
-      total_amount: number;
-      gst_rate: number;
-      purchase_price: number;
-      gst_amount: number;
       manufacture_date: string;
       expiry_date: string;
       lot_no: string;
+      uom: string;
+      final_quantity: string;
       product_name: string;
       product_code: string;
     }[] = [];
@@ -318,11 +440,6 @@ const downloadPdf = async ({
         const data = {
           product_id: orderProduct.product_id,
           quantity: orderProduct.quantity,
-          offer_discount: orderProduct.offer_discount,
-          total_amount: orderProduct.total_amount,
-          gst_rate: orderProduct.gst_rate,
-          purchase_price: orderProduct.purchase_price,
-          gst_amount: orderProduct.gst_amount,
           manufacture_date: formatDate(new Date(orderProduct.manufacture_date)),
           expiry_date: formatDate(new Date(orderProduct.expiry_date)),
           lot_no: orderProduct.lot_no,
@@ -333,6 +450,9 @@ const downloadPdf = async ({
                 masterConfig.defaultDataConfig.languageConfig.lang_code
             )?.value || productDoc.product_name[0].value,
           product_code: productDoc.product_code,
+
+          uom: orderProduct.uom,
+          final_quantity: orderProduct.final_quantity,
         };
         modifiedProducts.push(data);
       })

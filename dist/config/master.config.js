@@ -115,6 +115,7 @@ export const masterConfig = {
     },
     billingConfig: {
         invoicePrefix: "AGV",
+        poInvoicePrefix: "PO",
         invoiceFormat: "PREFIX-0001-MMYYYY",
     },
     ownerCompanyDetails: {
