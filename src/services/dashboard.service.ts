@@ -195,7 +195,8 @@ const getDashboard = async ({
         },
       },
     ]);
-    newData.orders.averageOrderAmount = averageOrderAmount[0]?.avgAmount || 0;
+    newData.orders.averageOrderAmount =
+      averageOrderAmount[0]?.avgAmount?.toFixed(2) || 0;
 
     newData.orders.confirmedOrderCount = await Order.countDocuments({
       ...filterQuery,
@@ -258,6 +259,17 @@ const getDashboard = async ({
       { paid: 0, unpaid: 0 }
     );
 
+    // const poResult = await PurchaseOrder.aggregate([
+    //   {
+    //     $match: { ...filterQuery },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$payment_status",
+    //       totalBillingAmount: { $sum: "$billing_amount" },
+    //     },
+    //   },
+    // ]);
     const poResult = await PurchaseOrder.aggregate([
       {
         $match: { ...filterQuery },
@@ -265,7 +277,7 @@ const getDashboard = async ({
       {
         $group: {
           _id: "$payment_status",
-          totalBillingAmount: { $sum: "$billing_amount" },
+          totalBillingAmount: { $sum: "$advance_payment_amount" },
         },
       },
     ]);
@@ -286,7 +298,9 @@ const getDashboard = async ({
     newData.accounts.outstandings.sellAmount = billTotals.unpaid;
     newData.accounts.paid.purchaseAmount = poTotals.paid;
     newData.accounts.outstandings.purchaseAmount = poTotals.unpaid;
-    newData.accounts.on_hand = billTotals.paid - poTotals.paid;
+    // newData.accounts.on_hand = billTotals.paid - poTotals.paid;
+    newData.accounts.on_hand =
+      billTotals.paid - poTotals.paid - poTotals.unpaid;
 
     return { data: newData };
   } catch (error) {
