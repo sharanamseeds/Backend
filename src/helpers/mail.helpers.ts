@@ -1123,13 +1123,13 @@ export const generatePurchaseOrderCodeHtml = (
     </div>
 
       <div>
-      <h6 style="margin:8px 0px;text-align:center;">${
+      <h3 style="margin:8px 0px;text-align:center;">${
         admin?.agro_name || ""
-      }</h6>
-        <p style="margin:8px 0px;text-align:center;">${
+      }</h3>
+        <p style="margin:8px 0px;text-align:center;margin_top:0px;">${
           formatAddress(admin?.billing_address) || ""
         }</p>
-        <p style="margin:8px 0px;text-align:center;">${
+        <p style="margin:8px 0px;text-align:center;margin_top:0px;">Phone: ${
           admin?.contact_number || ""
         }</p>
       </div>
@@ -1152,23 +1152,23 @@ export const generatePurchaseOrderCodeHtml = (
         <p>Contact Person Phone : ${purchaseOrder?.contact_number || ""}</p>
         <p>Bill To: ${formatAddress(admin?.billing_address) || ""}</p>
         <p>Ship To: ${
-          admin.billing_equals_shipping
-            ? formatAddress(admin?.billing_address)
-            : formatAddress(admin?.shipping_address) || ""
+          formatAddress(admin?.shipping_address) ||
+          formatAddress(admin?.billing_address) ||
+          "-"
         }</p>
       </div>
     </div>
 
       <div>
         <p style="margin:8px 0px;">Dear Sir/Madam,</p>
-        <p style="margin:8px 0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
+        <p style="margin:8px 0px;margin_top:0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
       </div>
 
     <table>
       <thead>
         <tr>
-          <th>HSN / SAC Code</th>
-          <th>Item Description</th>
+          <th>Product Code</th>
+          <th>Product Name</th>
           <th>Delivery Date</th>
           <th>Quantity</th>
           <th>UoM</th>
@@ -1182,10 +1182,10 @@ export const generatePurchaseOrderCodeHtml = (
         <tr>
           <td>${item?.product_code || ""}</td>
           <td>${item?.product_name || ""}</td>
-          <td>${purchaseOrder?.purchase_date || ""}</td>
+          <td>${formatDate(purchaseOrder?.purchase_date) || ""}</td>
           <td>${item?.quantity || ""}</td>
-          <td>${"Each"}</td>
-          <td>${item?.quantity || ""}</td>
+          <td>${item?.uom || ""}</td>
+          <td>${item?.final_quantity || ""}</td>
         </tr>
         `
           )
@@ -1195,8 +1195,8 @@ export const generatePurchaseOrderCodeHtml = (
 
     <div class="terms">
       <p><strong>Other Terms & Conditions:</strong></p>
-      <p>1) The PO should be valid for the next 4 days from the creation date of PO.</p>
-      <p>2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
+      <p style="margin_top:0px;">1) The PO should be valid for the next 4 days from the creation date of PO.</p>
+      <p style="margin_top:0px;">2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
     </div>
 
     <div class="footer">

@@ -977,9 +977,9 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
     </div>
 
       <div>
-      <h6 style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.agro_name) || ""}</h6>
-        <p style="margin:8px 0px;text-align:center;">${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
-        <p style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
+      <h3 style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.agro_name) || ""}</h3>
+        <p style="margin:8px 0px;text-align:center;margin_top:0px;">${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
+        <p style="margin:8px 0px;text-align:center;margin_top:0px;">Phone: ${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
       </div>
 
 
@@ -999,22 +999,22 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
         <p>Contact Person Name: ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.contact_name) || ""}</p>
         <p>Contact Person Phone : ${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.contact_number) || ""}</p>
         <p>Bill To: ${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
-        <p>Ship To: ${admin.billing_equals_shipping
-    ? formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address)
-    : formatAddress(admin === null || admin === void 0 ? void 0 : admin.shipping_address) || ""}</p>
+        <p>Ship To: ${formatAddress(admin === null || admin === void 0 ? void 0 : admin.shipping_address) ||
+    formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) ||
+    "-"}</p>
       </div>
     </div>
 
       <div>
         <p style="margin:8px 0px;">Dear Sir/Madam,</p>
-        <p style="margin:8px 0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
+        <p style="margin:8px 0px;margin_top:0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
       </div>
 
     <table>
       <thead>
         <tr>
-          <th>HSN / SAC Code</th>
-          <th>Item Description</th>
+          <th>Product Code</th>
+          <th>Product Name</th>
           <th>Delivery Date</th>
           <th>Quantity</th>
           <th>UoM</th>
@@ -1027,10 +1027,10 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
         <tr>
           <td>${(item === null || item === void 0 ? void 0 : item.product_code) || ""}</td>
           <td>${(item === null || item === void 0 ? void 0 : item.product_name) || ""}</td>
-          <td>${(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.purchase_date) || ""}</td>
+          <td>${formatDate(purchaseOrder === null || purchaseOrder === void 0 ? void 0 : purchaseOrder.purchase_date) || ""}</td>
           <td>${(item === null || item === void 0 ? void 0 : item.quantity) || ""}</td>
-          <td>${"Each"}</td>
-          <td>${(item === null || item === void 0 ? void 0 : item.quantity) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.uom) || ""}</td>
+          <td>${(item === null || item === void 0 ? void 0 : item.final_quantity) || ""}</td>
         </tr>
         `)
     .join("")}
@@ -1039,8 +1039,8 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
 
     <div class="terms">
       <p><strong>Other Terms & Conditions:</strong></p>
-      <p>1) The PO should be valid for the next 4 days from the creation date of PO.</p>
-      <p>2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
+      <p style="margin_top:0px;">1) The PO should be valid for the next 4 days from the creation date of PO.</p>
+      <p style="margin_top:0px;">2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
     </div>
 
     <div class="footer">
