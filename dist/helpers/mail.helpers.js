@@ -978,8 +978,8 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
 
       <div>
       <h3 style="margin:8px 0px;text-align:center;">${(admin === null || admin === void 0 ? void 0 : admin.agro_name) || ""}</h3>
-        <p style="margin:8px 0px;text-align:center;margin_top:0px;">${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
-        <p style="margin:8px 0px;text-align:center;margin_top:0px;">Phone: ${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
+        <p style="margin:8px 0px;text-align:center;margin-top:0px;">${formatAddress(admin === null || admin === void 0 ? void 0 : admin.billing_address) || ""}</p>
+        <p style="margin:8px 0px;text-align:center;margin-top:0px;">Phone: ${(admin === null || admin === void 0 ? void 0 : admin.contact_number) || ""}</p>
       </div>
 
 
@@ -1007,7 +1007,7 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
 
       <div>
         <p style="margin:8px 0px;">Dear Sir/Madam,</p>
-        <p style="margin:8px 0px;margin_top:0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
+        <p style="margin:8px 0px;margin-top:0px;">We are pleased to award this order for supplying following items as per terms and conditions mentioned below:</p>
       </div>
 
     <table>
@@ -1039,8 +1039,8 @@ export const generatePurchaseOrderCodeHtml = (purchaseOrder, vendor, admin, modi
 
     <div class="terms">
       <p><strong>Other Terms & Conditions:</strong></p>
-      <p style="margin_top:0px;">1) The PO should be valid for the next 4 days from the creation date of PO.</p>
-      <p style="margin_top:0px;">2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
+      <p style="margin-top:0px;">1) The PO should be valid for the next 4 days from the creation date of PO.</p>
+      <p style="margin-top:0px;">2) Any consignment, damaged during the transportation or failing quality checks, will be returned to the supplier.</p>
     </div>
 
     <div class="footer">
