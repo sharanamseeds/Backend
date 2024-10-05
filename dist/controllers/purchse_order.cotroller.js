@@ -96,12 +96,10 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
             { header: "Vendor ID", key: "vendor_id", width: 30 },
             { header: "Invoice No", key: "invoice_no", width: 30 },
             { header: "Purchase Date", key: "purchase_date", width: 30 },
+            { header: "Contact Name", key: "contact_name", width: 30 },
+            { header: "Contact Number", key: "contact_number", width: 30 },
             { header: "Product Ids", key: "productIds", width: 30 },
             { header: "Quantities", key: "quantities", width: 30 },
-            { header: "Total Amounts", key: "totalAmounts", width: 30 },
-            { header: "Offer Discounts", key: "offerDiscounts", width: 30 },
-            { header: "Gst Rates", key: "gstRates", width: 30 },
-            { header: "Purchase Prices", key: "purchasePrices", width: 30 },
             { header: "Total Amount", key: "total_amount", width: 30 },
             { header: "Billing Amount", key: "billing_amount", width: 30 },
             { header: "Status", key: "status", width: 20 },
@@ -116,29 +114,15 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
                 .map((p) => p.product_id.toString())
                 .join(", ");
             const quantities = order.products.map((p) => p.quantity).join(", ");
-            const totalAmounts = order.products
-                .map((p) => p.total_amount)
-                .join(", ");
-            const offerDiscounts = order.products
-                .map((p) => p.offer_discount)
-                .join(", ");
-            const gstRates = order.products.map((p) => p.gst_rate).join(", ");
-            const purchasePrices = order.products
-                .map((p) => p.purchase_price)
-                .join(", ");
             worksheet.addRow({
                 _id: (_a = order === null || order === void 0 ? void 0 : order._id) === null || _a === void 0 ? void 0 : _a.toString(),
                 vendor_id: (_b = order.vendor_id) === null || _b === void 0 ? void 0 : _b.toString(),
                 productIds,
                 quantities,
-                totalAmounts,
-                offerDiscounts,
-                gstRates,
-                purchasePrices,
                 invoice_no: order === null || order === void 0 ? void 0 : order.invoice_no,
+                contact_name: order === null || order === void 0 ? void 0 : order.contact_name,
+                contact_number: order === null || order === void 0 ? void 0 : order.contact_number,
                 purchase_date: ((_c = order === null || order === void 0 ? void 0 : order.purchase_date) === null || _c === void 0 ? void 0 : _c.toISOString()) || "",
-                total_amount: order === null || order === void 0 ? void 0 : order.order_amount,
-                billing_amount: order === null || order === void 0 ? void 0 : order.billing_amount,
                 status: order === null || order === void 0 ? void 0 : order.status,
                 payment_status: order === null || order === void 0 ? void 0 : order.payment_status,
                 createdAt: ((_d = order === null || order === void 0 ? void 0 : order.createdAt) === null || _d === void 0 ? void 0 : _d.toISOString()) || "",

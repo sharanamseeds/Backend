@@ -123,13 +123,11 @@ const downloadExcel = catchAsync(
         { header: "Vendor ID", key: "vendor_id", width: 30 },
         { header: "Invoice No", key: "invoice_no", width: 30 },
         { header: "Purchase Date", key: "purchase_date", width: 30 },
+        { header: "Contact Name", key: "contact_name", width: 30 },
+        { header: "Contact Number", key: "contact_number", width: 30 },
 
         { header: "Product Ids", key: "productIds", width: 30 },
         { header: "Quantities", key: "quantities", width: 30 },
-        { header: "Total Amounts", key: "totalAmounts", width: 30 },
-        { header: "Offer Discounts", key: "offerDiscounts", width: 30 },
-        { header: "Gst Rates", key: "gstRates", width: 30 },
-        { header: "Purchase Prices", key: "purchasePrices", width: 30 },
 
         { header: "Total Amount", key: "total_amount", width: 30 },
         { header: "Billing Amount", key: "billing_amount", width: 30 },
@@ -145,30 +143,16 @@ const downloadExcel = catchAsync(
           .map((p) => p.product_id.toString())
           .join(", ");
         const quantities = order.products.map((p) => p.quantity).join(", ");
-        const totalAmounts = order.products
-          .map((p) => p.total_amount)
-          .join(", ");
-        const offerDiscounts = order.products
-          .map((p) => p.offer_discount)
-          .join(", ");
-        const gstRates = order.products.map((p) => p.gst_rate).join(", ");
-        const purchasePrices = order.products
-          .map((p) => p.purchase_price)
-          .join(", ");
 
         worksheet.addRow({
           _id: order?._id?.toString(),
           vendor_id: order.vendor_id?.toString(),
           productIds,
           quantities,
-          totalAmounts,
-          offerDiscounts,
-          gstRates,
-          purchasePrices,
           invoice_no: order?.invoice_no,
+          contact_name: order?.contact_name,
+          contact_number: order?.contact_number,
           purchase_date: order?.purchase_date?.toISOString() || "",
-          total_amount: order?.order_amount,
-          billing_amount: order?.billing_amount,
           status: order?.status,
           payment_status: order?.payment_status,
           createdAt: order?.createdAt?.toISOString() || "",
