@@ -15,8 +15,8 @@ import { initializeServer } from "./connections/http.connection.js";
 import dotenv from "dotenv";
 import { initializeDatabase } from "./connections/database.connection.js";
 import { createDefaultDatabase } from "./helpers/common.helpers..js";
-import cluster from "cluster";
-import os from "os";
+// import cluster from "cluster";
+// import os from "os";
 dotenv.config();
 const fileName = fileURLToPath(import.meta.url);
 const dirName = dirname(fileName);
@@ -53,33 +53,21 @@ function initializeApp() {
         }
     });
 }
-const numCPUs = os.cpus().length;
-if (cluster.isPrimary) {
-    logger.info(`Primary ${process.pid} is running`);
-    // Initialize the database in the primary process before forking workers
-    initializeApp().then(() => {
-        // Fork workers for each CPU core
-        for (let i = 0; i < numCPUs; i++) {
-            cluster.fork();
-        }
-        // Handle worker exit
-        cluster.on("exit", (worker, code, signal) => {
-            logger.info(`Worker ${worker.process.pid} died, starting a new one`);
-            cluster.fork(); // Restart a new worker if one dies
-        });
-    });
-}
-else {
-    // Workers can share any TCP connection
+initializeApp()
+    .then(() => {
     initializeServer()
         .then(() => {
-        logger.info(`Worker ${process.pid} is running`);
+        logger.info(`server started`);
     })
         .catch((e) => {
         logger.error("Error initializing server in worker:", e);
         // process.exit(1); // Exit if server initialization fails
     });
-}
+})
+    .catch((e) => {
+    logger.error("Error initializing server in worker:", e);
+    // process.exit(1); // Exit if server initialization fails
+});
 process
     .on("unhandledRejection", (response, p) => {
     console.log(response);
