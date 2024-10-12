@@ -942,7 +942,6 @@ const getOrder = async ({
       document: orderDoc.document,
     };
 
-    // Return the order with localized products
     return modifiedOrder;
   } catch (error) {
     throw error;

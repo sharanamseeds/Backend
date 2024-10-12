@@ -614,7 +614,6 @@ const getOrder = ({ orderId, query, }) => __awaiter(void 0, void 0, void 0, func
             is_retuned: orderDoc.is_retuned,
             document: orderDoc.document,
         };
-        // Return the order with localized products
         return modifiedOrder;
     }
     catch (error) {
