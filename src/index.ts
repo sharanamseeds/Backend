@@ -9,6 +9,7 @@ import { initializeDatabase } from "./connections/database.connection.js";
 import { createDefaultDatabase } from "./helpers/common.helpers..js";
 import cluster from "cluster";
 import os from "os";
+import { rootDir } from "./config/master.config.js";
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ const dirName = dirname(fileName);
 const streams = [
   { stream: process.stdout },
   {
-    stream: fs.createWriteStream(join(dirName, "../logs/info.log"), {
+    stream: fs.createWriteStream(join(rootDir, "/logs/info.log"), {
       flags: "a",
     }),
   },
@@ -92,5 +93,5 @@ process
   })
   .on("uncaughtException", (err) => {
     logger.error("Uncaught Exception thrown:", err);
-    process.exit(1); // Exit on uncaught exceptions
+    // process.exit(1); // Exit on uncaught exceptions
   });
