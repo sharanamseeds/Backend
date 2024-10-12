@@ -45,7 +45,11 @@ const addMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, func
     if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {
         bodyData = JSON.parse(req.query.payload);
     }
-    const moneyDoc = yield moneyService.addMoney(Object.assign({ requestUser: req.user }, bodyData));
+    const moneyDoc = yield moneyService.addMoney({
+        user_id: bodyData.user_id,
+        amount: bodyData.amount,
+        description: bodyData.description,
+    });
     const data4responseObject = {
         req: req,
         code: httpStatus.OK,

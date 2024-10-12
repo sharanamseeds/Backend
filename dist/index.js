@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import * as PinoLogger from "pino";
 import pinoms from "pino-multi-stream";
 import { fileURLToPath } from "url";
@@ -13,7 +22,7 @@ dotenv.config();
 const fileName = fileURLToPath(import.meta.url);
 const dirName = dirname(fileName);
 /**
- * register logger for development env...
+ * Register logger for development environment...
  */
 const streams = [
     { stream: process.stdout },
@@ -33,67 +42,55 @@ const logger = PinoLogger.pino({
     },
 }, pinoms.multistream(streams));
 global.logger = logger;
-// initializeDatabase()
-//   .then(() => {
-//     logger.info(`Database connection ✔`);
-//     initializeServer()
-//       .then(() => {
-//         createDefaultDatabase()
-//           .then(() => {
-//             logger.info(`Basic Data Created ✔`);
-//           })
-//           .catch((e) => {
-//             logger.error(e);
-//           });
-//       })
-//       .catch((e) => {
-//         logger.error(e);
-//       });
-//   })
-//   .catch((e) => {
-//     logger.error(e);
-//   });
 const numCPUs = os.cpus().length;
+// Function to initialize the database
+function initializeApp() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield initializeDatabase();
+            logger.info("Database connection ✔");
+            yield createDefaultDatabase();
+            logger.info("Default database created ✔");
+        }
+        catch (error) {
+            logger.error("Error during database initialization:", error);
+            process.exit(1); // Exit if database initialization fails
+        }
+    });
+}
 if (cluster.isPrimary) {
-    console.log(`Primary ${process.pid} is running`);
-    // Fork workers for each CPU core
-    for (let i = 0; i < numCPUs; i++) {
-        cluster.fork();
-    }
-    // Handle worker exit
-    cluster.on("exit", (worker, code, signal) => {
-        console.log(`Worker ${worker.process.pid} died, starting a new one`);
-        cluster.fork(); // Restart a new worker if one dies
+    logger.info(`Primary ${process.pid} is running`);
+    // Initialize the database in the primary process before forking workers
+    initializeApp().then(() => {
+        // Fork workers for each CPU core
+        for (let i = 0; i < numCPUs; i++) {
+            cluster.fork();
+        }
+        // Handle worker exit
+        cluster.on("exit", (worker, code, signal) => {
+            logger.info(`Worker ${worker.process.pid} died, starting a new one`);
+            cluster.fork(); // Restart a new worker if one dies
+        });
     });
 }
 else {
-    initializeDatabase()
+    // Workers can share any TCP connection
+    initializeServer()
         .then(() => {
-        logger.info(`Database connection ✔`);
-        initializeServer()
-            .then(() => {
-            createDefaultDatabase()
-                .then(() => {
-                logger.info(`Basic Data Created ✔`);
-            })
-                .catch((e) => {
-                logger.error(e);
-            });
-        })
-            .catch((e) => {
-            logger.error(e);
-        });
+        logger.info(`Worker ${process.pid} is running`);
     })
         .catch((e) => {
-        logger.error(e);
+        logger.error("Error initializing server in worker:", e);
+        process.exit(1); // Exit if server initialization fails
     });
 }
+// Global error handlers
 process
-    .on("unhandledRejection", (response, p) => {
-    console.log(response);
-    console.log(p);
+    .on("unhandledRejection", (reason, promise) => {
+    logger.error("Unhandled Rejection at:", promise, "reason:", reason);
 })
     .on("uncaughtException", (err) => {
-    logger.error(err);
+    logger.error("Uncaught Exception thrown:", err);
+    process.exit(1); // Exit on uncaught exceptions
 });
 //# sourceMappingURL=index.js.map

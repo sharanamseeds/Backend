@@ -54,8 +54,9 @@ const addMoney = catchAsync(
     }
 
     const moneyDoc = await moneyService.addMoney({
-      requestUser: req.user,
-      ...bodyData,
+      user_id: bodyData.user_id,
+      amount: bodyData.amount,
+      description: bodyData.description,
     });
 
     const data4responseObject = {

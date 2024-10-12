@@ -40,6 +40,7 @@ export interface typeOrder extends Document {
 
   order_notes: string;
   reason: string;
+  document: string;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -117,6 +118,9 @@ const orderSchema = new mongoose.Schema(
       type: String,
     },
     reason: {
+      type: String,
+    },
+    document: {
       type: String,
     },
   },

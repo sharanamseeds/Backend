@@ -216,17 +216,17 @@ const getMoney = async ({
 };
 
 const addMoney = async ({
-  requestUser,
+  user_id,
   amount,
   description,
 }: {
-  requestUser: typeUser | null;
+  user_id: string;
   amount: number;
   description: string;
 }): Promise<Document<unknown, {}, typeMoney> | null> => {
   try {
     const money = new Money({
-      user_id: requestUser._id,
+      user_id: user_id,
       amount,
       description,
     });

@@ -56,7 +56,7 @@ export const sendMail = async (options: MailOptions): Promise<void> => {
       global.logger.info("Mail Sent ✔");
     }
   } catch (error) {
-    global.logger.error(error);
+    global.logger.error(error.message);
   }
 };
 

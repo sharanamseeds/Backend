@@ -49,9 +49,27 @@ const calculateUserFinancials = ({ userId }) => __awaiter(void 0, void 0, void 0
         const credits = yield Money.find({
             user_id: new mongoose.Types.ObjectId(userId),
         });
-        const ledgers = yield Ledger.find({
-            user_id: new mongoose.Types.ObjectId(userId),
-        });
+        const ledgers = yield Ledger.aggregate([
+            {
+                $match: {
+                    user_id: new mongoose.Types.ObjectId(userId),
+                },
+            },
+            {
+                $lookup: {
+                    from: "bills",
+                    localField: "bill_id",
+                    foreignField: "_id",
+                    as: "bill",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$bill",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+        ]);
         return {
             totalMoneyAdded: ((_b = totalMoneyAdded[0]) === null || _b === void 0 ? void 0 : _b.total) || 0,
             totalCredit,

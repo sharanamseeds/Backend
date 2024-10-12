@@ -93,6 +93,7 @@ const createModule = async (moduleIndex: number, module: string) => {
   try {
     const code = module.toLowerCase(); //.replace(/\s+/g, "_");
     let moduleDoc = await Modules.findOne({ code });
+
     if (!moduleDoc) {
       const moduleCreate = new Modules({
         icon: makeIdentifier(module),
@@ -108,27 +109,24 @@ const createModule = async (moduleIndex: number, module: string) => {
         is_default: true,
       });
       const moduleDoc = await moduleCreate.save();
-      // global.logger.info(`MODULE: ${module} Created ✔`);
-      return moduleDoc;
-    } else {
-      // global.logger.info(`MODULE: ${module} Existed ✔`);
       return moduleDoc;
     }
+    return moduleDoc;
   } catch (error) {
+    console.log(error?.message);
     global.logger.error(`Error creating module: ${module}`, error);
   }
 };
 
 const createModules = async () => {
   try {
-    for (const [
-      moduleIndex,
-      module,
-    ] of masterConfig.defaultDataConfig.defaultModules.entries()) {
-      await createModule(moduleIndex, module);
-    }
+    const modulePromises = masterConfig.defaultDataConfig.defaultModules.map(
+      (module, moduleIndex) => createModule(moduleIndex, module)
+    );
+    await Promise.all(modulePromises);
+    global.logger.info("All modules created successfully");
   } catch (error) {
-    global.logger.error(`Error at creating all modules`, error);
+    global.logger.error(`Error creating all modules`, error);
   }
 };
 

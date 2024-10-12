@@ -56,7 +56,25 @@ const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
         }
         const totalDocs = yield Ledger.countDocuments(filterQuery);
         if (!pagination) {
-            const ledgerDoc = yield Ledger.find(filterQuery).sort({
+            const ledgerDoc = yield Ledger.aggregate([
+                {
+                    $match: filterQuery,
+                },
+                {
+                    $lookup: {
+                        from: "bills",
+                        localField: "bill_id",
+                        foreignField: "_id",
+                        as: "bill",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$bill",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+            ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
                 _id: 1,
             });
@@ -71,7 +89,25 @@ const getLedgerList = ({ query, }) => __awaiter(void 0, void 0, void 0, function
                 },
             };
         }
-        const ledgerDoc = yield Ledger.find(filterQuery)
+        const ledgerDoc = yield Ledger.aggregate([
+            {
+                $match: filterQuery,
+            },
+            {
+                $lookup: {
+                    from: "bills",
+                    localField: "bill_id",
+                    foreignField: "_id",
+                    as: "bill",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$bill",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+        ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
             _id: 1,
@@ -133,7 +169,25 @@ const getCustomerLedgerList = ({ query, requestUser, }) => __awaiter(void 0, voi
         }
         const totalDocs = yield Ledger.countDocuments(filterQuery);
         if (!pagination) {
-            const ledgerDoc = yield Ledger.find(filterQuery).sort({
+            const ledgerDoc = yield Ledger.aggregate([
+                {
+                    $match: filterQuery,
+                },
+                {
+                    $lookup: {
+                        from: "bills",
+                        localField: "bill_id",
+                        foreignField: "_id",
+                        as: "bill",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$bill",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+            ]).sort({
                 [sortBy]: sortOrder === "asc" ? 1 : -1,
                 _id: 1,
             });
@@ -148,7 +202,25 @@ const getCustomerLedgerList = ({ query, requestUser, }) => __awaiter(void 0, voi
                 },
             };
         }
-        const ledgerDoc = yield Ledger.find(filterQuery)
+        const ledgerDoc = yield Ledger.aggregate([
+            {
+                $match: filterQuery,
+            },
+            {
+                $lookup: {
+                    from: "bills",
+                    localField: "bill_id",
+                    foreignField: "_id",
+                    as: "bill",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$bill",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+        ])
             .sort({
             [sortBy]: sortOrder === "asc" ? 1 : -1,
             _id: 1,

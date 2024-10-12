@@ -32,23 +32,25 @@ const createInvoiceNo = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     return `${prefix}-0001-${currentMonthYear}`;
 });
-function calculateStandardQty(base_unit, quantity) {
+function calculateStandardQty(base_unit, quantity, size) {
     let std_qty = "";
     switch (base_unit) {
         case "GM":
-            std_qty = (quantity / 1000).toFixed(2) + " KG";
+            std_qty = ((quantity * size) / 1000).toFixed(2) + " KG";
             break;
         case "ML":
-            std_qty = (quantity / 1000).toFixed(2) + " LTR";
+            std_qty = ((quantity * size) / 1000).toFixed(2) + " LTR";
             break;
         case "KG":
-            std_qty = quantity.toFixed(2) + " KG";
+            std_qty = (quantity * size).toFixed(2) + " KG";
             break;
         case "LTR":
-            std_qty = quantity.toFixed(2) + " LTR";
+            std_qty = (quantity * size).toFixed(2) + " LTR";
+        case "EACH":
+            std_qty = (quantity * size).toFixed(2) + "EACH";
             break;
         default:
-            std_qty = quantity.toString();
+            std_qty = (quantity * size).toString();
     }
     return std_qty;
 }
@@ -188,7 +190,7 @@ const updatePurchaseOrder = ({ purchaseOrderId, req, }) => __awaiter(void 0, voi
                     expiry_date: new Date(orderProduct.expiry_date),
                     lot_no: orderProduct.lot_no,
                     uom: productDoc.base_unit,
-                    final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity)),
+                    final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity), Number(productDoc.size)),
                 };
                 modifiedProducts.push(data);
             })));
@@ -258,7 +260,7 @@ const addPurchaseOrder = ({ req }) => __awaiter(void 0, void 0, void 0, function
             expiry_date: new Date(orderProduct.expiry_date),
             lot_no: orderProduct.lot_no,
             uom: productDoc.base_unit,
-            final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity)),
+            final_quantity: calculateStandardQty(productDoc.base_unit, Number(orderProduct.quantity), Number(productDoc.size)),
         };
         modifiedProducts.push(data);
     })));

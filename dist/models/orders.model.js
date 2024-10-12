@@ -71,6 +71,9 @@ const orderSchema = new mongoose.Schema({
     reason: {
         type: String,
     },
+    document: {
+        type: String,
+    },
 }, { timestamps: true });
 orderSchema.index({ user_id: 1 });
 orderSchema.index({ order_type: 1 });

@@ -11,7 +11,7 @@ import Language from "../models/languages.model.js";
 import { escapeRegex, makeIdentifier } from "../helpers/common.helpers..js";
 const getLanguageList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", lang_name, search, } = query;
+        let { limit, page, pagination = true, sortBy = "lang_name", sortOrder = "asc", lang_name, search, } = query;
         if (typeof limit === "string") {
             limit = Number(limit);
         }

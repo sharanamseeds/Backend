@@ -14,7 +14,7 @@ import Offer from "../models/offers.models.js";
 import { productService } from "./products.service.js";
 import Product from "../models/products.model.js";
 import { billService } from "./bills.service.js";
-import { convertFiles } from "../helpers/files.management.js";
+import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { masterConfig } from "../config/master.config.js";
 import { escapeRegex } from "../helpers/common.helpers..js";
 const calculateDaysDifference = (startDate, endDate) => {
@@ -264,6 +264,21 @@ const checkProductsInStock = (products) => __awaiter(void 0, void 0, void 0, fun
 const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { limit, page, pagination = true, sortBy = "createdAt", sortOrder = "asc", buy_order_id, status, user_id, offer_id, product_id, bill_id, total_order_amount, billing_amount, order_type, is_creditable, credit_duration, search, } = query;
+        if (typeof limit === "string") {
+            limit = Number(limit);
+        }
+        if (!limit || isNaN(limit)) {
+            limit = 50;
+        }
+        if (typeof page === "string") {
+            page = Number(page);
+        }
+        if (!page || isNaN(page)) {
+            page = 1;
+        }
+        if (typeof pagination === "string") {
+            pagination = pagination === "true";
+        }
         let filterQuery = {};
         if (product_id) {
             filterQuery.products = {
@@ -307,10 +322,31 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         }
         const totalDocs = yield Order.countDocuments(filterQuery);
         if (!pagination) {
-            const orderDoc = yield Order.find(filterQuery).sort({
-                [sortBy]: sortOrder === "asc" ? 1 : -1,
-                _id: 1,
-            });
+            // const orderDoc = await Order.find(filterQuery).sort({
+            //   [sortBy]: sortOrder === "asc" ? 1 : -1,
+            //   _id: 1,
+            // });
+            const orderDoc = yield Order.aggregate([
+                { $match: filterQuery },
+                {
+                    $addFields: {
+                        statusPriority: {
+                            $cond: {
+                                if: { $eq: ["$status", "pending"] },
+                                then: 0,
+                                else: 1,
+                            },
+                        },
+                    },
+                },
+                {
+                    $sort: {
+                        statusPriority: 1,
+                        [sortBy]: sortOrder === "asc" ? 1 : -1,
+                        _id: 1,
+                    },
+                },
+            ]);
             return {
                 data: orderDoc,
                 meta: {
@@ -322,11 +358,65 @@ const getOrderList = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                 },
             };
         }
-        const orderDoc = yield Order.find(filterQuery)
-            .sort({
-            [sortBy]: sortOrder === "asc" ? 1 : -1,
-            _id: 1,
-        })
+        // const orderDoc = await Order.find(filterQuery)
+        //   .sort({
+        //     [sortBy]: sortOrder === "asc" ? 1 : -1,
+        //     _id: 1,
+        //   })
+        //   .skip((page - 1) * limit)
+        //   .limit(limit);
+        // const orderDoc = await Order.aggregate([
+        //   { $match: filterQuery }, // Apply the filter query
+        //   {
+        //     $addFields: {
+        //       statusPriority: {
+        //         $switch: {
+        //           branches: [
+        //             { case: { $eq: ["$status", "pending"] }, then: 0 }, // Highest priority
+        //             { case: { $eq: ["$status", "return_requested"] }, then: 1 }, // Second priority
+        //             { case: { $eq: ["$status", "confirmed"] }, then: 2 }, // Third priority
+        //             { case: { $eq: ["$status", "cancelled"] }, then: 3 }, // Fourth priority (example)
+        //           ],
+        //           default: 4, // Any other statuses will have the lowest priority
+        //         },
+        //       },
+        //     },
+        //   },
+        //   {
+        //     $sort: {
+        //       statusPriority: 1, // Sort by the custom status priority field
+        //       [sortBy]: sortOrder === "asc" ? 1 : -1, // Sort by the provided field and order
+        //       _id: 1, // Secondary sort by _id for consistency
+        //     },
+        //   },
+        //   {
+        //     $skip: (page - 1) * limit, // Skip for pagination
+        //   },
+        //   {
+        //     $limit: limit, // Limit the number of results
+        //   },
+        // ]);
+        const orderDoc = yield Order.aggregate([
+            { $match: filterQuery },
+            {
+                $addFields: {
+                    statusPriority: {
+                        $cond: {
+                            if: { $eq: ["$status", "pending"] },
+                            then: 0,
+                            else: 1,
+                        },
+                    },
+                },
+            },
+            {
+                $sort: {
+                    statusPriority: 1,
+                    [sortBy]: sortOrder === "asc" ? 1 : -1,
+                    _id: 1,
+                },
+            },
+        ])
             .skip((page - 1) * limit)
             .limit(limit);
         const total_pages = Math.ceil(totalDocs / limit);
@@ -604,6 +694,25 @@ const updateOrder = ({ orderId, requestUser, req, }) => __awaiter(void 0, void 0
             bodyData = JSON.parse(req.query.payload);
         }
         const { is_creditable, credit_duration, order_notes, payment_method, reason, status, } = bodyData;
+        const files = convertFiles(req.files);
+        const { document } = files;
+        if (Array.isArray(document) && document.length > 0) {
+            let options = {
+                document: document[0],
+                documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+                documentPath: masterConfig.fileStystem.folderPaths.PRODUCTS +
+                    orderDoc._id +
+                    "/" +
+                    masterConfig.fileStystem.folderPaths.LOGO,
+            };
+            if ((orderDoc === null || orderDoc === void 0 ? void 0 : orderDoc.document) && orderDoc.document !== "") {
+                options.oldPath = orderDoc.document;
+            }
+            const savedFile = yield createDocument(options);
+            if (savedFile) {
+                orderDoc.document = savedFile.path;
+            }
+        }
         if (order_notes) {
             orderDoc.order_notes = order_notes;
         }

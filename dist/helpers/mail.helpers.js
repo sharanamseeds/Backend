@@ -51,7 +51,7 @@ export const sendMail = (options) => __awaiter(void 0, void 0, void 0, function*
         }
     }
     catch (error) {
-        global.logger.error(error);
+        global.logger.error(error.message);
     }
 });
 const getLocalImageB64 = (imagePath) => {

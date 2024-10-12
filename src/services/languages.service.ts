@@ -22,7 +22,7 @@ const getLanguageList = async ({
       limit,
       page,
       pagination = true,
-      sortBy = "createdAt",
+      sortBy = "lang_name",
       sortOrder = "asc",
       lang_name,
       search,

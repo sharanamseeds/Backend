@@ -150,10 +150,10 @@ const getMoney = ({ moneyId, query, }) => __awaiter(void 0, void 0, void 0, func
         throw error;
     }
 });
-const addMoney = ({ requestUser, amount, description, }) => __awaiter(void 0, void 0, void 0, function* () {
+const addMoney = ({ user_id, amount, description, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const money = new Money({
-            user_id: requestUser._id,
+            user_id: user_id,
             amount,
             description,
         });

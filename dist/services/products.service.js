@@ -157,6 +157,8 @@ const projectLocalizedProducts = (lang_code, isActive) => {
         {
             $project: {
                 added_by: 1,
+                size: 1,
+                price_with_gst: 1,
                 updated_by: 1,
                 product_code: 1,
                 offers: 1,
@@ -517,6 +519,15 @@ const addProduct = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, 
         }
         const formatedBodyData = transformFormData(bodyData);
         const product_id = new mongoose.Types.ObjectId();
+        let price_with_gst = 0;
+        if ((formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.gst_percent) > 0) {
+            const gst = ((formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.price) * (formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.gst_percent)) / 100;
+            const new_price = formatedBodyData.price + Number(gst.toFixed(2));
+            price_with_gst = new_price;
+        }
+        else {
+            price_with_gst = formatedBodyData.price;
+        }
         let basicData = {
             _id: product_id,
             brand_id: formatedBodyData.brand_id,
@@ -533,7 +544,9 @@ const addProduct = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, 
             base_unit: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.base_unit,
             images: [],
             logo: [],
+            size: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.size,
             in_stock: (formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.quantity) && formatedBodyData.quantity > 0,
+            price_with_gst: price_with_gst,
         };
         if ("is_featured" in formatedBodyData) {
             basicData = Object.assign(Object.assign({}, basicData), { is_featured: formatedBodyData === null || formatedBodyData === void 0 ? void 0 : formatedBodyData.is_featured });
@@ -685,6 +698,10 @@ const updateProduct = ({ productId, requestUser, req, }) => __awaiter(void 0, vo
             productDoc.base_unit = bodyData.base_unit;
             delete bodyData.base_unit;
         }
+        if ("size" in bodyData) {
+            productDoc.size = bodyData.size;
+            delete bodyData.size;
+        }
         if (bodyData.product_name) {
             updateField(productDoc, bodyData, "product_name", lang_code);
             delete bodyData.product_name;
@@ -749,6 +766,14 @@ const updateProduct = ({ productId, requestUser, req, }) => __awaiter(void 0, vo
                 }
             }));
             yield Promise.all(savedFilesPromises);
+        }
+        if (productDoc.gst_percent > 0) {
+            const gst = (productDoc.price * productDoc.gst_percent) / 100;
+            const new_price = productDoc.price + Number(gst.toFixed(2));
+            productDoc.price_with_gst = new_price;
+        }
+        else {
+            productDoc.price_with_gst = productDoc.price;
         }
         let updatedProduct = yield Product.findByIdAndUpdate(productId, productDoc, { new: true });
         return productDoc;

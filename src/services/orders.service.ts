@@ -5,7 +5,7 @@ import Offer, { typeOffer } from "../models/offers.models.js";
 import { productService } from "./products.service.js";
 import Product from "../models/products.model.js";
 import { billService } from "./bills.service.js";
-import { convertFiles } from "../helpers/files.management.js";
+import { convertFiles, createDocument } from "../helpers/files.management.js";
 import { typeLocalizedString } from "../schema/localizedLanguage.schema.js";
 import { masterConfig } from "../config/master.config.js";
 import { escapeRegex } from "../helpers/common.helpers..js";
@@ -522,6 +522,24 @@ const getOrderList = async ({
       search,
     } = query;
 
+    if (typeof limit === "string") {
+      limit = Number(limit);
+    }
+    if (!limit || isNaN(limit)) {
+      limit = 50;
+    }
+
+    if (typeof page === "string") {
+      page = Number(page);
+    }
+    if (!page || isNaN(page)) {
+      page = 1;
+    }
+
+    if (typeof pagination === "string") {
+      pagination = pagination === "true";
+    }
+
     let filterQuery: any = {};
 
     if (product_id) {
@@ -569,10 +587,32 @@ const getOrderList = async ({
     const totalDocs = await Order.countDocuments(filterQuery);
 
     if (!pagination) {
-      const orderDoc = await Order.find(filterQuery).sort({
-        [sortBy]: sortOrder === "asc" ? 1 : -1,
-        _id: 1,
-      });
+      // const orderDoc = await Order.find(filterQuery).sort({
+      //   [sortBy]: sortOrder === "asc" ? 1 : -1,
+      //   _id: 1,
+      // });
+      const orderDoc = await Order.aggregate([
+        { $match: filterQuery }, // Apply the filter query
+        {
+          $addFields: {
+            statusPriority: {
+              $cond: {
+                if: { $eq: ["$status", "pending"] },
+                then: 0,
+                else: 1,
+              },
+            },
+          },
+        },
+        {
+          $sort: {
+            statusPriority: 1,
+            [sortBy]: sortOrder === "asc" ? 1 : -1,
+            _id: 1,
+          },
+        },
+      ]);
+
       return {
         data: orderDoc,
         meta: {
@@ -585,11 +625,67 @@ const getOrderList = async ({
       };
     }
 
-    const orderDoc = await Order.find(filterQuery)
-      .sort({
-        [sortBy]: sortOrder === "asc" ? 1 : -1,
-        _id: 1,
-      })
+    // const orderDoc = await Order.find(filterQuery)
+    //   .sort({
+    //     [sortBy]: sortOrder === "asc" ? 1 : -1,
+    //     _id: 1,
+    //   })
+    //   .skip((page - 1) * limit)
+    //   .limit(limit);
+
+    // const orderDoc = await Order.aggregate([
+    //   { $match: filterQuery }, // Apply the filter query
+    //   {
+    //     $addFields: {
+    //       statusPriority: {
+    //         $switch: {
+    //           branches: [
+    //             { case: { $eq: ["$status", "pending"] }, then: 0 }, // Highest priority
+    //             { case: { $eq: ["$status", "return_requested"] }, then: 1 }, // Second priority
+    //             { case: { $eq: ["$status", "confirmed"] }, then: 2 }, // Third priority
+    //             { case: { $eq: ["$status", "cancelled"] }, then: 3 }, // Fourth priority (example)
+    //           ],
+    //           default: 4, // Any other statuses will have the lowest priority
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $sort: {
+    //       statusPriority: 1, // Sort by the custom status priority field
+    //       [sortBy]: sortOrder === "asc" ? 1 : -1, // Sort by the provided field and order
+    //       _id: 1, // Secondary sort by _id for consistency
+    //     },
+    //   },
+    //   {
+    //     $skip: (page - 1) * limit, // Skip for pagination
+    //   },
+    //   {
+    //     $limit: limit, // Limit the number of results
+    //   },
+    // ]);
+
+    const orderDoc = await Order.aggregate([
+      { $match: filterQuery },
+      {
+        $addFields: {
+          statusPriority: {
+            $cond: {
+              if: { $eq: ["$status", "pending"] },
+              then: 0,
+              else: 1,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          statusPriority: 1,
+          [sortBy]: sortOrder === "asc" ? 1 : -1,
+          _id: 1,
+        },
+      },
+    ])
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -979,6 +1075,30 @@ const updateOrder = async ({
       reason,
       status,
     } = bodyData;
+
+    const files = convertFiles(req.files);
+    const { document } = files;
+
+    if (Array.isArray(document) && document.length > 0) {
+      let options: any = {
+        document: document[0],
+        documentType: masterConfig.fileStystem.fileTypes.IMAGE,
+        documentPath:
+          masterConfig.fileStystem.folderPaths.PRODUCTS +
+          orderDoc._id +
+          "/" +
+          masterConfig.fileStystem.folderPaths.LOGO,
+      };
+
+      if (orderDoc?.document && orderDoc.document !== "") {
+        options.oldPath = orderDoc.document;
+      }
+
+      const savedFile = await createDocument(options);
+      if (savedFile) {
+        orderDoc.document = savedFile.path;
+      }
+    }
 
     if (order_notes) {
       orderDoc.order_notes = order_notes;

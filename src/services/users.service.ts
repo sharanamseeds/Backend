@@ -56,9 +56,27 @@ const calculateUserFinancials = async ({ userId }) => {
       user_id: new mongoose.Types.ObjectId(userId),
     });
 
-    const ledgers = await Ledger.find({
-      user_id: new mongoose.Types.ObjectId(userId),
-    });
+    const ledgers = await Ledger.aggregate([
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: "bills",
+          localField: "bill_id",
+          foreignField: "_id",
+          as: "bill",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bill",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
 
     return {
       totalMoneyAdded: totalMoneyAdded[0]?.total || 0,

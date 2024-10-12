@@ -10,18 +10,17 @@ export const masterConfig = {
     authConfig: {
         ACCESS_TOKEN_SECRET: "ACCESS_TOKEN_SECRET",
         REFRESH_TOKEN_SECRET: "REFRESH_TOKEN_SECRET",
-        VerificationCodeExpires: 180,
+        VerificationCodeExpires: 90,
     },
     mongodbConfig: {
-        url: "mongodb+srv://mvkotadiya50:ZRMSSg0DcSZoDEmg@cluster0.5pdns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-        // url: "mongodb://localhost:27017/",
+        url: "mongodb://admin:%24ecureP4sssw0rd%232024@82.112.238.3:27017/?tls=false",
     },
     superAdminConfig: {
         email: "sharanamseeds@gmail.com",
         password: "Admin@1234",
-        name: "Sharanam Seeds",
+        name: "Khetiwala",
         contact_number: "9537712126",
-        agro_name: "Sharanam Seeds",
+        agro_name: "Khetiwala",
     },
     defaultDataConfig: {
         defaultModules: [
@@ -40,7 +39,6 @@ export const masterConfig = {
             "App Banner",
             "Purchase Order",
             "Vendors",
-            // "Company",
         ],
         languageConfig: {
             lang_name: "English",
@@ -65,7 +63,7 @@ export const masterConfig = {
         mailConfig: {
             email: "sharanamseeds@gmail.com",
             password: "bizg gtar ogel vbmm",
-            name: "Sharanam Seeds",
+            name: "Khetiwala",
         },
         emailTemplateConfig: {
             email_template_info: {
@@ -74,7 +72,7 @@ export const masterConfig = {
                 app_store_link: "https://sharanamagritech.com/authentication/login",
             },
             company_details: {
-                company_name: "Sharanam Seeds",
+                company_name: "Khetiwala",
                 company_slogan: "Vedic Wisdom for Modern Farming",
                 qr_code_path: "default_images/qr-code.png",
                 primary_logo_path: "default_images/1.png",
@@ -119,12 +117,12 @@ export const masterConfig = {
         invoiceFormat: "PREFIX-0001-MMYYYY",
     },
     ownerCompanyDetails: {
-        brand_name: "Sharanam Seeds",
-        legal_name: "Sharanam Seeds Private Limited",
+        brand_name: "Khetiwala",
+        legal_name: "Khetiwala Private Limited",
         slogan: "Vedic Wisdom for Modern Farming",
         industry: ["Agriculture"],
         description: "",
-        website: "sharanamagritech.com",
+        website: "khetiwala.com",
         type: "B2B",
         logo: {
             primary: "",
@@ -152,4 +150,9 @@ export const masterConfig = {
     },
 };
 // https://myaccount.google.com/apppasswords
+// New MongoDB Details:
+// Host IP: 82.112.238.3
+// Username: admin
+// Password: $ecureP4ssw0rd#2024
+// URL: mongodb://admin:%24ecureP4sssw0rd%232024@82.112.238.3:27017/?tls=false
 //# sourceMappingURL=master.config.js.map

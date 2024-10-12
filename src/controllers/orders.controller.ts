@@ -8,6 +8,8 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 import ExcelJS from "exceljs";
 import Order from "../models/orders.model.js";
+import Product from "../models/products.model.js";
+import { masterConfig } from "../config/master.config.js";
 
 const getOrder = catchAsync(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -165,7 +167,6 @@ const downloadExcel = catchAsync(
     try {
       // Fetch orders from the database
       const orders = await Order.find();
-      // .populate("user_id").populate("products.product_id").populate("products.offer_id");
 
       // Create a new Excel workbook and worksheet
       const workbook = new ExcelJS.Workbook();
@@ -176,6 +177,7 @@ const downloadExcel = catchAsync(
         { header: "User ID", key: "user_id", width: 30 },
         { header: "Order Type", key: "order_type", width: 10 },
         { header: "Product IDs", key: "product_ids", width: 40 },
+        { header: "Product Names", key: "product_names", width: 40 },
         { header: "Offer IDs", key: "offer_ids", width: 40 },
         { header: "Quantities", key: "quantities", width: 20 },
         { header: "Total Amounts", key: "total_amounts", width: 20 },
@@ -195,8 +197,25 @@ const downloadExcel = catchAsync(
         { header: "Updated At", key: "updatedAt", width: 25 },
       ];
 
-      // Add rows to the worksheet
-      orders.forEach((order) => {
+      // Loop through orders and add rows to the worksheet
+      for (const order of orders) {
+        // Fetch the product names asynchronously for each product
+        const productNames = await Promise.all(
+          order.products.map(async (p) => {
+            const productDoc = await Product.findById(p.product_id);
+            if (!productDoc) {
+              return "-";
+            } else {
+              return productDoc.product_name.find(
+                (item) =>
+                  item.lang_code ===
+                  masterConfig.defaultDataConfig.defaultLanguages[0].lang_code
+              ).value;
+            }
+          })
+        );
+
+        // Prepare other order-related fields
         const productIds = order.products
           .map((p) => p.product_id.toString())
           .join(", ");
@@ -215,10 +234,12 @@ const downloadExcel = catchAsync(
           .map((p) => p.purchase_price)
           .join(", ");
 
+        // Add row to the worksheet
         worksheet.addRow({
           user_id: order.user_id.toString(),
           order_type: order.order_type,
           product_ids: productIds,
+          product_names: productNames.join(", "),
           offer_ids: offerIds,
           quantities: quantities,
           total_amounts: totalAmounts,
@@ -237,7 +258,7 @@ const downloadExcel = catchAsync(
           createdAt: order.createdAt?.toISOString(),
           updatedAt: order.updatedAt?.toISOString(),
         });
-      });
+      }
 
       // Set the response headers and content type for the Excel file
       res.setHeader(

@@ -12,7 +12,9 @@ import { masterConfig } from "../config/master.config.js";
 export const initializeDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            yield mongoose.connect(masterConfig.mongodbConfig.url);
+            yield mongoose.connect(masterConfig.mongodbConfig.url, {
+                serverSelectionTimeoutMS: 20000, // Increase timeout to 20 seconds
+            });
             resolve();
         }
         catch (e) {

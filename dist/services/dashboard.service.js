@@ -18,7 +18,7 @@ import Languages from "../models/languages.model.js";
 import Ledger from "../models/ledger.model.js";
 import PurchaseOrder from "../models/purchase_orders.model.js";
 const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     try {
         let { start_date, end_date } = query;
         let filterQuery = {};
@@ -145,7 +145,8 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                 },
             },
         ]);
-        newData.orders.averageOrderAmount = ((_b = averageOrderAmount[0]) === null || _b === void 0 ? void 0 : _b.avgAmount) || 0;
+        newData.orders.averageOrderAmount =
+            ((_c = (_b = averageOrderAmount[0]) === null || _b === void 0 ? void 0 : _b.avgAmount) === null || _c === void 0 ? void 0 : _c.toFixed(2)) || 0;
         newData.orders.confirmedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "confirm" }));
         newData.orders.rejectedOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "rejected" }));
         newData.orders.pendingOrderCount = yield Order.countDocuments(Object.assign(Object.assign({}, filterQuery), { status: "pending" }));
@@ -175,6 +176,17 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
             }
             return acc;
         }, { paid: 0, unpaid: 0 });
+        // const poResult = await PurchaseOrder.aggregate([
+        //   {
+        //     $match: { ...filterQuery },
+        //   },
+        //   {
+        //     $group: {
+        //       _id: "$payment_status",
+        //       totalBillingAmount: { $sum: "$billing_amount" },
+        //     },
+        //   },
+        // ]);
         const poResult = yield PurchaseOrder.aggregate([
             {
                 $match: Object.assign({}, filterQuery),
@@ -182,7 +194,7 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
             {
                 $group: {
                     _id: "$payment_status",
-                    totalBillingAmount: { $sum: "$billing_amount" },
+                    totalBillingAmount: { $sum: "$advance_payment_amount" },
                 },
             },
         ]);
@@ -199,7 +211,9 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
         newData.accounts.outstandings.sellAmount = billTotals.unpaid;
         newData.accounts.paid.purchaseAmount = poTotals.paid;
         newData.accounts.outstandings.purchaseAmount = poTotals.unpaid;
-        newData.accounts.on_hand = billTotals.paid - poTotals.paid;
+        // newData.accounts.on_hand = billTotals.paid - poTotals.paid;
+        newData.accounts.on_hand =
+            billTotals.paid - poTotals.paid - poTotals.unpaid;
         return { data: newData };
     }
     catch (error) {

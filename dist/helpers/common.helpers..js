@@ -89,26 +89,23 @@ const createModule = (moduleIndex, module) => __awaiter(void 0, void 0, void 0, 
                 is_default: true,
             });
             const moduleDoc = yield moduleCreate.save();
-            // global.logger.info(`MODULE: ${module} Created ✔`);
             return moduleDoc;
         }
-        else {
-            // global.logger.info(`MODULE: ${module} Existed ✔`);
-            return moduleDoc;
-        }
+        return moduleDoc;
     }
     catch (error) {
+        console.log(error === null || error === void 0 ? void 0 : error.message);
         global.logger.error(`Error creating module: ${module}`, error);
     }
 });
 const createModules = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        for (const [moduleIndex, module,] of masterConfig.defaultDataConfig.defaultModules.entries()) {
-            yield createModule(moduleIndex, module);
-        }
+        const modulePromises = masterConfig.defaultDataConfig.defaultModules.map((module, moduleIndex) => createModule(moduleIndex, module));
+        yield Promise.all(modulePromises);
+        global.logger.info("All modules created successfully");
     }
     catch (error) {
-        global.logger.error(`Error at creating all modules`, error);
+        global.logger.error(`Error creating all modules`, error);
     }
 });
 const createSuperAdminPermissions = (roleId) => __awaiter(void 0, void 0, void 0, function* () {

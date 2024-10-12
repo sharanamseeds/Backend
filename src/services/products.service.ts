@@ -161,6 +161,8 @@ const projectLocalizedProducts = (lang_code: string, isActive?: boolean) => {
     {
       $project: {
         added_by: 1,
+        size: 1,
+        price_with_gst: 1,
         updated_by: 1,
         product_code: 1,
         offers: 1,
@@ -626,6 +628,16 @@ const addProduct = async ({
     const formatedBodyData = transformFormData(bodyData);
     const product_id = new mongoose.Types.ObjectId();
 
+    let price_with_gst = 0;
+    if (formatedBodyData?.gst_percent > 0) {
+      const gst =
+        (formatedBodyData?.price * formatedBodyData?.gst_percent) / 100;
+      const new_price = formatedBodyData.price + Number(gst.toFixed(2));
+      price_with_gst = new_price;
+    } else {
+      price_with_gst = formatedBodyData.price;
+    }
+
     let basicData: any = {
       _id: product_id,
       brand_id: formatedBodyData.brand_id,
@@ -642,7 +654,9 @@ const addProduct = async ({
       base_unit: formatedBodyData?.base_unit,
       images: [],
       logo: [],
+      size: formatedBodyData?.size,
       in_stock: formatedBodyData?.quantity && formatedBodyData.quantity > 0,
+      price_with_gst: price_with_gst,
     };
 
     if ("is_featured" in formatedBodyData) {
@@ -828,6 +842,10 @@ const updateProduct = async ({
       productDoc.base_unit = bodyData.base_unit;
       delete bodyData.base_unit;
     }
+    if ("size" in bodyData) {
+      productDoc.size = bodyData.size;
+      delete bodyData.size;
+    }
 
     if (bodyData.product_name) {
       updateField(productDoc, bodyData, "product_name", lang_code);
@@ -900,6 +918,15 @@ const updateProduct = async ({
 
       await Promise.all(savedFilesPromises);
     }
+
+    if (productDoc.gst_percent > 0) {
+      const gst = (productDoc.price * productDoc.gst_percent) / 100;
+      const new_price = productDoc.price + Number(gst.toFixed(2));
+      productDoc.price_with_gst = new_price;
+    } else {
+      productDoc.price_with_gst = productDoc.price;
+    }
+
     let updatedProduct = await Product.findByIdAndUpdate(
       productId,
       productDoc,
