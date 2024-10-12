@@ -19,12 +19,7 @@ const dirName = dirname(fileName);
  * register logger for development env...
  */
 const streams = [
-  { stream: process.stdout },
-  {
-    stream: fs.createWriteStream(join(dirName, "../logs/info.log"), {
-      flags: "a",
-    }),
-  },
+  { stream: process.stdout }, // Log to console only
 ];
 
 const logger = PinoLogger.pino(
@@ -33,7 +28,10 @@ const logger = PinoLogger.pino(
     transport: {
       target: "pino-pretty",
       options: {
-        colorize: true,
+        colorize: true, // Colorize the output for better readability
+        levelFirst: true, // Print log level first
+        messageFormat: "{msg}", // Only log the message, no other metadata
+        translateTime: true, // Show human-readable time
       },
     },
   },

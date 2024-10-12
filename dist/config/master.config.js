@@ -3,10 +3,10 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const rootDir = "/home/milan";
-// export const rootDir2 = path.resolve(__dirname, "../..");
+const domain = "https://sharanamagritech.com";
 export const masterConfig = {
     server_type: "production",
-    server_base_url: "https://sharanamagritech.com:8080/",
+    server_base_url: `${domain}:8080/`,
     authConfig: {
         ACCESS_TOKEN_SECRET: "ACCESS_TOKEN_SECRET",
         REFRESH_TOKEN_SECRET: "REFRESH_TOKEN_SECRET",
@@ -67,9 +67,9 @@ export const masterConfig = {
         },
         emailTemplateConfig: {
             email_template_info: {
-                admin_web_app_link: "https://sharanamagritech.com/authentication/login",
-                mobile_app_link: "https://sharanamagritech.com/authentication/login",
-                app_store_link: "https://sharanamagritech.com/authentication/login",
+                admin_web_app_link: `${domain}/authentication/login`,
+                mobile_app_link: `${domain}/authentication/login`,
+                app_store_link: `${domain}/authentication/login`,
             },
             company_details: {
                 company_name: "Khetiwala",
