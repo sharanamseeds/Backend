@@ -8,6 +8,8 @@ import { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 import ExcelJS from "exceljs";
 import PurchaseOrder from "../models/purchase_orders.model.js";
 import { purchaseOrderService } from "../services/purchse_order.service.js";
+import Product from "../models/products.model.js";
+import { masterConfig } from "../config/master.config.js";
 
 const getPurchaseOrder = catchAsync(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -128,27 +130,39 @@ const downloadExcel = catchAsync(
 
         { header: "Product Ids", key: "productIds", width: 30 },
         { header: "Quantities", key: "quantities", width: 30 },
-
-        { header: "Total Amount", key: "total_amount", width: 30 },
-        { header: "Billing Amount", key: "billing_amount", width: 30 },
+        { header: "Product Names", key: "productNames", width: 30 },
         { header: "Status", key: "status", width: 20 },
         { header: "Payment Status", key: "payment_status", width: 20 },
         { header: "Created At", key: "createdAt", width: 30 },
         { header: "Updated At", key: "updatedAt", width: 30 },
       ];
 
-      // Add rows to the worksheet
-      purchaseOrders.forEach((order) => {
+      for (const order of purchaseOrders) {
         const productIds = order.products
           .map((p) => p.product_id.toString())
           .join(", ");
         const quantities = order.products.map((p) => p.quantity).join(", ");
-
+        const productNames = await Promise.all(
+          order.products.map(async (p) => {
+            const productDoc = await Product.findById(p.product_id);
+            if (!productDoc) {
+              return "-";
+            } else {
+              const nameObj = productDoc.product_name.find(
+                (item) =>
+                  item.lang_code ===
+                  masterConfig.defaultDataConfig.defaultLanguages[0].lang_code
+              );
+              return nameObj ? nameObj.value : "-";
+            }
+          })
+        );
         worksheet.addRow({
           _id: order?._id?.toString(),
           vendor_id: order.vendor_id?.toString(),
           productIds,
           quantities,
+          productNames: productNames.join(", "),
           invoice_no: order?.invoice_no,
           contact_name: order?.contact_name,
           contact_number: order?.contact_number,
@@ -158,7 +172,7 @@ const downloadExcel = catchAsync(
           createdAt: order?.createdAt?.toISOString() || "",
           updatedAt: order?.updatedAt?.toISOString() || "",
         });
-      });
+      }
 
       // Set the response headers and content type for the Excel file
       res.setHeader(

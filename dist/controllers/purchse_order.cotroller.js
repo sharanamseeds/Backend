@@ -12,6 +12,8 @@ import httpStatus from "http-status";
 import ExcelJS from "exceljs";
 import PurchaseOrder from "../models/purchase_orders.model.js";
 import { purchaseOrderService } from "../services/purchse_order.service.js";
+import Product from "../models/products.model.js";
+import { masterConfig } from "../config/master.config.js";
 const getPurchaseOrder = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const purchaseOrderDoc = yield purchaseOrderService.getPurchaseOrder({
         purchaseOrderId: req.params.id,
@@ -86,6 +88,7 @@ const downloadPdf = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, f
     });
 }));
 const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e;
     try {
         const purchaseOrders = yield PurchaseOrder.find();
         // Create a new Excel workbook and worksheet
@@ -100,25 +103,34 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
             { header: "Contact Number", key: "contact_number", width: 30 },
             { header: "Product Ids", key: "productIds", width: 30 },
             { header: "Quantities", key: "quantities", width: 30 },
-            { header: "Total Amount", key: "total_amount", width: 30 },
-            { header: "Billing Amount", key: "billing_amount", width: 30 },
+            { header: "Product Names", key: "productNames", width: 30 },
             { header: "Status", key: "status", width: 20 },
             { header: "Payment Status", key: "payment_status", width: 20 },
             { header: "Created At", key: "createdAt", width: 30 },
             { header: "Updated At", key: "updatedAt", width: 30 },
         ];
-        // Add rows to the worksheet
-        purchaseOrders.forEach((order) => {
-            var _a, _b, _c, _d, _e;
+        for (const order of purchaseOrders) {
             const productIds = order.products
                 .map((p) => p.product_id.toString())
                 .join(", ");
             const quantities = order.products.map((p) => p.quantity).join(", ");
+            const productNames = yield Promise.all(order.products.map((p) => __awaiter(void 0, void 0, void 0, function* () {
+                const productDoc = yield Product.findById(p.product_id);
+                if (!productDoc) {
+                    return "-";
+                }
+                else {
+                    const nameObj = productDoc.product_name.find((item) => item.lang_code ===
+                        masterConfig.defaultDataConfig.defaultLanguages[0].lang_code);
+                    return nameObj ? nameObj.value : "-";
+                }
+            })));
             worksheet.addRow({
                 _id: (_a = order === null || order === void 0 ? void 0 : order._id) === null || _a === void 0 ? void 0 : _a.toString(),
                 vendor_id: (_b = order.vendor_id) === null || _b === void 0 ? void 0 : _b.toString(),
                 productIds,
                 quantities,
+                productNames: productNames.join(", "),
                 invoice_no: order === null || order === void 0 ? void 0 : order.invoice_no,
                 contact_name: order === null || order === void 0 ? void 0 : order.contact_name,
                 contact_number: order === null || order === void 0 ? void 0 : order.contact_number,
@@ -128,7 +140,7 @@ const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
                 createdAt: ((_d = order === null || order === void 0 ? void 0 : order.createdAt) === null || _d === void 0 ? void 0 : _d.toISOString()) || "",
                 updatedAt: ((_e = order === null || order === void 0 ? void 0 : order.updatedAt) === null || _e === void 0 ? void 0 : _e.toISOString()) || "",
             });
-        });
+        }
         // Set the response headers and content type for the Excel file
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", "attachment; filename=purchase_orders.xlsx");

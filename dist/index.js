@@ -15,8 +15,6 @@ import { initializeServer } from "./connections/http.connection.js";
 import dotenv from "dotenv";
 import { initializeDatabase } from "./connections/database.connection.js";
 import { createDefaultDatabase } from "./helpers/common.helpers..js";
-// import cluster from "cluster";
-// import os from "os";
 dotenv.config();
 const fileName = fileURLToPath(import.meta.url);
 const dirName = dirname(fileName);
