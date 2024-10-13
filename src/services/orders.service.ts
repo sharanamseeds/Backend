@@ -1109,9 +1109,9 @@ const updateOrder = async ({
         return orderDoc;
       }
 
-      if (orderDoc.added_by !== requestUser._id) {
-        throw new Error("Only User Can Cancle Order");
-      }
+      // if (orderDoc.added_by !== requestUser._id) {
+      //   throw new Error("Only User Can Cancle Order");
+      // }
 
       if (
         orderDoc.status === "delivered" ||

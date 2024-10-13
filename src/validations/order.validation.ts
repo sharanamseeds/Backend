@@ -63,7 +63,7 @@ const updateOrderSchema = Joi.object({
       otherwise: Joi.forbidden(),
     }),
   reason: Joi.string().when("status", {
-    is: ["return_rejected", "rejected"],
+    is: ["return_rejected", "rejected", "cancelled"],
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),

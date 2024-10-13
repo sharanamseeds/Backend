@@ -720,9 +720,9 @@ const updateOrder = ({ orderId, requestUser, req, }) => __awaiter(void 0, void 0
             if (orderDoc.status === "cancelled") {
                 return orderDoc;
             }
-            if (orderDoc.added_by !== requestUser._id) {
-                throw new Error("Only User Can Cancle Order");
-            }
+            // if (orderDoc.added_by !== requestUser._id) {
+            //   throw new Error("Only User Can Cancle Order");
+            // }
             if (orderDoc.status === "delivered" ||
                 orderDoc.status === "rejected" ||
                 orderDoc.status === "return_rejected" ||
