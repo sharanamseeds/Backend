@@ -380,34 +380,6 @@ const refreshUserToken = async ({ refreshToken }: { refreshToken: string }) => {
 };
 
 const sendVerificationCode = async ({ email }: { email: string }) => {
-  // try {
-  //   // Find user by email
-  //   const user = await User.findOne({ email });
-
-  //   if (!user) {
-  //     throw new NotFoundError("User not found");
-  //   }
-  //   await Otps.deleteMany({ code_for: email });
-
-  //   const verificationCode = generateVerificationCode();
-  //   let otpDoc = new Otps({ code: verificationCode, code_for: email });
-  //   const savedOtp = await otpDoc.save();
-  //   if (savedOtp) {
-  //     // send code via email
-  //     await sendUserOTPMail(email, verificationCode);
-  //   }
-  //   // Respond with success message
-  //   const payloadDoc = {
-  //     status: savedOtp ? true : false,
-  //     message: "Verification Code Sent Successfully",
-  //   };
-  //   return payloadDoc;
-  // } catch (error) {
-  //   throw error;
-  // }
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     // Find user by email
     const user = await User.findOne({ email });
@@ -415,70 +387,27 @@ const sendVerificationCode = async ({ email }: { email: string }) => {
     if (!user) {
       throw new NotFoundError("User not found");
     }
+    await Otps.deleteMany({ code_for: email });
 
-    // Delete old OTPs for the email
-    await Otps.deleteMany({ code_for: email }).session(session);
-
-    // Generate a new verification code
     const verificationCode = generateVerificationCode();
-
-    // Create a new OTP document
-    const otpDoc = new Otps({ code: verificationCode, code_for: email });
-    const savedOtp = await otpDoc.save({ session });
-
-    // If OTP is saved successfully, send email
+    let otpDoc = new Otps({ code: verificationCode, code_for: email });
+    const savedOtp = await otpDoc.save();
     if (savedOtp) {
+      // send code via email
       await sendUserOTPMail(email, verificationCode);
     }
-
-    // Commit the transaction
-    await session.commitTransaction();
-
     // Respond with success message
-    return {
-      status: !!savedOtp,
-      message: `Sent Verification Code Successfully`,
+    const payloadDoc = {
+      status: savedOtp ? true : false,
+      message: "Verification Code Sent Successfully",
     };
+    return payloadDoc;
   } catch (error) {
-    await session.abortTransaction();
     throw error;
-  } finally {
-    session.endSession();
   }
 };
 
 const reSendVerificationCode = async ({ email }: { email: string }) => {
-  // try {
-  //   // Find user by email
-  //   const user = await User.findOne({ email });
-
-  //   if (!user) {
-  //     throw new NotFoundError("User not found");
-  //   }
-
-  //   await Otps.deleteMany({ code_for: email });
-
-  //   const verificationCode = generateVerificationCode();
-
-  //   let otpDoc = new Otps({ code: verificationCode, code_for: email });
-  //   const savedOtp = await otpDoc.save();
-  //   if (savedOtp) {
-  //     // send code via email
-  //     await sendUserOTPMail(email, verificationCode);
-  //   }
-  //   // Respond with success message
-  //   const payloadDoc = {
-  //     status: savedOtp ? true : false,
-  //     message: "Verification Code Sent Successfully",
-  //   };
-
-  //   return payloadDoc;
-  // } catch (error) {
-  //   throw error;
-  // }
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     // Find user by email
     const user = await User.findOne({ email });
@@ -487,34 +416,25 @@ const reSendVerificationCode = async ({ email }: { email: string }) => {
       throw new NotFoundError("User not found");
     }
 
-    // Delete old OTPs for the email
-    await Otps.deleteMany({ code_for: email }).session(session);
+    await Otps.deleteMany({ code_for: email });
 
-    // Generate a new verification code
     const verificationCode = generateVerificationCode();
 
-    // Create a new OTP document
-    const otpDoc = new Otps({ code: verificationCode, code_for: email });
-    const savedOtp = await otpDoc.save({ session });
-
-    // If OTP is saved successfully, send email
+    let otpDoc = new Otps({ code: verificationCode, code_for: email });
+    const savedOtp = await otpDoc.save();
     if (savedOtp) {
+      // send code via email
       await sendUserOTPMail(email, verificationCode);
     }
-
-    // Commit the transaction
-    await session.commitTransaction();
-
     // Respond with success message
-    return {
-      status: !!savedOtp,
-      message: `Resent Verification Code Successfully`,
+    const payloadDoc = {
+      status: savedOtp ? true : false,
+      message: "Verification Code Sent Successfully",
     };
+
+    return payloadDoc;
   } catch (error) {
-    await session.abortTransaction();
     throw error;
-  } finally {
-    session.endSession();
   }
 };
 

@@ -66,7 +66,7 @@ export const masterConfig = {
   nodemailerConfig: {
     mailConfig: {
       email: "sharanamseeds@gmail.com",
-      password: "bizg gtar ogel vbmm",
+      password: "vfqi qcsg uwhw dzcc",
       name: "Khetiwala",
     },
     emailTemplateConfig: {
