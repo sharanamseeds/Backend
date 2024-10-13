@@ -153,6 +153,8 @@ const projectLocalizedCartProducts = (lang_code: string) => {
               category_id: 1,
               in_stock: 1,
               gst_percent: 1,
+              price_with_gst: 1,
+              size: 1,
               price: 1,
               quantity: 1,
               is_active: 1,
