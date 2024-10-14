@@ -3,7 +3,7 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const rootDir = "/home/milan";
-const domain = "https://sharanamagritech.com";
+const domain = "https://khetiwala.com";
 export const masterConfig = {
     server_type: "production",
     server_base_url: `${domain}:8080/`,
@@ -16,7 +16,7 @@ export const masterConfig = {
         url: "mongodb://admin:%24ecureP4sssw0rd%232024@82.112.238.3:27017/?tls=false",
     },
     superAdminConfig: {
-        email: "sharanamseeds@gmail.com",
+        email: "khetiwalaa@gmail.com",
         password: "Admin@1234",
         name: "Khetiwala",
         contact_number: "9537712126",
@@ -61,8 +61,8 @@ export const masterConfig = {
     },
     nodemailerConfig: {
         mailConfig: {
-            email: "sharanamseeds@gmail.com",
-            password: "vfqi qcsg uwhw dzcc",
+            email: "khetiwalaa@gmail.com",
+            password: "nfft xeaw twkt lzja",
             name: "Khetiwala",
         },
         emailTemplateConfig: {
@@ -155,4 +155,5 @@ export const masterConfig = {
 // Username: admin
 // Password: $ecureP4ssw0rd#2024
 // URL: mongodb://admin:%24ecureP4sssw0rd%232024@82.112.238.3:27017/?tls=false
+// Sharanam@2024p4ssw0rd
 //# sourceMappingURL=master.config.js.map
