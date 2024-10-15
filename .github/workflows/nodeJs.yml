@@ -23,13 +23,16 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: cp -r default_images /home/milan
+      # - run: cp -r default_images /home/milan
       # - run: npm run build
-      - name: Stop and delete existing PM2 processes
-        run: |
-          pm2 stop all || true
-          pm2 delete all || true
-      - run: pm2 start ./dist/index.js
+      # - name: Stop and delete existing PM2 processes
+      #   run: |
+      #     pm2 stop all || true
+      #     pm2 delete all || true
+      # - run: pm2 start ./dist/index.js
+      - run: pm2 restart 0
+      - run: cp -r default_images /home/milan
+
       # - run: pm2 save
       # - run: mv ecosystem.config.js ecosystem.config.cjs
       # - run: cp -r default_images/ /home/ubuntu/pm2/
