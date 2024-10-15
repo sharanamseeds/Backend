@@ -15,6 +15,8 @@ import { escapeRegex, sendUserAccountCreatedMail, sendUserAccountVerifiedMail, }
 import { masterConfig } from "../config/master.config.js";
 import Money from "../models/money.model.js";
 import Ledger from "../models/ledger.model.js";
+import ExcelJS from "exceljs";
+import { generateLedgerPdfCodeHtml } from "../helpers/mail.helpers.js";
 const AppcalculateUserFinancials = ({ userId, query }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const userDoc = yield User.findById(userId);
@@ -156,8 +158,386 @@ const AppcalculateUserFinancials = ({ userId, query }) => __awaiter(void 0, void
         throw new Error(`Error calculating financials: ${error.message}`);
     }
 });
+const AppcalculateUserFinancialsDownloadExcel = ({ userId, query, res, }) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    const userDoc = yield User.findById(userId);
+    const { date, category, from, to } = query;
+    if (!userDoc) {
+        throw new Error("Invalid user ID");
+    }
+    let ledgerQuery = { user_id: new mongoose.Types.ObjectId(userId) };
+    let moneyQuery = { user_id: new mongoose.Types.ObjectId(userId) };
+    if (category) {
+        switch (category) {
+            case "credit_note":
+                ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { type: "credit" });
+                break;
+            case "debit_note":
+                ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { type: "debit" });
+                break;
+            default:
+                break;
+        }
+    }
+    if (date) {
+        let start_date;
+        let end_date;
+        const currentDate = new Date();
+        switch (date) {
+            case "all":
+                break;
+            case "current_year":
+                start_date = new Date(currentDate.getFullYear(), 0, 1);
+                end_date = currentDate;
+                break;
+            case "past_year":
+                start_date = new Date(currentDate.getFullYear() - 1, 0, 1);
+                end_date = new Date(currentDate.getFullYear() - 1, 11, 31);
+                break;
+            case "last_three_month":
+                start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+                end_date = new Date();
+                break;
+            case "last_one_month":
+                start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+                end_date = new Date();
+                break;
+            case "last_one_year":
+                start_date = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+                end_date = new Date();
+                break;
+            case "custom":
+                if (from)
+                    start_date = new Date(from);
+                if (to)
+                    end_date = new Date(to);
+                break;
+            default:
+                break;
+        }
+        if (start_date || end_date) {
+            const dateRange = Object.assign(Object.assign({}, (start_date ? { $gte: new Date(start_date) } : {})), (end_date ? { $lte: new Date(end_date) } : {}));
+            moneyQuery = Object.assign(Object.assign({}, moneyQuery), { createdAt: dateRange });
+            ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { createdAt: dateRange });
+        }
+    }
+    try {
+        let totalMoneyAdded = [];
+        if (!category || category !== "debit_note") {
+            totalMoneyAdded = yield Money.aggregate([
+                { $match: moneyQuery },
+                { $group: { _id: null, total: { $sum: "$amount" } } },
+            ]);
+        }
+        let ledgerData = [];
+        if (!category || category !== "payment") {
+            ledgerData = yield Ledger.aggregate([
+                { $match: ledgerQuery },
+                { $group: { _id: "$type", totalAmount: { $sum: "$payment_amount" } } },
+            ]);
+        }
+        let totalCredit = 0;
+        let totalDebit = 0;
+        ledgerData.forEach((item) => {
+            if (item._id === "credit") {
+                totalCredit = item.totalAmount;
+            }
+            else if (item._id === "debit") {
+                totalDebit = item.totalAmount;
+            }
+        });
+        const availableCreditLimit = (((_c = totalMoneyAdded[0]) === null || _c === void 0 ? void 0 : _c.total) || 0) + totalCredit - totalDebit;
+        let credits = [];
+        if (!category || category !== "debit_note") {
+            credits = yield Money.find(moneyQuery);
+        }
+        let ledgers = [];
+        if (!category || category !== "payment") {
+            ledgers = yield Ledger.aggregate([
+                { $match: ledgerQuery },
+                {
+                    $lookup: {
+                        from: "bills",
+                        localField: "bill_id",
+                        foreignField: "_id",
+                        as: "bill",
+                    },
+                },
+                { $unwind: { path: "$bill", preserveNullAndEmptyArrays: true } },
+            ]);
+        }
+        const data = {};
+        const addToGroupedData = (array, type) => {
+            array.forEach((item) => {
+                const monthYear = new Date(item.createdAt).toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                });
+                if (!data[monthYear]) {
+                    data[monthYear] = { month: monthYear, ledgers: [], credits: [] };
+                }
+                if (type === "ledger") {
+                    data[monthYear].ledgers.push(item);
+                }
+                else if (type === "credit") {
+                    data[monthYear].credits.push(item);
+                }
+            });
+        };
+        addToGroupedData(ledgers, "ledger");
+        addToGroupedData(credits, "credit");
+        const groupedData = Object.values(data);
+        // Create a new Excel workbook and worksheet
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("statement");
+        // Add headers to the worksheet based on the typeUser fields
+        worksheet.columns = [
+            { header: "Date", key: "date", width: 30 },
+            { header: "Amount", key: "amount", width: 30 },
+            { header: "type", key: "type", width: 30 },
+            { header: "Invoice No", key: "invoice_no", width: 20 },
+        ];
+        if (groupedData.length > 0) {
+            groupedData.forEach((group) => {
+                if ((group === null || group === void 0 ? void 0 : group.ledgers.length) > 0) {
+                    group === null || group === void 0 ? void 0 : group.ledgers.forEach((ledger) => {
+                        const createdAt = (ledger === null || ledger === void 0 ? void 0 : ledger.createdAt)
+                            ? new Date(ledger.createdAt)
+                            : new Date();
+                        const formattedDate = `${String(createdAt.getDate()).padStart(2, "0")}/${String(createdAt.getMonth() + 1).padStart(2, "0")}/${createdAt.getFullYear()}`;
+                        worksheet.addRow({
+                            date: formattedDate,
+                            amount: ledger.payment_amount,
+                            type: ledger.type,
+                            invoice_no: ledger.invoice_id,
+                        });
+                    });
+                }
+                if ((group === null || group === void 0 ? void 0 : group.credits.length) > 0) {
+                    group === null || group === void 0 ? void 0 : group.credits.forEach((credit) => {
+                        const createdAt = (credit === null || credit === void 0 ? void 0 : credit.createdAt)
+                            ? new Date(credit.createdAt)
+                            : new Date();
+                        const formattedDate = `${String(createdAt.getDate()).padStart(2, "0")}/${String(createdAt.getMonth() + 1).padStart(2, "0")}/${createdAt.getFullYear()}`;
+                        worksheet.addRow({
+                            date: formattedDate,
+                            amount: credit.amount,
+                            type: "Payment",
+                            invoice_no: "-",
+                        });
+                    });
+                }
+            });
+        }
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", "attachment; filename=statement.xlsx");
+        // Write the Excel file to the response
+        yield workbook.xlsx.write(res);
+        // End the response
+        res.end();
+    }
+    catch (error) {
+        throw new Error(`Error calculating financials: ${error.message}`);
+    }
+});
+const AppcalculateUserFinancialsDownloadPDF = ({ userId, query, res, }) => __awaiter(void 0, void 0, void 0, function* () {
+    var _d, _e;
+    const userDoc = yield User.findById(userId);
+    const { date, category, from, to } = query;
+    if (!userDoc) {
+        throw new Error("Invalid user ID");
+    }
+    let ledgerQuery = { user_id: new mongoose.Types.ObjectId(userId) };
+    let moneyQuery = { user_id: new mongoose.Types.ObjectId(userId) };
+    if (category) {
+        switch (category) {
+            case "credit_note":
+                ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { type: "credit" });
+                break;
+            case "debit_note":
+                ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { type: "debit" });
+                break;
+            default:
+                break;
+        }
+    }
+    if (date) {
+        let start_date;
+        let end_date;
+        const currentDate = new Date();
+        switch (date) {
+            case "all":
+                break;
+            case "current_year":
+                start_date = new Date(currentDate.getFullYear(), 0, 1);
+                end_date = currentDate;
+                break;
+            case "past_year":
+                start_date = new Date(currentDate.getFullYear() - 1, 0, 1);
+                end_date = new Date(currentDate.getFullYear() - 1, 11, 31);
+                break;
+            case "last_three_month":
+                start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+                end_date = new Date();
+                break;
+            case "last_one_month":
+                start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+                end_date = new Date();
+                break;
+            case "last_one_year":
+                start_date = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+                end_date = new Date();
+                break;
+            case "custom":
+                if (from)
+                    start_date = new Date(from);
+                if (to)
+                    end_date = new Date(to);
+                break;
+            default:
+                break;
+        }
+        if (start_date || end_date) {
+            const dateRange = Object.assign(Object.assign({}, (start_date ? { $gte: new Date(start_date) } : {})), (end_date ? { $lte: new Date(end_date) } : {}));
+            moneyQuery = Object.assign(Object.assign({}, moneyQuery), { createdAt: dateRange });
+            ledgerQuery = Object.assign(Object.assign({}, ledgerQuery), { createdAt: dateRange });
+        }
+    }
+    try {
+        let totalMoneyAdded = [];
+        if (!category || category !== "debit_note") {
+            totalMoneyAdded = yield Money.aggregate([
+                { $match: moneyQuery },
+                { $group: { _id: null, total: { $sum: "$amount" } } },
+            ]);
+        }
+        let ledgerData = [];
+        if (!category || category !== "payment") {
+            ledgerData = yield Ledger.aggregate([
+                { $match: ledgerQuery },
+                { $group: { _id: "$type", totalAmount: { $sum: "$payment_amount" } } },
+            ]);
+        }
+        let totalCredit = 0;
+        let totalDebit = 0;
+        ledgerData.forEach((item) => {
+            if (item._id === "credit") {
+                totalCredit = item.totalAmount;
+            }
+            else if (item._id === "debit") {
+                totalDebit = item.totalAmount;
+            }
+        });
+        const availableCreditLimit = (((_d = totalMoneyAdded[0]) === null || _d === void 0 ? void 0 : _d.total) || 0) + totalCredit - totalDebit;
+        let credits = [];
+        if (!category || category !== "debit_note") {
+            credits = yield Money.find(moneyQuery);
+        }
+        let ledgers = [];
+        if (!category || category !== "payment") {
+            ledgers = yield Ledger.aggregate([
+                { $match: ledgerQuery },
+                {
+                    $lookup: {
+                        from: "bills",
+                        localField: "bill_id",
+                        foreignField: "_id",
+                        as: "bill",
+                    },
+                },
+                { $unwind: { path: "$bill", preserveNullAndEmptyArrays: true } },
+            ]);
+        }
+        const data = {};
+        const addToGroupedData = (array, type) => {
+            array.forEach((item) => {
+                const monthYear = new Date(item.createdAt).toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                });
+                if (!data[monthYear]) {
+                    data[monthYear] = { month: monthYear, ledgers: [], credits: [] };
+                }
+                if (type === "ledger") {
+                    data[monthYear].ledgers.push(item);
+                }
+                else if (type === "credit") {
+                    data[monthYear].credits.push(item);
+                }
+            });
+        };
+        addToGroupedData(ledgers, "ledger");
+        addToGroupedData(credits, "credit");
+        const groupedData = Object.values(data);
+        // if (groupedData.length > 0) {
+        //   groupedData.forEach((group: any) => {
+        //     if (group?.ledgers.length > 0) {
+        //       group?.ledgers.forEach((ledger: any) => {
+        //         const createdAt = ledger?.createdAt
+        //           ? new Date(ledger.createdAt)
+        //           : new Date();
+        //         const formattedDate = `${String(createdAt.getDate()).padStart(
+        //           2,
+        //           "0"
+        //         )}/${String(createdAt.getMonth() + 1).padStart(
+        //           2,
+        //           "0"
+        //         )}/${createdAt.getFullYear()}`;
+        //         worksheet.addRow({
+        //           date: formattedDate,
+        //           amount: ledger.payment_amount,
+        //           type: ledger.type,
+        //           invoice_no: ledger.invoice_id,
+        //         });
+        //       });
+        //     }
+        //     if (group?.credits.length > 0) {
+        //       group?.credits.forEach((credit: any) => {
+        //         const createdAt = credit?.createdAt
+        //           ? new Date(credit.createdAt)
+        //           : new Date();
+        //         const formattedDate = `${String(createdAt.getDate()).padStart(
+        //           2,
+        //           "0"
+        //         )}/${String(createdAt.getMonth() + 1).padStart(
+        //           2,
+        //           "0"
+        //         )}/${createdAt.getFullYear()}`;
+        //         worksheet.addRow({
+        //           date: formattedDate,
+        //           amount: credit.amount,
+        //           type: "Payment",
+        //           invoice_no: "-",
+        //         });
+        //       });
+        //     }
+        //   });
+        // }
+        const ledgerStaticData = {
+            totalMoneyAdded: ((_e = totalMoneyAdded[0]) === null || _e === void 0 ? void 0 : _e.total) || 0,
+            totalCredit,
+            totalDebit,
+            availableCreditLimit,
+            groupedData,
+        };
+        const htmlForAttachment = generateLedgerPdfCodeHtml(userDoc, ledgerStaticData, false);
+        res.setHeader("Content-Type", "application/html");
+        res.setHeader("Content-Disposition", "attachment; filename=bill.html");
+        res.send(htmlForAttachment);
+        // return {
+        //   totalMoneyAdded: totalMoneyAdded[0]?.total || 0,
+        //   totalCredit,
+        //   totalDebit,
+        //   availableCreditLimit,
+        //   groupedData,
+        // };
+    }
+    catch (error) {
+        throw new Error(`Error calculating financials: ${error.message}`);
+    }
+});
 const calculateUserFinancials = ({ userId }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d;
+    var _f, _g;
     const userDoc = yield User.findById(userId);
     if (!userDoc) {
         throw new Error("Invalid user ID");
@@ -186,7 +566,7 @@ const calculateUserFinancials = ({ userId }) => __awaiter(void 0, void 0, void 0
                 totalDebit = item.totalAmount;
             }
         });
-        const finalBalance = (((_c = totalMoneyAdded[0]) === null || _c === void 0 ? void 0 : _c.total) || 0) + totalCredit - totalDebit;
+        const finalBalance = (((_f = totalMoneyAdded[0]) === null || _f === void 0 ? void 0 : _f.total) || 0) + totalCredit - totalDebit;
         const credits = yield Money.find({
             user_id: new mongoose.Types.ObjectId(userId),
         });
@@ -212,7 +592,7 @@ const calculateUserFinancials = ({ userId }) => __awaiter(void 0, void 0, void 0
             },
         ]);
         return {
-            totalMoneyAdded: ((_d = totalMoneyAdded[0]) === null || _d === void 0 ? void 0 : _d.total) || 0,
+            totalMoneyAdded: ((_g = totalMoneyAdded[0]) === null || _g === void 0 ? void 0 : _g.total) || 0,
             totalCredit,
             totalDebit,
             finalBalance,
@@ -323,10 +703,10 @@ const getUser = ({ userId, query, }) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const addUser = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e;
+    var _h;
     try {
         let bodyData = {};
-        if (((_e = req === null || req === void 0 ? void 0 : req.query) === null || _e === void 0 ? void 0 : _e.payload) && typeof req.query.payload === "string") {
+        if (((_h = req === null || req === void 0 ? void 0 : req.query) === null || _h === void 0 ? void 0 : _h.payload) && typeof req.query.payload === "string") {
             bodyData = JSON.parse(req.query.payload);
         }
         const { password } = bodyData;
@@ -437,7 +817,7 @@ const addUser = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 const updateUser = ({ userId, requestUser, req, }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _f;
+    var _j;
     try {
         const userOriginal = yield User.findById(userId);
         let userDoc = yield User.findByIdAndUpdate(userId);
@@ -445,7 +825,7 @@ const updateUser = ({ userId, requestUser, req, }) => __awaiter(void 0, void 0, 
             throw new Error("User Not Found");
         }
         let body = {};
-        if (((_f = req === null || req === void 0 ? void 0 : req.query) === null || _f === void 0 ? void 0 : _f.payload) && typeof req.query.payload === "string") {
+        if (((_j = req === null || req === void 0 ? void 0 : req.query) === null || _j === void 0 ? void 0 : _j.payload) && typeof req.query.payload === "string") {
             body = JSON.parse(req.query.payload);
         }
         if ("role_id" in body ||
@@ -586,5 +966,7 @@ export const userService = {
     deleteUser,
     calculateUserFinancials,
     AppcalculateUserFinancials,
+    AppcalculateUserFinancialsDownloadExcel,
+    AppcalculateUserFinancialsDownloadPDF,
 };
 //# sourceMappingURL=users.service.js.map

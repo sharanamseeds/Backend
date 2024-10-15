@@ -14,6 +14,8 @@ import {
 import { masterConfig } from "../config/master.config.js";
 import Money from "../models/money.model.js";
 import Ledger from "../models/ledger.model.js";
+import ExcelJS from "exceljs";
+import { generateLedgerPdfCodeHtml } from "../helpers/mail.helpers.js";
 
 const AppcalculateUserFinancials = async ({ userId, query }) => {
   const userDoc = await User.findById(userId);
@@ -172,6 +174,471 @@ const AppcalculateUserFinancials = async ({ userId, query }) => {
       availableCreditLimit,
       groupedData,
     };
+  } catch (error) {
+    throw new Error(`Error calculating financials: ${error.message}`);
+  }
+};
+
+const AppcalculateUserFinancialsDownloadExcel = async ({
+  userId,
+  query,
+  res,
+}) => {
+  const userDoc = await User.findById(userId);
+  const { date, category, from, to } = query;
+
+  if (!userDoc) {
+    throw new Error("Invalid user ID");
+  }
+
+  let ledgerQuery: any = { user_id: new mongoose.Types.ObjectId(userId) };
+  let moneyQuery: any = { user_id: new mongoose.Types.ObjectId(userId) };
+
+  if (category) {
+    switch (category) {
+      case "credit_note":
+        ledgerQuery = { ...ledgerQuery, type: "credit" };
+        break;
+      case "debit_note":
+        ledgerQuery = { ...ledgerQuery, type: "debit" };
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (date) {
+    let start_date;
+    let end_date;
+    const currentDate = new Date();
+
+    switch (date) {
+      case "all":
+        break;
+      case "current_year":
+        start_date = new Date(currentDate.getFullYear(), 0, 1);
+        end_date = currentDate;
+        break;
+      case "past_year":
+        start_date = new Date(currentDate.getFullYear() - 1, 0, 1);
+        end_date = new Date(currentDate.getFullYear() - 1, 11, 31);
+        break;
+      case "last_three_month":
+        start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+        end_date = new Date();
+        break;
+      case "last_one_month":
+        start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+        end_date = new Date();
+        break;
+      case "last_one_year":
+        start_date = new Date(
+          currentDate.setFullYear(currentDate.getFullYear() - 1)
+        );
+        end_date = new Date();
+        break;
+      case "custom":
+        if (from) start_date = new Date(from);
+        if (to) end_date = new Date(to);
+        break;
+      default:
+        break;
+    }
+
+    if (start_date || end_date) {
+      const dateRange = {
+        ...(start_date ? { $gte: new Date(start_date) } : {}),
+        ...(end_date ? { $lte: new Date(end_date) } : {}),
+      };
+      moneyQuery = { ...moneyQuery, createdAt: dateRange };
+      ledgerQuery = { ...ledgerQuery, createdAt: dateRange };
+    }
+  }
+
+  try {
+    let totalMoneyAdded = [];
+    if (!category || category !== "debit_note") {
+      totalMoneyAdded = await Money.aggregate([
+        { $match: moneyQuery },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]);
+    }
+
+    let ledgerData = [];
+    if (!category || category !== "payment") {
+      ledgerData = await Ledger.aggregate([
+        { $match: ledgerQuery },
+        { $group: { _id: "$type", totalAmount: { $sum: "$payment_amount" } } },
+      ]);
+    }
+
+    let totalCredit = 0;
+    let totalDebit = 0;
+
+    ledgerData.forEach((item) => {
+      if (item._id === "credit") {
+        totalCredit = item.totalAmount;
+      } else if (item._id === "debit") {
+        totalDebit = item.totalAmount;
+      }
+    });
+
+    const availableCreditLimit =
+      (totalMoneyAdded[0]?.total || 0) + totalCredit - totalDebit;
+
+    let credits = [];
+    if (!category || category !== "debit_note") {
+      credits = await Money.find(moneyQuery);
+    }
+
+    let ledgers = [];
+    if (!category || category !== "payment") {
+      ledgers = await Ledger.aggregate([
+        { $match: ledgerQuery },
+        {
+          $lookup: {
+            from: "bills",
+            localField: "bill_id",
+            foreignField: "_id",
+            as: "bill",
+          },
+        },
+        { $unwind: { path: "$bill", preserveNullAndEmptyArrays: true } },
+      ]);
+    }
+
+    const data = {};
+
+    const addToGroupedData = (array, type) => {
+      array.forEach((item) => {
+        const monthYear = new Date(item.createdAt).toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+
+        if (!data[monthYear]) {
+          data[monthYear] = { month: monthYear, ledgers: [], credits: [] };
+        }
+
+        if (type === "ledger") {
+          data[monthYear].ledgers.push(item);
+        } else if (type === "credit") {
+          data[monthYear].credits.push(item);
+        }
+      });
+    };
+
+    addToGroupedData(ledgers, "ledger");
+    addToGroupedData(credits, "credit");
+
+    const groupedData = Object.values(data);
+
+    // Create a new Excel workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("statement");
+
+    // Add headers to the worksheet based on the typeUser fields
+    worksheet.columns = [
+      { header: "Date", key: "date", width: 30 },
+      { header: "Amount", key: "amount", width: 30 },
+      { header: "type", key: "type", width: 30 },
+      { header: "Invoice No", key: "invoice_no", width: 20 },
+    ];
+
+    if (groupedData.length > 0) {
+      groupedData.forEach((group: any) => {
+        if (group?.ledgers.length > 0) {
+          group?.ledgers.forEach((ledger: any) => {
+            const createdAt = ledger?.createdAt
+              ? new Date(ledger.createdAt)
+              : new Date();
+
+            const formattedDate = `${String(createdAt.getDate()).padStart(
+              2,
+              "0"
+            )}/${String(createdAt.getMonth() + 1).padStart(
+              2,
+              "0"
+            )}/${createdAt.getFullYear()}`;
+
+            worksheet.addRow({
+              date: formattedDate,
+              amount: ledger.payment_amount,
+              type: ledger.type,
+              invoice_no: ledger.invoice_id,
+            });
+          });
+        }
+
+        if (group?.credits.length > 0) {
+          group?.credits.forEach((credit: any) => {
+            const createdAt = credit?.createdAt
+              ? new Date(credit.createdAt)
+              : new Date();
+
+            const formattedDate = `${String(createdAt.getDate()).padStart(
+              2,
+              "0"
+            )}/${String(createdAt.getMonth() + 1).padStart(
+              2,
+              "0"
+            )}/${createdAt.getFullYear()}`;
+
+            worksheet.addRow({
+              date: formattedDate,
+              amount: credit.amount,
+              type: "Payment",
+              invoice_no: "-",
+            });
+          });
+        }
+      });
+    }
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=statement.xlsx");
+
+    // Write the Excel file to the response
+    await workbook.xlsx.write(res);
+
+    // End the response
+    res.end();
+  } catch (error) {
+    throw new Error(`Error calculating financials: ${error.message}`);
+  }
+};
+
+const AppcalculateUserFinancialsDownloadPDF = async ({
+  userId,
+  query,
+  res,
+}) => {
+  const userDoc = await User.findById(userId);
+  const { date, category, from, to } = query;
+
+  if (!userDoc) {
+    throw new Error("Invalid user ID");
+  }
+
+  let ledgerQuery: any = { user_id: new mongoose.Types.ObjectId(userId) };
+  let moneyQuery: any = { user_id: new mongoose.Types.ObjectId(userId) };
+
+  if (category) {
+    switch (category) {
+      case "credit_note":
+        ledgerQuery = { ...ledgerQuery, type: "credit" };
+        break;
+      case "debit_note":
+        ledgerQuery = { ...ledgerQuery, type: "debit" };
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (date) {
+    let start_date;
+    let end_date;
+    const currentDate = new Date();
+
+    switch (date) {
+      case "all":
+        break;
+      case "current_year":
+        start_date = new Date(currentDate.getFullYear(), 0, 1);
+        end_date = currentDate;
+        break;
+      case "past_year":
+        start_date = new Date(currentDate.getFullYear() - 1, 0, 1);
+        end_date = new Date(currentDate.getFullYear() - 1, 11, 31);
+        break;
+      case "last_three_month":
+        start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+        end_date = new Date();
+        break;
+      case "last_one_month":
+        start_date = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+        end_date = new Date();
+        break;
+      case "last_one_year":
+        start_date = new Date(
+          currentDate.setFullYear(currentDate.getFullYear() - 1)
+        );
+        end_date = new Date();
+        break;
+      case "custom":
+        if (from) start_date = new Date(from);
+        if (to) end_date = new Date(to);
+        break;
+      default:
+        break;
+    }
+
+    if (start_date || end_date) {
+      const dateRange = {
+        ...(start_date ? { $gte: new Date(start_date) } : {}),
+        ...(end_date ? { $lte: new Date(end_date) } : {}),
+      };
+      moneyQuery = { ...moneyQuery, createdAt: dateRange };
+      ledgerQuery = { ...ledgerQuery, createdAt: dateRange };
+    }
+  }
+
+  try {
+    let totalMoneyAdded = [];
+    if (!category || category !== "debit_note") {
+      totalMoneyAdded = await Money.aggregate([
+        { $match: moneyQuery },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]);
+    }
+
+    let ledgerData = [];
+    if (!category || category !== "payment") {
+      ledgerData = await Ledger.aggregate([
+        { $match: ledgerQuery },
+        { $group: { _id: "$type", totalAmount: { $sum: "$payment_amount" } } },
+      ]);
+    }
+
+    let totalCredit = 0;
+    let totalDebit = 0;
+
+    ledgerData.forEach((item) => {
+      if (item._id === "credit") {
+        totalCredit = item.totalAmount;
+      } else if (item._id === "debit") {
+        totalDebit = item.totalAmount;
+      }
+    });
+
+    const availableCreditLimit =
+      (totalMoneyAdded[0]?.total || 0) + totalCredit - totalDebit;
+
+    let credits = [];
+    if (!category || category !== "debit_note") {
+      credits = await Money.find(moneyQuery);
+    }
+
+    let ledgers = [];
+    if (!category || category !== "payment") {
+      ledgers = await Ledger.aggregate([
+        { $match: ledgerQuery },
+        {
+          $lookup: {
+            from: "bills",
+            localField: "bill_id",
+            foreignField: "_id",
+            as: "bill",
+          },
+        },
+        { $unwind: { path: "$bill", preserveNullAndEmptyArrays: true } },
+      ]);
+    }
+
+    const data = {};
+
+    const addToGroupedData = (array, type) => {
+      array.forEach((item) => {
+        const monthYear = new Date(item.createdAt).toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+
+        if (!data[monthYear]) {
+          data[monthYear] = { month: monthYear, ledgers: [], credits: [] };
+        }
+
+        if (type === "ledger") {
+          data[monthYear].ledgers.push(item);
+        } else if (type === "credit") {
+          data[monthYear].credits.push(item);
+        }
+      });
+    };
+
+    addToGroupedData(ledgers, "ledger");
+    addToGroupedData(credits, "credit");
+
+    const groupedData = Object.values(data);
+
+    // if (groupedData.length > 0) {
+    //   groupedData.forEach((group: any) => {
+    //     if (group?.ledgers.length > 0) {
+    //       group?.ledgers.forEach((ledger: any) => {
+    //         const createdAt = ledger?.createdAt
+    //           ? new Date(ledger.createdAt)
+    //           : new Date();
+
+    //         const formattedDate = `${String(createdAt.getDate()).padStart(
+    //           2,
+    //           "0"
+    //         )}/${String(createdAt.getMonth() + 1).padStart(
+    //           2,
+    //           "0"
+    //         )}/${createdAt.getFullYear()}`;
+
+    //         worksheet.addRow({
+    //           date: formattedDate,
+    //           amount: ledger.payment_amount,
+    //           type: ledger.type,
+    //           invoice_no: ledger.invoice_id,
+    //         });
+    //       });
+    //     }
+
+    //     if (group?.credits.length > 0) {
+    //       group?.credits.forEach((credit: any) => {
+    //         const createdAt = credit?.createdAt
+    //           ? new Date(credit.createdAt)
+    //           : new Date();
+
+    //         const formattedDate = `${String(createdAt.getDate()).padStart(
+    //           2,
+    //           "0"
+    //         )}/${String(createdAt.getMonth() + 1).padStart(
+    //           2,
+    //           "0"
+    //         )}/${createdAt.getFullYear()}`;
+
+    //         worksheet.addRow({
+    //           date: formattedDate,
+    //           amount: credit.amount,
+    //           type: "Payment",
+    //           invoice_no: "-",
+    //         });
+    //       });
+    //     }
+    //   });
+    // }
+
+    const ledgerStaticData = {
+      totalMoneyAdded: totalMoneyAdded[0]?.total || 0,
+      totalCredit,
+      totalDebit,
+      availableCreditLimit,
+      groupedData,
+    };
+
+    const htmlForAttachment = generateLedgerPdfCodeHtml(
+      userDoc,
+      ledgerStaticData,
+      false
+    );
+    res.setHeader("Content-Type", "application/html");
+    res.setHeader("Content-Disposition", "attachment; filename=bill.html");
+    res.send(htmlForAttachment);
+
+    // return {
+    //   totalMoneyAdded: totalMoneyAdded[0]?.total || 0,
+    //   totalCredit,
+    //   totalDebit,
+    //   availableCreditLimit,
+    //   groupedData,
+    // };
   } catch (error) {
     throw new Error(`Error calculating financials: ${error.message}`);
   }
@@ -738,4 +1205,6 @@ export const userService = {
   deleteUser,
   calculateUserFinancials,
   AppcalculateUserFinancials,
+  AppcalculateUserFinancialsDownloadExcel,
+  AppcalculateUserFinancialsDownloadPDF,
 };

@@ -613,6 +613,206 @@ export const generateBillCodeHtml = (bill, isForMail = true, isReturnBill = true
 </body>
 </html>
 `;
+export const generateLedgerPdfCodeHtml = (userDoc, ledgerStaticData, isForMail = true) => {
+    var _a;
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      padding: 20px;
+    }
+
+    /* Header styles */
+    .header {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .header img {
+      max-width: 150px; /* Adjust logo size */
+      vertical-align: middle;
+    }
+    .header h1 {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: right;
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Details section styles */
+    .details {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .details .company,
+    .details .buyer {
+      display: table-cell;
+      width: 50%; /* Adjust width for even distribution */
+      vertical-align: top;
+    }
+    .details p {
+      margin: 5px; /* Add some space between elements */
+    }
+    .company p {
+      margin: 5px; /* Add some space between elements */
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+    }
+
+    /* Summary and Bank Details styles */
+    .total,
+    .gst-summary {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .total{
+    margin: 10px;
+    }
+    .bank-details {
+      display: table;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .bank-details .bank-info,
+    .bank-details .qr-code {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+    }
+    .bank-details .qr-code {
+      text-align: right;
+    }
+
+    /* Signature and Page Break styles */
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Return bill notice */
+    .return-notice {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+  <title>Statement</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src=${isForMail
+        ? "cid:companylogo"
+        : "data:" +
+            getLocalImageB64(masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                .primary_logo_path).mimeType +
+            ";base64," +
+            getLocalImageB64(masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                .primary_logo_path).b64Data} alt="Company Logo" />
+      <h1>Statement</h1>
+    </div>
+
+    <div class="details">
+      <div class="company"> 
+      </div>
+      <div class="buyer">
+        <p><strong>Customer Details:</strong></p>
+        <p><strong>Name:</strong> ${(userDoc === null || userDoc === void 0 ? void 0 : userDoc.agro_name) || ""}</p>
+        <p><strong>Email:</strong> ${(userDoc === null || userDoc === void 0 ? void 0 : userDoc.email) || ""}</p>
+        <p><strong>Phone:</strong> ${(userDoc === null || userDoc === void 0 ? void 0 : userDoc.contact_number) || ""}</p>
+        <p><strong>GST No:</strong> ${(userDoc === null || userDoc === void 0 ? void 0 : userDoc.gst_number) || ""}</p>
+      </div>
+    </div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Amount</th>
+      <th>Type</th>
+      <th>Invoice No</th>
+    </tr>
+      </thead>
+        <tbody>
+          ${(_a = ledgerStaticData === null || ledgerStaticData === void 0 ? void 0 : ledgerStaticData.groupedData) === null || _a === void 0 ? void 0 : _a.map((group) => {
+        var _a, _b;
+        return `
+              ${(_a = group === null || group === void 0 ? void 0 : group.ledgers) === null || _a === void 0 ? void 0 : _a.map((ledger) => `
+                <tr>
+                  <td>
+                    ${(ledger === null || ledger === void 0 ? void 0 : ledger.createdAt)
+            ? new Date(ledger.createdAt).toLocaleDateString("en-GB")
+            : new Date().toLocaleDateString("en-GB")}
+                  </td>
+                  <td>${(ledger === null || ledger === void 0 ? void 0 : ledger.payment_amount) || 0}</td>
+                  <td>${(ledger === null || ledger === void 0 ? void 0 : ledger.type) || "N/A"}</td>
+                  <td>${(ledger === null || ledger === void 0 ? void 0 : ledger.invoice_id) || "N/A"}</td>
+                </tr>
+              `).join("")}
+              ${(_b = group === null || group === void 0 ? void 0 : group.credits) === null || _b === void 0 ? void 0 : _b.map((credit) => `
+                <tr>
+                  <td>
+                    ${(credit === null || credit === void 0 ? void 0 : credit.createdAt)
+            ? new Date(credit.createdAt).toLocaleDateString("en-GB")
+            : new Date().toLocaleDateString("en-GB")}
+                  </td>
+                  <td>${(credit === null || credit === void 0 ? void 0 : credit.amount) || 0}</td>
+                  <td>Payment</td>
+                  <td>-</td>
+                </tr>
+              `).join("")}
+            `;
+    }).join("")}
+        </tbody>
+      </table>
+
+    <div class="gst-summary">
+      <p class="total"><strong>Total Money Added:</strong> ₹ ${(ledgerStaticData === null || ledgerStaticData === void 0 ? void 0 : ledgerStaticData.totalMoneyAdded) || 0}</p>
+      <p class="total"><strong>Total Credit Entry Amount:</strong> ₹ ${(ledgerStaticData === null || ledgerStaticData === void 0 ? void 0 : ledgerStaticData.totalCredit) || 0}</p>
+      <p class="total"><strong>Total Debit Entry Amount:</strong> ₹ ${(ledgerStaticData === null || ledgerStaticData === void 0 ? void 0 : ledgerStaticData.totalDebit) || 0}</p>
+      <p class="total">
+        <strong>Available Credit Limit:</strong> ₹ ${(ledgerStaticData === null || ledgerStaticData === void 0 ? void 0 : ledgerStaticData.availableCreditLimit) || 0}
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+};
 const formatAddress = (address) => {
     const { address_line, city, state, pincode } = address;
     // Create an array of available values

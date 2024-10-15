@@ -110,6 +110,22 @@ const getAppAccountDetails = catchAsync((req, res) => __awaiter(void 0, void 0, 
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
+const AppcalculateUserFinancialsDownloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    const userDoc = yield userService.AppcalculateUserFinancialsDownloadExcel({
+        userId: ((_c = req.query) === null || _c === void 0 ? void 0 : _c.user_id) || req.user._id,
+        query: req.query,
+        res: res,
+    });
+}));
+const AppcalculateUserFinancialsDownloadPDF = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _d;
+    const userDoc = yield userService.AppcalculateUserFinancialsDownloadPDF({
+        userId: ((_d = req.query) === null || _d === void 0 ? void 0 : _d.user_id) || req.user._id,
+        query: req.query,
+        res: res,
+    });
+}));
 const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield User.find();
@@ -227,5 +243,7 @@ export const userController = {
     downloadExcel,
     getAccountDetails,
     getAppAccountDetails,
+    AppcalculateUserFinancialsDownloadExcel,
+    AppcalculateUserFinancialsDownloadPDF,
 };
 //# sourceMappingURL=users.controller.js.map

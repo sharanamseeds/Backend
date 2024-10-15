@@ -719,6 +719,241 @@ export const generateBillCodeHtml = (
 </html>
 `;
 
+export const generateLedgerPdfCodeHtml = (
+  userDoc: typeUser,
+  ledgerStaticData: {
+    totalMoneyAdded: any;
+    totalCredit: number;
+    totalDebit: number;
+    availableCreditLimit: number;
+    groupedData: unknown[];
+  },
+  isForMail: boolean = true
+) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      padding: 20px;
+    }
+
+    /* Header styles */
+    .header {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .header img {
+      max-width: 150px; /* Adjust logo size */
+      vertical-align: middle;
+    }
+    .header h1 {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: right;
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Details section styles */
+    .details {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .details .company,
+    .details .buyer {
+      display: table-cell;
+      width: 50%; /* Adjust width for even distribution */
+      vertical-align: top;
+    }
+    .details p {
+      margin: 5px; /* Add some space between elements */
+    }
+    .company p {
+      margin: 5px; /* Add some space between elements */
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+    }
+
+    /* Summary and Bank Details styles */
+    .total,
+    .gst-summary {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .total{
+    margin: 10px;
+    }
+    .bank-details {
+      display: table;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .bank-details .bank-info,
+    .bank-details .qr-code {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+    }
+    .bank-details .qr-code {
+      text-align: right;
+    }
+
+    /* Signature and Page Break styles */
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Return bill notice */
+    .return-notice {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+  <title>Statement</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src=${
+        isForMail
+          ? "cid:companylogo"
+          : "data:" +
+            getLocalImageB64(
+              masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                .primary_logo_path
+            ).mimeType +
+            ";base64," +
+            getLocalImageB64(
+              masterConfig.nodemailerConfig.emailTemplateConfig.company_details
+                .primary_logo_path
+            ).b64Data
+      } alt="Company Logo" />
+      <h1>Statement</h1>
+    </div>
+
+    <div class="details">
+      <div class="company"> 
+      </div>
+      <div class="buyer">
+        <p><strong>Customer Details:</strong></p>
+        <p><strong>Name:</strong> ${userDoc?.agro_name || ""}</p>
+        <p><strong>Email:</strong> ${userDoc?.email || ""}</p>
+        <p><strong>Phone:</strong> ${userDoc?.contact_number || ""}</p>
+        <p><strong>GST No:</strong> ${userDoc?.gst_number || ""}</p>
+      </div>
+    </div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Amount</th>
+      <th>Type</th>
+      <th>Invoice No</th>
+    </tr>
+      </thead>
+        <tbody>
+          ${ledgerStaticData?.groupedData
+            ?.map(
+              (group: any) => `
+              ${group?.ledgers
+                ?.map(
+                  (ledger) => `
+                <tr>
+                  <td>
+                    ${
+                      ledger?.createdAt
+                        ? new Date(ledger.createdAt).toLocaleDateString("en-GB")
+                        : new Date().toLocaleDateString("en-GB")
+                    }
+                  </td>
+                  <td>${ledger?.payment_amount || 0}</td>
+                  <td>${ledger?.type || "N/A"}</td>
+                  <td>${ledger?.invoice_id || "N/A"}</td>
+                </tr>
+              `
+                )
+                .join("")}
+              ${group?.credits
+                ?.map(
+                  (credit: any) => `
+                <tr>
+                  <td>
+                    ${
+                      credit?.createdAt
+                        ? new Date(credit.createdAt).toLocaleDateString("en-GB")
+                        : new Date().toLocaleDateString("en-GB")
+                    }
+                  </td>
+                  <td>${credit?.amount || 0}</td>
+                  <td>Payment</td>
+                  <td>-</td>
+                </tr>
+              `
+                )
+                .join("")}
+            `
+            )
+            .join("")}
+        </tbody>
+      </table>
+
+    <div class="gst-summary">
+      <p class="total"><strong>Total Money Added:</strong> ₹ ${
+        ledgerStaticData?.totalMoneyAdded || 0
+      }</p>
+      <p class="total"><strong>Total Credit Entry Amount:</strong> ₹ ${
+        ledgerStaticData?.totalCredit || 0
+      }</p>
+      <p class="total"><strong>Total Debit Entry Amount:</strong> ₹ ${
+        ledgerStaticData?.totalDebit || 0
+      }</p>
+      <p class="total">
+        <strong>Available Credit Limit:</strong> ₹ ${
+          ledgerStaticData?.availableCreditLimit || 0
+        }
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+
 const formatAddress = (address: {
   address_line?: string;
   city?: string;

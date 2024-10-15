@@ -134,6 +134,24 @@ const getAppAccountDetails = catchAsync(
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
   }
 );
+const AppcalculateUserFinancialsDownloadExcel = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userDoc = await userService.AppcalculateUserFinancialsDownloadExcel({
+      userId: req.query?.user_id || req.user._id,
+      query: req.query,
+      res: res,
+    });
+  }
+);
+const AppcalculateUserFinancialsDownloadPDF = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userDoc = await userService.AppcalculateUserFinancialsDownloadPDF({
+      userId: req.query?.user_id || req.user._id,
+      query: req.query,
+      res: res,
+    });
+  }
+);
 
 const downloadExcel = catchAsync(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -264,4 +282,6 @@ export const userController = {
   downloadExcel,
   getAccountDetails,
   getAppAccountDetails,
+  AppcalculateUserFinancialsDownloadExcel,
+  AppcalculateUserFinancialsDownloadPDF,
 };
