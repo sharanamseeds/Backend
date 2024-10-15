@@ -17,6 +17,7 @@ import Offer from "../models/offers.models.js";
 import Languages from "../models/languages.model.js";
 import Ledger from "../models/ledger.model.js";
 import PurchaseOrder from "../models/purchase_orders.model.js";
+import { masterConfig } from "../config/master.config.js";
 const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     try {
@@ -98,6 +99,11 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
                     sellAmount: 0,
                 },
                 on_hand: 0,
+                ledger: {
+                    totalCredit: 0,
+                    totalDebit: 0,
+                    finalBalance: 0,
+                },
             },
         };
         newData.users.total = yield User.countDocuments(filterQuery);
@@ -176,17 +182,6 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
             }
             return acc;
         }, { paid: 0, unpaid: 0 });
-        // const poResult = await PurchaseOrder.aggregate([
-        //   {
-        //     $match: { ...filterQuery },
-        //   },
-        //   {
-        //     $group: {
-        //       _id: "$payment_status",
-        //       totalBillingAmount: { $sum: "$billing_amount" },
-        //     },
-        //   },
-        // ]);
         const poResult = yield PurchaseOrder.aggregate([
             {
                 $match: Object.assign({}, filterQuery),
@@ -207,11 +202,54 @@ const getDashboard = ({ query, }) => __awaiter(void 0, void 0, void 0, function*
             }
             return acc;
         }, { paid: 0, unpaid: 0 });
+        const adminDoc = yield User.findOne({
+            email: masterConfig.superAdminConfig.email,
+            is_app_user: false,
+        });
+        const ledgerStatic = yield Ledger.aggregate([
+            {
+                $match: { user_id: adminDoc._id },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalCredit: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "credit"] }, "$payment_amount", 0],
+                        },
+                    },
+                    totalDebit: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "debit"] }, "$payment_amount", 0],
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalCredit: 1,
+                    totalDebit: 1,
+                    finalBalance: { $subtract: ["$totalCredit", "$totalDebit"] },
+                },
+            },
+        ]);
+        if (ledgerStatic.length > 0) {
+            const ledgerData = ledgerStatic[0];
+            if ("totalCredit" in ledgerData) {
+                newData.accounts.ledger.totalCredit = ledgerData.totalCredit;
+            }
+            if ("totalDebit" in ledgerData) {
+                newData.accounts.ledger.totalDebit = ledgerData.totalDebit;
+            }
+            if ("finalBalance" in ledgerData) {
+                newData.accounts.ledger.finalBalance = ledgerData.finalBalance;
+            }
+        }
         newData.accounts.paid.sellAmount = billTotals.paid;
         newData.accounts.outstandings.sellAmount = billTotals.unpaid;
         newData.accounts.paid.purchaseAmount = poTotals.paid;
         newData.accounts.outstandings.purchaseAmount = poTotals.unpaid;
-        // newData.accounts.on_hand = billTotals.paid - poTotals.paid;
         newData.accounts.on_hand =
             billTotals.paid - poTotals.paid - poTotals.unpaid;
         return { data: newData };

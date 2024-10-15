@@ -116,6 +116,25 @@ const getAccountDetails = catchAsync(
   }
 );
 
+const getAppAccountDetails = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userDoc = await userService.AppcalculateUserFinancials({
+      userId: req.query?.user_id || req.user._id,
+      query: req.query,
+    });
+
+    const data4responseObject = {
+      req: req,
+      code: httpStatus.OK,
+      message: "User Account Details Fetched!!",
+      payload: { result: userDoc },
+      logPayload: false,
+    };
+
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+  }
+);
+
 const downloadExcel = catchAsync(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -244,4 +263,5 @@ export const userController = {
   deleteUser,
   downloadExcel,
   getAccountDetails,
+  getAppAccountDetails,
 };

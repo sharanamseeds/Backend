@@ -645,7 +645,7 @@ const addOrder = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, fu
             order_type: "buy",
             status: "pending",
             user_id: userDoc._id,
-            added_by: (bodyData === null || bodyData === void 0 ? void 0 : bodyData.user_id) ? bodyData.user_id : requestUser._id,
+            added_by: userDoc._id,
             updated_by: requestUser._id,
             products: modifiedOrderItems,
             tax_amount: totalOrderAmount.tax_amount,

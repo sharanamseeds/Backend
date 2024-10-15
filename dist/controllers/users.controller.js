@@ -95,6 +95,21 @@ const getAccountDetails = catchAsync((req, res) => __awaiter(void 0, void 0, voi
     };
     res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
 }));
+const getAppAccountDetails = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const userDoc = yield userService.AppcalculateUserFinancials({
+        userId: ((_b = req.query) === null || _b === void 0 ? void 0 : _b.user_id) || req.user._id,
+        query: req.query,
+    });
+    const data4responseObject = {
+        req: req,
+        code: httpStatus.OK,
+        message: "User Account Details Fetched!!",
+        payload: { result: userDoc },
+        logPayload: false,
+    };
+    res.status(httpStatus.OK).send(createResponseObject(data4responseObject));
+}));
 const downloadExcel = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield User.find();
@@ -211,5 +226,6 @@ export const userController = {
     deleteUser,
     downloadExcel,
     getAccountDetails,
+    getAppAccountDetails,
 };
 //# sourceMappingURL=users.controller.js.map

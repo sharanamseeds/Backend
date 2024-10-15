@@ -24,6 +24,7 @@ router.put("/user/:id", authenticateToken, (req, res, next) => __awaiter(void 0,
     validateViaJoi(userMiddlewareSchemas.updateUserSchema, validationData, req, res, next);
 }), userController.updateUser);
 router.get("/get_account_details", authenticateToken, userController.getAccountDetails);
+router.get("/app/get_account_details", authenticateToken, userController.getAppAccountDetails);
 router.get("/download-excel", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_download" }]), userController.downloadExcel);
 /* Get all users */
 router.get("/", authenticateToken, CHECKPERMISSION([{ module: "user", permission: "can_read" }]), userController.getUserList);

@@ -984,7 +984,7 @@ const addOrder = async ({
       order_type: "buy",
       status: "pending",
       user_id: userDoc._id,
-      added_by: bodyData?.user_id ? bodyData.user_id : requestUser._id,
+      added_by: userDoc._id,
       updated_by: requestUser._id,
       products: modifiedOrderItems,
       tax_amount: totalOrderAmount.tax_amount,

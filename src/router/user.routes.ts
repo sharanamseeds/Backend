@@ -35,6 +35,12 @@ router.get(
 );
 
 router.get(
+  "/app/get_account_details",
+  authenticateToken,
+  userController.getAppAccountDetails
+);
+
+router.get(
   "/download-excel",
   authenticateToken,
   CHECKPERMISSION([{ module: "user", permission: "can_download" }]),
