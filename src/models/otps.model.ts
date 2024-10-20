@@ -13,10 +13,10 @@ const otpSchema = new mongoose.Schema({
   createdAt: { type: Date, default: new Date() },
 });
 
-otpSchema.index(
-  { createdAt: 1 },
-  { expireAfterSeconds: masterConfig.authConfig.VerificationCodeExpires }
-);
+// otpSchema.index(
+//   { createdAt: 1 },
+//   { expireAfterSeconds: masterConfig.authConfig.VerificationCodeExpires }
+// );
 otpSchema.index({ code: 1 });
 otpSchema.index({ code_for: 1 }, { unique: true });
 
