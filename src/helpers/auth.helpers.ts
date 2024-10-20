@@ -61,8 +61,8 @@ export const verifyToken = (token: string, secret: string): any => {
 };
 
 export function generateVerificationCode(length: number = 6): string {
-  const characters =
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const characters = "0123456789";
+  // "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let code = "";
 
   for (let i = 0; i < length; i++) {
