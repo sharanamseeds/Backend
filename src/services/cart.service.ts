@@ -481,20 +481,46 @@ const addCart = async ({
   req?: any;
 }): Promise<Document<unknown, {}, typeCart> | null> => {
   try {
-    const cartId = new mongoose.Types.ObjectId();
     let bodyData: any = {};
     if (req?.query?.payload && typeof req.query.payload === "string") {
       bodyData = JSON.parse(req.query.payload);
     }
 
-    const cartData = {
-      _id: cartId,
+    let cartData = {
       user_id: requestUser._id,
       ...bodyData,
     };
+    if (bodyData?.product_id) {
+      cartData.product_id = bodyData.product_id;
+    }
+    if (bodyData?.selectedOffer) {
+      cartData.selectedOffer = bodyData.selectedOffer;
+    } else {
+      cartData.selectedOffer = null;
+    }
 
-    const cart = new Cart(cartData);
-    return await cart.save();
+    let isAdded = await Cart.findOne(cartData);
+    if (isAdded) {
+      if (bodyData.quantity) {
+        let newQuantity = bodyData.quantity;
+        if (typeof newQuantity === "string") {
+          newQuantity = parseInt(newQuantity, 10);
+        }
+        isAdded.quantity += newQuantity;
+      } else {
+        isAdded.quantity += 1;
+      }
+
+      return await isAdded.save();
+    } else {
+      cartData = {
+        user_id: requestUser._id,
+        ...bodyData,
+      };
+
+      const cart = new Cart(cartData);
+      return await cart.save();
+    }
   } catch (error) {
     throw error;
   }

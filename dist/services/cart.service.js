@@ -403,14 +403,39 @@ const getCart = ({ cartId, query, }) => __awaiter(void 0, void 0, void 0, functi
 const addCart = ({ requestUser, req, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const cartId = new mongoose.Types.ObjectId();
         let bodyData = {};
         if (((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.payload) && typeof req.query.payload === "string") {
             bodyData = JSON.parse(req.query.payload);
         }
-        const cartData = Object.assign({ _id: cartId, user_id: requestUser._id }, bodyData);
-        const cart = new Cart(cartData);
-        return yield cart.save();
+        let cartData = Object.assign({ user_id: requestUser._id }, bodyData);
+        if (bodyData === null || bodyData === void 0 ? void 0 : bodyData.product_id) {
+            cartData.product_id = bodyData.product_id;
+        }
+        if (bodyData === null || bodyData === void 0 ? void 0 : bodyData.selectedOffer) {
+            cartData.selectedOffer = bodyData.selectedOffer;
+        }
+        else {
+            cartData.selectedOffer = null;
+        }
+        let isAdded = yield Cart.findOne(cartData);
+        if (isAdded) {
+            if (bodyData.quantity) {
+                let newQuantity = bodyData.quantity;
+                if (typeof newQuantity === "string") {
+                    newQuantity = parseInt(newQuantity, 10);
+                }
+                isAdded.quantity += newQuantity;
+            }
+            else {
+                isAdded.quantity += 1;
+            }
+            return yield isAdded.save();
+        }
+        else {
+            cartData = Object.assign({ user_id: requestUser._id }, bodyData);
+            const cart = new Cart(cartData);
+            return yield cart.save();
+        }
     }
     catch (error) {
         throw error;
