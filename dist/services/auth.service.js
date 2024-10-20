@@ -11,11 +11,11 @@ import mongoose from "mongoose";
 import { masterConfig } from "../config/master.config.js";
 import { comparePassword, compareVerificationCode, generateAccessToken, generatePassword, generateRefreshToken, generateVerificationCode, verifyToken, } from "../helpers/auth.helpers.js";
 import { sendUserAccountCreatedMail, sendUserAccountVerifiedMail, sendUserOTPMail, } from "../helpers/common.helpers..js";
-import Otps from "../models/otps.model.js";
 import User from "../models/users.model.js";
 import { NotFoundError } from "./products.service.js";
 import jwt from "jsonwebtoken";
 import Permissions from "../models/permission.model.js";
+import Otps from "../models/otps.model.js";
 const login = ({ email, password, }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Validate email and password presence
@@ -293,7 +293,10 @@ const sendVerificationCode = ({ email }) => __awaiter(void 0, void 0, void 0, fu
         }
         yield Otps.deleteMany({ code_for: email });
         const verificationCode = generateVerificationCode();
-        let otpDoc = new Otps({ code: verificationCode, code_for: email });
+        let otpDoc = yield new Otps({
+            code: verificationCode,
+            code_for: email,
+        });
         const savedOtp = yield otpDoc.save();
         if (savedOtp) {
             // send code via email
@@ -310,6 +313,34 @@ const sendVerificationCode = ({ email }) => __awaiter(void 0, void 0, void 0, fu
         throw error;
     }
 });
+// const sendVerificationCode = async ({ email }: { email: string }) => {
+//   try {
+//     // Find user by email
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       throw new NotFoundError("User not found");
+//     }
+//     // Generate a new OTP
+//     const verificationCode = generateVerificationCode();
+//     // Update or insert the OTP for the user
+//     const savedOtp = await Otps.findOneAndUpdate(
+//       { code_for: email }, // Find by email (code_for)
+//       { code: verificationCode }, // Update with new OTP code
+//       { new: true, upsert: true } // Upsert (create if not found)
+//     );
+//     if (savedOtp) {
+//       // Send code via email
+//       await sendUserOTPMail(email, verificationCode);
+//     }
+//     // Respond with success message
+//     return {
+//       status: true,
+//       message: "Verification Code Sent Successfully",
+//     };
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 const reSendVerificationCode = ({ email }) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Find user by email
