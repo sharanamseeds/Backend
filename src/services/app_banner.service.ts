@@ -193,13 +193,32 @@ const updateAppBanner = async ({
             appBannerDoc._id +
             "/" +
             masterConfig.fileStystem.folderPaths.IMAGES,
+          oldPath: appBannerDoc.banners.find(
+            (item) => item.lang_code === req.query.lang_code
+          )?.value,
         });
+        // if (savedFile) {
+        //   const localizedImagePath: typeLocalizedString = {
+        //     lang_code: req.query.lang_code,
+        //     value: savedFile.path,
+        //   };
+        //   appBannerDoc.banners.push(localizedImagePath);
+        // }
         if (savedFile) {
           const localizedImagePath: typeLocalizedString = {
             lang_code: req.query.lang_code,
             value: savedFile.path,
           };
-          appBannerDoc.banners.push(localizedImagePath);
+
+          const existingBannerIndex = appBannerDoc.banners.findIndex(
+            (item) => item.lang_code === req.query.lang_code
+          );
+
+          if (existingBannerIndex !== -1) {
+            appBannerDoc.banners[existingBannerIndex] = localizedImagePath;
+          } else {
+            appBannerDoc.banners.push(localizedImagePath);
+          }
         }
       });
 

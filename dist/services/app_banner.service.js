@@ -152,6 +152,7 @@ const updateAppBanner = ({ bannerId, req, }) => __awaiter(void 0, void 0, void 0
         }
         if (Array.isArray(banners) && banners.length > 0) {
             const savedFilesPromises = banners.map((image) => __awaiter(void 0, void 0, void 0, function* () {
+                var _b;
                 const savedFile = yield createDocument({
                     document: image,
                     documentType: masterConfig.fileStystem.fileTypes.IMAGE,
@@ -159,13 +160,27 @@ const updateAppBanner = ({ bannerId, req, }) => __awaiter(void 0, void 0, void 0
                         appBannerDoc._id +
                         "/" +
                         masterConfig.fileStystem.folderPaths.IMAGES,
+                    oldPath: (_b = appBannerDoc.banners.find((item) => item.lang_code === req.query.lang_code)) === null || _b === void 0 ? void 0 : _b.value,
                 });
+                // if (savedFile) {
+                //   const localizedImagePath: typeLocalizedString = {
+                //     lang_code: req.query.lang_code,
+                //     value: savedFile.path,
+                //   };
+                //   appBannerDoc.banners.push(localizedImagePath);
+                // }
                 if (savedFile) {
                     const localizedImagePath = {
                         lang_code: req.query.lang_code,
                         value: savedFile.path,
                     };
-                    appBannerDoc.banners.push(localizedImagePath);
+                    const existingBannerIndex = appBannerDoc.banners.findIndex((item) => item.lang_code === req.query.lang_code);
+                    if (existingBannerIndex !== -1) {
+                        appBannerDoc.banners[existingBannerIndex] = localizedImagePath;
+                    }
+                    else {
+                        appBannerDoc.banners.push(localizedImagePath);
+                    }
                 }
             }));
             yield Promise.all(savedFilesPromises);
