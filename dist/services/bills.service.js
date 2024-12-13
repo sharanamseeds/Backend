@@ -188,6 +188,7 @@ const getBill = ({ billId, query, }) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const addBill = ({ requestUser, order_id, }) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const orderDoc = yield Order.findById(order_id);
         if (!orderDoc) {
@@ -211,6 +212,12 @@ const addBill = ({ requestUser, order_id, }) => __awaiter(void 0, void 0, void 0
             updated_by: requestUser._id,
         });
         let billDoc = yield bill.save();
+        // create ledgers
+        yield ledgerService.addLedger({
+            requestUser: requestUser,
+            bill_id: (_a = billDoc === null || billDoc === void 0 ? void 0 : billDoc._id) === null || _a === void 0 ? void 0 : _a.toString(),
+            description: "",
+        });
         billDoc = yield billDoc.save();
         return billDoc;
     }
@@ -219,7 +226,6 @@ const addBill = ({ requestUser, order_id, }) => __awaiter(void 0, void 0, void 0
     }
 });
 const updateBill = ({ billId, requestUser, files, status, payment_method, }) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         let billDoc = yield Bill.findById(billId);
         if (!billDoc) {
@@ -247,11 +253,11 @@ const updateBill = ({ billId, requestUser, files, status, payment_method, }) => 
             billDoc.payment_method = payment_method;
             billDoc.payment_status = status;
             yield billDoc.save();
-            yield ledgerService.addLedger({
-                requestUser: requestUser,
-                bill_id: (_a = billDoc === null || billDoc === void 0 ? void 0 : billDoc._id) === null || _a === void 0 ? void 0 : _a.toString(),
-                description: "",
-            });
+            // await ledgerService.addLedger({
+            //   requestUser: requestUser,
+            //   bill_id: billDoc?._id?.toString(),
+            //   description: "",
+            // });
         }
         return billDoc;
     }

@@ -299,6 +299,12 @@ const addBill = async ({
 
     let billDoc = await bill.save();
 
+    // create ledgers
+    await ledgerService.addLedger({
+      requestUser: requestUser,
+      bill_id: billDoc?._id?.toString(),
+      description: "",
+    });
     billDoc = await billDoc.save();
     return billDoc;
   } catch (error) {
@@ -350,11 +356,11 @@ const updateBill = async ({
       billDoc.payment_status = status;
       await billDoc.save();
 
-      await ledgerService.addLedger({
-        requestUser: requestUser,
-        bill_id: billDoc?._id?.toString(),
-        description: "",
-      });
+      // await ledgerService.addLedger({
+      //   requestUser: requestUser,
+      //   bill_id: billDoc?._id?.toString(),
+      //   description: "",
+      // });
     }
     return billDoc;
   } catch (error) {
