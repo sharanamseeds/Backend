@@ -256,9 +256,9 @@ const addLedger = ({ requestUser, bill_id, description, }) => __awaiter(void 0, 
         if (!billDoc) {
             throw new Error("Bill Not Found");
         }
-        if (billDoc.payment_status !== "paid") {
-            throw new Error("Bill is not Paid");
-        }
+        // if (billDoc.payment_status !== "paid") {
+        //   throw new Error("Bill is not Paid");
+        // }
         const orderDoc = yield Order.findById(billDoc.order_id);
         const sellerDoc = yield User.findOne({
             email: masterConfig.superAdminConfig.email,

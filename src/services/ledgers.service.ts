@@ -336,9 +336,9 @@ const addLedger = async ({
     if (!billDoc) {
       throw new Error("Bill Not Found");
     }
-    if (billDoc.payment_status !== "paid") {
-      throw new Error("Bill is not Paid");
-    }
+    // if (billDoc.payment_status !== "paid") {
+    //   throw new Error("Bill is not Paid");
+    // }
 
     const orderDoc = await Order.findById(billDoc.order_id);
     const sellerDoc = await User.findOne({
